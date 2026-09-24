@@ -1,15 +1,53 @@
 <app-navbar></app-navbar>
 
 <main class="auth">
-  <h1>Registrarme</h1>
+  <h1>Registro de Estudiante</h1>
 
   <form class="auth-form">
-    <label for="nombre">Nombre completo</label>
-    <input type="text" id="nombre" name="nombre">
+    <!-- Fila 1: Datos Personales -->
+    <label for="nombre">Nombres</label>
+    <input type="text" id="nombre" name="nombre" placeholder="Ej. Brayan" >
 
-    <label for="correo">Correo institucional</label>
+    <label for="apellido">Apellidos</label>
+    <input type="text" id="apellido" name="apellido" required>
+
+    <label for="documento">Número de Documento (CC/TI)</label>
+    <input type="text" id="documento" name="documento">
+
+    <!-- Fila 2: Contacto -->
+    <label for="telefono">Número de Teléfono</label>
+    <input type="tel" id="telefono" name="telefono">
+
+    <label for="direccion">Dirección de Residencia</label>
+    <input type="text" id="direccion" name="direccion">
+
+    <!-- Fila 3: Información Académica (La Cascada) -->
+    <label for="sede">Sede Académica</label>
+    <!-- El evento (change) avisa al TypeScript cuando hay una nueva selección -->
+    <select id="sede" name="sede" (change)="onSedeChange($event)">
+      <option value="">Seleccione una sede...</option>
+      <option value="fusagasuga">Fusagasugá</option>
+      <option value="chia">Chía</option>
+      <option value="soacha">Soacha</option>
+      <option value="zipaquira">Zipaquirá</option>
+      <option value="girardot">Girardot</option>
+      <option value="ubate">Ubaté</option>
+    </select>
+
+    <label for="programa">Programa Académico</label>
+    <!-- [disabled] bloquea el select si aún no hay programas cargados -->
+    <select id="programa" name="programa" [disabled]="programasDisponibles.length === 0">
+      <option value="">Seleccione su programa...</option>
+      <!-- *ngFor dibuja una etiqueta <option> por cada programa disponible en el arreglo -->
+      <option *ngFor="let prog of programasDisponibles" [value]="prog">
+        {{ prog }}
+      </option>
+    </select>
+
+    <!-- Fila 4: Credenciales -->
+    <label for="correo">Correo institucional (@ucundinamarca.edu.co)</label>
     <input type="email" id="correo" name="correo">
-
+    
     <label for="clave">Contraseña</label>
     <input type="password" id="clave" name="clave">
 
@@ -22,4 +60,4 @@
   <p class="auth-link">¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión</a></p>
 </main>
 
-<app-footer></app-footer>
+<app-footer></app-footer> 
