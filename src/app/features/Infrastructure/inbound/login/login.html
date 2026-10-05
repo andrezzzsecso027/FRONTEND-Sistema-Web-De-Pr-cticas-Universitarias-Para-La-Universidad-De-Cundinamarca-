@@ -3,17 +3,17 @@
 <main class="auth">
   <h1>Iniciar sesión</h1>
 
-  <!-- La clave está en [formGroup] y (ngSubmit) -->
+
 <form class="auth-form" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
   
   <label for="correo">Correo Electrónico</label>
-  <!-- formControlName debe coincidir EXACTAMENTE con tu archivo .ts -->
-  <input type="email" id="correo" formControlName="correo">
+
+  <input type="email" id="correo" formControlName="email">
 
   <label for="contrasenia">Contraseña</label>
-  <input type="password" id="contrasenia" formControlName="contrasenia">
+  <input type="password" id="contrasenia" formControlName="password">
 
-  <!-- El botón debe ser tipo submit -->
+
   <button type="submit" [disabled]="loginForm.invalid">Iniciar Sesión</button>
   
 </form>

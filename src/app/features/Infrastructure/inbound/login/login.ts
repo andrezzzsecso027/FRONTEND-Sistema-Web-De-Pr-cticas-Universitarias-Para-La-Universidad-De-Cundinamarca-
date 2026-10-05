@@ -5,6 +5,7 @@ import { Navbar } from '../../../../share/ui/navbar/navbar';
 import { Footer } from '../../../../share/ui/footer/footer';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Auth } from '../../../../core/services/auth';
+import { email } from '@angular/forms/signals';
 @Component({
   imports: [Navbar,Footer,RouterLink,CommonModule, ReactiveFormsModule],
   selector: 'app-login',
@@ -20,8 +21,8 @@ export class Login {
     private router: Router
   ) {
     this.loginForm = this.fb.group({
-      correo: ['', [Validators.required, Validators.email]],
-      contrasenia: ['', Validators.required]
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', Validators.required]
     });
   }
 
@@ -30,16 +31,20 @@ export class Login {
       alert('Por favor completa todos los campos.');
       return;
     }
+    const { email, password } = this.loginForm.value;
 
-    this.authService.login(this.loginForm.value).subscribe({
-      next: (usuario) => {
-        if (usuario.rolUsuario === 'administrador') {
+    this.authService.login(email,password).subscribe({
+      next: (response) => {
+       localStorage.setItem('token', response.token);
+        localStorage.setItem('usuario_sesion', JSON.stringify(response));
+
+        if (response.userRol === 'administrador') {
           this.router.navigate(['/panel-administrador']);
         } else {
-          alert(`Bienvenido ${usuario.rolUsuario}. Redirigiendo a tu perfil...`);
-          // Redirigir a vista de estudiante/empresa o página principal
+          alert(`Bienvenido. Redirigiendo a tu perfil...`);
           this.router.navigate(['/']);
         }
+
       },
       error: (err) => {
         console.error(err);

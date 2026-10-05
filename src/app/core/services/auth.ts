@@ -5,9 +5,10 @@ import { Observable, tap } from 'rxjs';
 import { Router } from '@angular/router';
 
 export interface LoginResponse {
-  idUsuario: number;
-  correo: string;
-  rolUsuario: string;
+  idUser: number;
+  email: string;
+  userRol: string;
+  token: string;
 }
 
 @Injectable({
@@ -15,16 +16,17 @@ export interface LoginResponse {
 })
 
 export class Auth {
-private apiUrl = 'http://localhost:8081/api/autenticacion/login';
+private apiUrl = 'http://localhost:8081/api/auth/login';
 
   constructor(private http: HttpClient, private router: Router) {}
 
-  login(credenciales: { correo: string; contrasenia: string }): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(this.apiUrl, credenciales).pipe(
-      tap((usuario) => {
-        localStorage.setItem('usuario_sesion', JSON.stringify(usuario));
-      })
-    );
+  login(emailForm: string, passwordForm: string): Observable<any> {
+    const payload = {
+      email: emailForm,
+      password: passwordForm
+    };
+
+    return this.http.post(this.apiUrl, payload);
   }
 
   getUsuarioActual(): LoginResponse | null {
@@ -34,15 +36,16 @@ private apiUrl = 'http://localhost:8081/api/autenticacion/login';
 
   getRol(): string | null {
     const usuario = this.getUsuarioActual();
-    return usuario ? usuario.rolUsuario : null;
+    return usuario ? usuario.userRol : null;
   }
-
   isLoggedIn(): boolean {
-    return !!this.getUsuarioActual();
+   
+    return !!localStorage.getItem('token'); 
   }
 
   logout(): void {
     localStorage.removeItem('usuario_sesion');
+    localStorage.removeItem('token'); 
     this.router.navigate(['/login']);
   }
 }

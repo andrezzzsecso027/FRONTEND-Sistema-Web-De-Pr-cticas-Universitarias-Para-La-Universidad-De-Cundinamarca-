@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Navbar } from '../../../../share/ui/navbar/navbar';
 import { Footer } from '../../../../share/ui/footer/footer';
-import { Estudiante } from '../../outbound/estudiante/estudiante';
+import { Estudiante } from '../../../../core/services/estudiante/estudiante';
 
 @Component({
   imports: [RouterLink,Navbar,Footer,CommonModule,ReactiveFormsModule],

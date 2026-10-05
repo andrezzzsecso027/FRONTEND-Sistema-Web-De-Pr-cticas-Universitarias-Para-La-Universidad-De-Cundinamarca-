@@ -5,7 +5,7 @@ import { Navbar } from '../../../../share/ui/navbar/navbar';
 import { Footer } from '../../../../share/ui/footer/footer';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Empresa } from '../../outbound/empresa/empresa';
+import { Empresa } from '../../../../core/services/empresa/empresa';
 
 
 @Component({
