@@ -2,41 +2,91 @@
 
 <main class="auth">
   <h1>Registro Corporativo</h1>
+  <p class="auth-subtitle">Completa la información para unir tu empresa a nuestra red</p>
 
- <form class="auth-form" [formGroup]="formularioEmpresa" (ngSubmit)="onSubmit()">
-  
-  <label for="nit">NIT</label>
-  <input type="text" id="nit" formControlName="nit">
-
-  <label for="nombreEmpresa">Razón Social</label>
-  <input type="text" id="nombreEmpresa" formControlName="nombreEmpresa">
-
-  <label for="tipoEmpresa">Tipo de Empresa</label>
-  <select id="tipoEmpresa" formControlName="tipoEmpresa">
-      <option value="SAS">S.A.S. (Sociedad por Acciones Simplificada)</option>
-      <option value="LTDA">Sociedad Limitada (Ltda.)</option>
-      <option value="SA">Sociedad Anónima (S.A.)</option>
-      <option value="ESAL">Fundación / ONG (Sin Ánimo de Lucro)</option>
-      <option value="PUBLICA">Entidad del Estado / Pública</option>
+  <form class="auth-form" [formGroup]="formularioEmpresa" (ngSubmit)="onSubmit()">
+    
+    <div class="form-grid">
       
-  </select>
+      <!-- COLUMNA IZQUIERDA: Datos de la Empresa -->
+      <div class="form-column">
+        <h3><i class="icon-building"></i> Datos de la Empresa</h3>
+        
+        <label for="nit">NIT</label>
+        <input type="text" id="nit" formControlName="nit" placeholder="Ej: 900123456-7">
 
-  <label for="direccionEmpresa">Dirección</label>
-  <input type="text" id="direccionEmpresa" formControlName="direccionEmpresa">
+        <label for="nombreEmpresa">Razón Social</label>
+        <input type="text" id="nombreEmpresa" formControlName="nombreEmpresa">
 
-  <label for="telefonoEmpresa">Teléfono</label>
-  <input type="tel" id="telefonoEmpresa" formControlName="telefonoEmpresa">
+        <label for="legalName">Nombre Legal de la Empresa</label>
+        <input type="text" id="legalName" formControlName="legalName">
 
-  <label for="correo">Correo corporativo</label>
-  <input type="email" id="correo" formControlName="correo">
+        <label for="tipoEmpresa">Tipo de Empresa</label>
+        <select id="tipoEmpresa" formControlName="tipoEmpresa">
+            <option value="" disabled selected>Selecciona una opción...</option>
+            <option value="SAS">S.A.S. (Sociedad por Acciones Simplificada)</option>
+            <option value="LTDA">Sociedad Limitada (Ltda.)</option>
+            <option value="SA">Sociedad Anónima (S.A.)</option>
+            <option value="ESAL">Fundación / ONG (Sin Ánimo de Lucro)</option>
+            <option value="PUBLICA">Entidad del Estado / Pública</option>
+        </select>
 
-  <label for="contrasenia">Contraseña</label>
-  <input type="password" id="contrasenia" formControlName="contrasenia">
+        <div class="input-row">
+          <div class="input-group">
+            <label for="department">Departamento</label>
+            <select id="department" formControlName="department" (change)="onDepartamentoChange($event)">
+              <option value="" disabled selected>Seleccione...</option>
+              <option *ngFor="let depto of departamentos" [value]="depto">{{ depto }}</option>
+            </select>
+          </div>
+          
+          <div class="input-group">
+            <label for="city">Ciudad / Municipio</label>
+            <select id="city" formControlName="city">
+              <option value="" disabled selected>Seleccione...</option>
+              <option *ngFor="let mun of municipiosFiltrados" [value]="mun">{{ mun }}</option>
+            </select>
+          </div>
+        </div>
+        <label for="direccionEmpresa">Dirección</label>
+        <input type="text" id="direccionEmpresa" formControlName="direccionEmpresa" placeholder="Ej: Calle 123 #45-67">
+      </div> <!-- ¡ESTE ES EL DIV QUE FALTABA PARA CERRAR LA COLUMNA IZQUIERDA! -->
 
-  <button type="submit" [disabled]="formularioEmpresa.invalid">Solicitar registro</button>
-</form>
+      <!-- COLUMNA DERECHA: Representante y Cuenta -->
+      <div class="form-column">
+        <h3><i class="icon-user"></i> Representante Legal y Acceso</h3>
 
-  <p class="auth-link">¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión</a></p>
+        <label for="nameRepresentive">Nombres del Representante</label>
+        <input type="text" id="nameRepresentive" formControlName="nameRepresentive">
+
+        <label for="lastNameRepresentive">Apellidos del Representante</label>
+        <input type="text" id="lastNameRepresentive" formControlName="lastNameRepresentive">
+
+        <label for="numberDocument">Documento de Identidad</label>
+        <input type="text" id="numberDocument" formControlName="numberDocument">
+
+        <label for="telefonoEmpresa">Teléfono Corporativo</label>
+        <input type="tel" id="telefonoEmpresa" formControlName="telefonoEmpresa">
+
+        <hr class="divider">
+
+        <label for="correo">Correo corporativo</label>
+        <input type="email" id="correo" formControlName="correo" placeholder="ejemplo@empresa.com">
+
+        <label for="contrasenia">Contraseña</label>
+        <input type="password" id="contrasenia" formControlName="contrasenia">
+      </div>
+
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="submit-btn" [disabled]="formularioEmpresa.invalid">
+        Solicitar registro de empresa
+      </button>
+      <p class="auth-link">¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión aquí</a></p>
+    </div>
+
+  </form>
 </main>
 
 <app-footer></app-footer>
