@@ -1,60 +1,59 @@
-<app-navbar></app-navbar>
+﻿<app-navbar></app-navbar>
 
 <main class="auth">
   <h1>Registro Corporativo</h1>
   <p class="auth-subtitle">Completa la información para unir tu empresa a nuestra red</p>
 
   <form class="auth-form" [formGroup]="formularioEmpresa" (ngSubmit)="onSubmit()">
-    
+
     <div class="form-grid">
-      
-      <!-- COLUMNA IZQUIERDA: Datos de la Empresa -->
+
       <div class="form-column">
-        <h3><i class="icon-building"></i> Datos de la Empresa</h3>
-        
+        <h3>Datos de la Empresa</h3>
+
         <label for="nit">NIT</label>
         <input type="text" id="nit" formControlName="nit" placeholder="Ej: 900123456-7">
 
         <label for="nombreEmpresa">Razón Social</label>
-        <input type="text" id="nombreEmpresa" formControlName="nombreEmpresa">
+        <input type="text" id="nombreEmpresa" formControlName="nombreEmpresa" placeholder="Ej: Mi Empresa S.A.S.">
 
         <label for="legalName">Nombre Legal de la Empresa</label>
         <input type="text" id="legalName" formControlName="legalName">
 
         <label for="tipoEmpresa">Tipo de Empresa</label>
         <select id="tipoEmpresa" formControlName="tipoEmpresa">
-            <option value="" disabled selected>Selecciona una opción...</option>
-            <option value="SAS">S.A.S. (Sociedad por Acciones Simplificada)</option>
-            <option value="LTDA">Sociedad Limitada (Ltda.)</option>
-            <option value="SA">Sociedad Anónima (S.A.)</option>
-            <option value="ESAL">Fundación / ONG (Sin Ánimo de Lucro)</option>
-            <option value="PUBLICA">Entidad del Estado / Pública</option>
+          <option value="" disabled>Selecciona una opción...</option>
+          <option value="SAS">S.A.S. (Sociedad por Acciones Simplificada)</option>
+          <option value="LTDA">Sociedad Limitada (Ltda.)</option>
+          <option value="SA">Sociedad Anónima (S.A.)</option>
+          <option value="ESAL">Fundación / ONG (Sin Ánimo de Lucro)</option>
+          <option value="PUBLICA">Entidad del Estado / Pública</option>
         </select>
 
         <div class="input-row">
           <div class="input-group">
             <label for="department">Departamento</label>
             <select id="department" formControlName="department" (change)="onDepartamentoChange($event)">
-              <option value="" disabled selected>Seleccione...</option>
+              <option value="" disabled>Seleccione...</option>
               <option *ngFor="let depto of departamentos" [value]="depto">{{ depto }}</option>
             </select>
           </div>
-          
+
           <div class="input-group">
             <label for="city">Ciudad / Municipio</label>
             <select id="city" formControlName="city">
-              <option value="" disabled selected>Seleccione...</option>
+              <option value="" disabled>Seleccione...</option>
               <option *ngFor="let mun of municipiosFiltrados" [value]="mun">{{ mun }}</option>
             </select>
           </div>
         </div>
+
         <label for="direccionEmpresa">Dirección</label>
         <input type="text" id="direccionEmpresa" formControlName="direccionEmpresa" placeholder="Ej: Calle 123 #45-67">
-      </div> <!-- ¡ESTE ES EL DIV QUE FALTABA PARA CERRAR LA COLUMNA IZQUIERDA! -->
+      </div>
 
-      <!-- COLUMNA DERECHA: Representante y Cuenta -->
       <div class="form-column">
-        <h3><i class="icon-user"></i> Representante Legal y Acceso</h3>
+        <h3>Representante Legal y Acceso</h3>
 
         <label for="nameRepresentive">Nombres del Representante</label>
         <input type="text" id="nameRepresentive" formControlName="nameRepresentive">
@@ -74,7 +73,7 @@
         <input type="email" id="correo" formControlName="correo" placeholder="ejemplo@empresa.com">
 
         <label for="contrasenia">Contraseña</label>
-        <input type="password" id="contrasenia" formControlName="contrasenia">
+        <input type="password" id="contrasenia" formControlName="contrasenia" placeholder="Mínimo 8 caracteres">
       </div>
 
     </div>

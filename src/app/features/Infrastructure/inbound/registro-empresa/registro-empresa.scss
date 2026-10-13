@@ -1,140 +1,195 @@
-/* Contenedor principal expandido para soportar 2 columnas */
+﻿/* Registro de Empresa - Diseño institucional UdeC con 2 columnas */
+
 .auth {
-  max-width: 850px; /* Más ancho que el original */
-  margin: 60px auto;
-  padding: 30px 40px;
-  background-color: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); /* Efecto tarjeta suave */
+  max-width: 950px;
+  margin: 48px auto;
+  padding: 40px 48px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
   text-align: center;
+  border-top: 4px solid #B7930A;
+  position: relative;
+}
+
+.auth::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #00853E, transparent);
+  border-radius: 0 0 16px 16px;
 }
 
 .auth h1 {
-  color: #1a3c6e;
-  font-size: 2rem;
+  color: #00853E;
+  font-family: 'Century Gothic', system-ui, sans-serif;
+  font-size: 1.75rem;
   margin-bottom: 8px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
 }
 
 .auth-subtitle {
   color: #666;
-  margin-bottom: 30px;
-  font-size: 1rem;
+  margin-bottom: 32px;
+  font-size: 0.95rem;
 }
 
-/* La magia del Grid de 2 columnas */
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 40px; /* Espacio entre las columnas */
+  gap: 40px;
   text-align: left;
 }
 
+.form-column {
+  display: flex;
+  flex-direction: column;
+}
+
 .form-column h3 {
-  font-size: 1.2rem;
-  color: #1a3c6e;
-  border-bottom: 2px solid #f0f0f0;
+  font-family: 'Century Gothic', system-ui, sans-serif;
+  font-size: 1.05rem;
+  color: #00853E;
+  border-bottom: 2px solid #E5F4EB;
   padding-bottom: 10px;
   margin-bottom: 20px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .auth-form label {
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: #333;
-  margin-top: 15px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #1A1A1A;
+  margin-top: 16px;
   margin-bottom: 6px;
   display: block;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-/* Estilos de los inputs mejorados */
 .auth-form input,
 .auth-form select {
   width: 100%;
-  padding: 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
+  padding: 12px 14px;
+  border: 2px solid #E0E0E0;
+  border-radius: 10px;
   font-size: 0.95rem;
-  transition: all 0.3s ease;
+  font-family: inherit;
+  background-color: #FAFAF7;
+  color: #1A1A1A;
+  transition: all 0.25s ease;
   box-sizing: border-box;
+}
+
+.auth-form input:hover,
+.auth-form select:hover {
+  border-color: #C0C0C0;
+  background-color: #ffffff;
 }
 
 .auth-form input:focus,
 .auth-form select:focus {
   outline: none;
-  border-color: #1a3c6e;
-  box-shadow: 0 0 0 3px rgba(26, 60, 110, 0.1); /* Brillo azul al seleccionar */
+  border-color: #00853E;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 4px rgba(0, 133, 62, 0.18);
+  transform: translateY(-1px);
 }
 
-/* Para dividir inputs en la misma fila (Ej: Depto y Ciudad) */
 .input-row {
   display: flex;
-  gap: 15px;
+  gap: 16px;
+  margin-top: 8px;
 }
 
 .input-group {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.input-group label {
+  margin-top: 8px;
 }
 
 .divider {
   border: 0;
   height: 1px;
-  background: #eee;
-  margin: 25px 0 10px 0;
+  background: #E5F4EB;
+  margin: 24px 0 16px 0;
 }
 
-/* Botón de acción centrado abajo */
 .form-actions {
   margin-top: 40px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 16px;
 }
 
 .submit-btn {
-  padding: 14px 40px;
-  background-color: #1a3c6e;
-  color: white;
+  padding: 16px 40px;
+  background: linear-gradient(135deg, #00853E 0%, #006B32 100%);
+  color: #ffffff;
   border: none;
-  border-radius: 8px;
-  font-size: 1.1rem;
-  font-weight: 600;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 700;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: all 0.25s ease;
   width: 100%;
   max-width: 400px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 12px rgba(0, 133, 62, 0.25);
 }
 
 .submit-btn:hover:not(:disabled) {
-  background-color: #112a50;
+  background: linear-gradient(135deg, #00A04A 0%, #00853E 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 133, 62, 0.35);
 }
 
 .submit-btn:disabled {
-  background-color: #a0aabf;
+  background: #CCCCCC;
   cursor: not-allowed;
+  box-shadow: none;
 }
 
 .auth-link {
-  margin-top: 20px;
-  font-size: 0.95rem;
+  margin-top: 8px;
+  font-size: 0.9rem;
+  color: #666;
 }
 
 .auth-link a {
-  color: #1a3c6e;
-  font-weight: 600;
+  color: #00853E;
+  font-weight: 700;
   text-decoration: none;
 }
 
 .auth-link a:hover {
+  color: #006B32;
   text-decoration: underline;
 }
 
-/* Responsividad: Si la pantalla es pequeña (celulares/tablets pequeñas), se vuelve 1 sola columna */
 @media (max-width: 768px) {
   .form-grid {
     grid-template-columns: 1fr;
-    gap: 20px;
+    gap: 24px;
   }
   .auth {
-    padding: 20px;
+    padding: 24px 20px;
+    margin: 24px auto;
+  }
+  .input-row {
+    flex-direction: column;
+    gap: 8px;
   }
 }

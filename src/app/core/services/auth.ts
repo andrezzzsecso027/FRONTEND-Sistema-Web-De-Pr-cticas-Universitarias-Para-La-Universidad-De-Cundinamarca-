@@ -17,7 +17,7 @@ export interface LoginResponse {
   providedIn: 'root'
 })
 export class Auth {
-  private apiUrl = `${environment.baseUrl}${environment.endpoints.login}`;
+  private apiUrl = `${environment.baseUrl}${environment.endpoints.auth}/login`;
 
   constructor(private http: HttpClient, private router: Router) {}
 
