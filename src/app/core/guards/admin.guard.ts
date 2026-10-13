@@ -1,8 +1,8 @@
-import { inject } from '@angular/core';
+﻿import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { Auth } from '../services/auth';
 
-export const adminGuard: CanActivateFn = (route, state) => {
+export const adminGuard: CanActivateFn = () => {
   const auth = inject(Auth);
   const router = inject(Router);
 
@@ -10,7 +10,7 @@ export const adminGuard: CanActivateFn = (route, state) => {
     return true;
   }
 
-  alert('Acceso denegado: solo el administrador puede acceder a este panel.');
+  console.warn('[adminGuard] Acceso denegado: se requiere rol administrador');
   router.navigate(['/login']);
   return false;
 };

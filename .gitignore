@@ -45,3 +45,6 @@ Thumbs.db
 
 # Variables de entorno locales
 src/environments/*
+
+# Archivos temporales de analisis
+codigo_completo.txt

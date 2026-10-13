@@ -1,26 +1,119 @@
-.navbar {
+﻿.navbar {
+  background-color: #ffffff;
+  border-bottom: 1px solid #e0e0e0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.navbar::after {
+  content: '';
+  display: block;
+  height: 3px;
+  background: linear-gradient(90deg, #00853E 0%, #B7930A 50%, #00853E 100%);
+}
+
+.navbar-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 16px 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 24px;
-  background-color: #ffffff;
-  border-bottom: 1px solid #e0e0e0;
+  gap: 24px;
 }
 
 .navbar-logo {
-  font-weight: bold;
-  font-size: 1.2rem;
-  color: #1a3c6e;
+  display: flex;
+  align-items: center;
   text-decoration: none;
   cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.logo-text {
+  font-family: 'Century Gothic', system-ui, sans-serif;
+  font-weight: 800;
+  font-size: 1.5rem;
+  color: #00853E;
+  letter-spacing: -0.5px;
+}
+
+.navbar-logo:hover .logo-text {
+  color: #006B32;
 }
 
 .navbar-links {
   display: flex;
-  gap: 16px;
+  align-items: center;
+  gap: 8px;
 }
 
-.navbar-links a {
+.nav-link {
   text-decoration: none;
-  color: #333;
+  color: #1A1A1A;
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 10px 16px;
+  border-radius: 8px;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.nav-link:not(.btn-registro)::after {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 2px;
+  background-color: #B7930A;
+  transition: width 0.3s ease;
+}
+
+.nav-link:not(.btn-registro):hover {
+  color: #00853E;
+}
+
+.nav-link:not(.btn-registro):hover::after {
+  width: 60%;
+}
+
+.btn-registro {
+  background-color: #00853E;
+  color: #ffffff !important;
+  padding: 10px 22px;
+  border-radius: 8px;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(0, 133, 62, 0.2);
+}
+
+.btn-registro:hover {
+  background-color: #00A04A;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 133, 62, 0.3);
+}
+
+@media (max-width: 640px) {
+  .navbar-container {
+    padding: 12px 16px;
+  }
+  .logo-text {
+    font-size: 1.25rem;
+  }
+  .nav-link {
+    padding: 8px 12px;
+    font-size: 0.875rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-link:not(.btn-registro) {
+    display: none;
+  }
+  .btn-registro {
+    padding: 8px 16px;
+  }
 }

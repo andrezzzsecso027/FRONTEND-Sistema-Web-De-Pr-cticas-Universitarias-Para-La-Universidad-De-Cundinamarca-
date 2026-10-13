@@ -1,1 +1,165 @@
-/* You can add global styles to this file, and also import other style files */
+﻿/* ============================================
+   SISTEMA DE DISEÑO — UdecPrac
+   Inspirado en la identidad institucional de la
+   Universidad de Cundinamarca
+   ============================================ */
+
+:root {
+  --verde-udec: #1a5e20;
+  --verde-oscuro: #0f3d15;
+  --verde-claro: #e8f0e9;
+  --dorado-udec: #c9a227;
+  --dorado-oscuro: #a8851a;
+  --blanco: #ffffff;
+  --crema: #fafaf7;
+  --gris-borde: #d9d9d9;
+  --gris-texto: #555555;
+  --negro-texto: #222222;
+  --font-family: 'Century Gothic', 'Questrial', 'URW Gothic', system-ui, sans-serif;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --transition: all 0.2s ease;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: var(--font-family);
+  color: var(--negro-texto);
+  background-color: var(--crema);
+  line-height: 1.6;
+}
+
+app-root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+main {
+  flex: 1;
+}
+
+a {
+  color: var(--verde-udec);
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+a:hover {
+  color: var(--verde-oscuro);
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  transition: var(--transition);
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.auth {
+  max-width: 440px;
+  margin: 48px auto;
+  padding: 32px;
+  background: var(--blanco);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  text-align: center;
+  border-top: 4px solid var(--dorado-udec);
+}
+
+.auth h1 {
+  color: var(--verde-udec);
+  font-size: 1.5rem;
+  margin-bottom: 24px;
+  font-weight: 700;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.auth-form label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-top: 16px;
+  margin-bottom: 4px;
+}
+
+.auth-form input,
+.auth-form select {
+  padding: 12px 14px;
+  border: 1.5px solid var(--gris-borde);
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  font-family: inherit;
+  transition: var(--transition);
+}
+
+.auth-form input:focus,
+.auth-form select:focus {
+  outline: none;
+  border-color: var(--verde-udec);
+  box-shadow: 0 0 0 3px rgba(26, 94, 32, 0.12);
+}
+
+.auth-form button {
+  margin-top: 24px;
+  padding: 14px;
+  background-color: var(--verde-udec);
+  color: var(--blanco);
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.auth-form button:not(:disabled):hover {
+  background-color: var(--verde-oscuro);
+  box-shadow: var(--shadow-md);
+}
+
+.auth-link {
+  margin-top: 24px;
+  font-size: 0.875rem;
+  color: var(--gris-texto);
+}
+
+.auth-link a {
+  color: var(--verde-udec);
+  font-weight: 700;
+}
+
+.hero-section {
+  background: linear-gradient(135deg, var(--verde-udec) 0%, var(--verde-oscuro) 100%);
+  color: var(--blanco);
+  padding: 64px 24px;
+  text-align: center;
+}
+
+.hero-section h1 {
+  font-size: 2.5rem;
+  margin-bottom: 16px;
+  font-weight: 800;
+}
+
+.hero-section p {
+  font-size: 1.125rem;
+  opacity: 0.95;
+  max-width: 600px;
+  margin: 0 auto 32px;
+}

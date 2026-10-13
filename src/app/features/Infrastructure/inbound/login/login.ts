@@ -1,11 +1,10 @@
-import { Component } from '@angular/core';
+﻿import { Component } from '@angular/core';
 import { RouterLink,Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Navbar } from '../../../../share/ui/navbar/navbar';
 import { Footer } from '../../../../share/ui/footer/footer';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Auth } from '../../../../core/services/auth';
-import { email } from '@angular/forms/signals';
 @Component({
   imports: [Navbar,Footer,RouterLink,CommonModule, ReactiveFormsModule],
   selector: 'app-login',
