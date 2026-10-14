@@ -1,0 +1,77 @@
+﻿<app-navbar></app-navbar>
+
+<main class="ofertas-page">
+  <div class="container">
+
+    <header class="ofertas-header">
+      <h1>Ofertas de Práctica Disponibles</h1>
+      <p>Encuentra la oportunidad que impulse tu carrera profesional.</p>
+    </header>
+
+    <!-- MENSAJES -->
+    <div *ngIf="mensajeExito" class="alert alert-success">
+      {{ mensajeExito }}
+    </div>
+    <div *ngIf="mensajeError" class="alert alert-error">
+      {{ mensajeError }}
+    </div>
+
+    <!-- LOADING -->
+    <div *ngIf="cargando" class="loading">
+      <p>Cargando ofertas disponibles...</p>
+    </div>
+
+    <!-- SIN OFERTAS -->
+    <div *ngIf="!cargando && ofertas.length === 0" class="empty-state">
+      <div class="empty-icon">📭</div>
+      <h3>No hay ofertas disponibles</h3>
+      <p>Vuelve pronto, estamos actualizando las oportunidades.</p>
+    </div>
+
+    <!-- GRID DE OFERTAS -->
+    <div *ngIf="!cargando && ofertas.length > 0" class="ofertas-grid">
+      <article *ngFor="let oferta of ofertas" class="oferta-card">
+
+        <div class="oferta-badge">{{ oferta.modality }}</div>
+
+        <h2 class="oferta-title">{{ oferta.practiceName }}</h2>
+
+        <p class="oferta-profession">{{ oferta.profession }}</p>
+
+        <p class="oferta-description">
+          {{ oferta.practiceDescription }}
+        </p>
+
+        <ul class="oferta-details">
+          <li>
+            <span class="detail-label">Salario</span>
+            <span class="detail-value">{{ formatearSalario(oferta.salary) }}</span>
+          </li>
+          <li>
+            <span class="detail-label">Ubicación</span>
+            <span class="detail-value">{{ oferta.location }}</span>
+          </li>
+          <li>
+            <span class="detail-label">Cupos</span>
+            <span class="detail-value">{{ oferta.availableSpots }}</span>
+          </li>
+          <li>
+            <span class="detail-label">Cierra</span>
+            <span class="detail-value">{{ oferta.closingDate }}</span>
+          </li>
+        </ul>
+
+        <button
+          class="btn-postular"
+          [disabled]="procesandoId === oferta.idOffer"
+          (click)="postularme(oferta)">
+          {{ procesandoId === oferta.idOffer ? 'Postulando...' : 'Postularme' }}
+        </button>
+
+      </article>
+    </div>
+
+  </div>
+</main>
+
+<app-footer></app-footer>

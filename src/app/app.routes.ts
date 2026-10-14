@@ -5,6 +5,7 @@ import { Registro } from './features/Infrastructure/inbound/registro/registro';
 import { RegistroEstudiante } from './features/Infrastructure/inbound/registro-estudiante/registro-estudiante';
 import { RegistroEmpresa } from './features/Infrastructure/inbound/registro-empresa/registro-empresa';
 import { PanelAdministrador } from './features/Infrastructure/inbound/panel-administrador/panel-administrador';
+import { OfertaLista } from './features/Infrastructure/inbound/oferta-lista/oferta-lista';
 import { adminGuard } from './core/guards/admin.guard';
 
 export const routes: Routes = [
@@ -13,6 +14,7 @@ export const routes: Routes = [
   { path: 'registro', component: Registro },
   { path: 'registro-estudiante', component: RegistroEstudiante },
   { path: 'registro-empresa', component: RegistroEmpresa },
+  { path: 'ofertas', component: OfertaLista },
   { path: 'panel-administrador', component: PanelAdministrador, canActivate: [adminGuard] },
   { path: '**', redirectTo: '', pathMatch: 'full' }
 ];
