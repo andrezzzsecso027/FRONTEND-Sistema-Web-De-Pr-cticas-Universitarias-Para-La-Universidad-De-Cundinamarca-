@@ -1,60 +1,111 @@
-<app-navbar></app-navbar>
+﻿<app-navbar></app-navbar>
 
-<main class="panel-container" style="padding: 2rem; max-width: 1200px; margin: 0 auto;">
-  <h1 style="text-align: center; color: #2c3e50;">Panel de Control - Administrador</h1>
-  <p style="text-align: center; margin-bottom: 2rem;">Vista general de usuarios registrados en el sistema.</p>
+<main class="panel">
+  <div class="panel-container">
 
-  <section class="table-section" style="margin-bottom: 3rem;">
-    <h2 style="color: #4CAF50; border-bottom: 2px solid #4CAF50; padding-bottom: 0.5rem;">🎓 Estudiantes Registrados</h2>
-    <table style="width: 100%; border-collapse: collapse; margin-top: 1rem; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-      <thead style="background-color: #f8f9fa;">
-        <tr>
-          <th style="padding: 12px; border: 1px solid #ddd; text-align: left;">Documento</th>
-          <th style="padding: 12px; border: 1px solid #ddd; text-align: left;">Nombres</th>
-          <th style="padding: 12px; border: 1px solid #ddd; text-align: left;">Apellidos</th>
-          <th style="padding: 12px; border: 1px solid #ddd; text-align: left;">Programa Académico</th>
-          <th style="padding: 12px; border: 1px solid #ddd; text-align: left;">Sede</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let est of estudiantes" style="background-color: #fff;">
-          <td style="padding: 12px; border: 1px solid #ddd;">{{ est.documento }}</td>
-          <td style="padding: 12px; border: 1px solid #ddd;">{{ est.nombres }}</td>
-          <td style="padding: 12px; border: 1px solid #ddd;">{{ est.apellidos }}</td>
-          <td style="padding: 12px; border: 1px solid #ddd;">{{ est.programaAcademico }}</td>
-          <td style="padding: 12px; border: 1px solid #ddd;">{{ est.sede }}</td>
-        </tr>
-        <tr *ngIf="estudiantes.length === 0">
-          <td colspan="5" style="padding: 20px; text-align: center; color: #777;">No hay estudiantes registrados aún.</td>
-        </tr>
-      </tbody>
-    </table>
-  </section>
+    <header class="panel-header">
+      <h1>Panel de Administrador</h1>
+      <p>Gestiona estudiantes, empresas y ofertas de la plataforma.</p>
+    </header>
 
-  <section class="table-section">
-    <h2 style="color: #2196F3; border-bottom: 2px solid #2196F3; padding-bottom: 0.5rem;">🏢 Empresas Aliadas</h2>
-    <table style="width: 100%; border-collapse: collapse; margin-top: 1rem; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-      <thead style="background-color: #f8f9fa;">
-        <tr>
-          <th style="padding: 12px; border: 1px solid #ddd; text-align: left;">NIT</th>
-          <th style="padding: 12px; border: 1px solid #ddd; text-align: left;">Nombre de Empresa</th>
-          <th style="padding: 12px; border: 1px solid #ddd; text-align: left;">Teléfono</th>
-          <th style="padding: 12px; border: 1px solid #ddd; text-align: left;">Dirección</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let emp of empresas" style="background-color: #fff;">
-          <td style="padding: 12px; border: 1px solid #ddd;">{{ emp.NIT }}</td> 
-          <td style="padding: 12px; border: 1px solid #ddd;">{{ emp.nombreEmpresa }}</td>
-          <td style="padding: 12px; border: 1px solid #ddd;">{{ emp.telefonoEmpresa }}</td>
-          <td style="padding: 12px; border: 1px solid #ddd;">{{ emp.direccionEmpresa }}</td>
-        </tr>
-        <tr *ngIf="empresas.length === 0">
-          <td colspan="4" style="padding: 20px; text-align: center; color: #777;">No hay empresas registradas aún.</td>
-        </tr>
-      </tbody>
-    </table>
-  </section>
+    <!-- MENSAJES -->
+    <div *ngIf="mensajeExito" class="alert alert-success">
+      {{ mensajeExito }}
+    </div>
+    <div *ngIf="mensajeError" class="alert alert-error">
+      {{ mensajeError }}
+    </div>
+
+    <!-- EMPRESAS PENDIENTES -->
+    <section class="panel-section">
+      <div class="section-header">
+        <h2>Empresas pendientes de aprobación</h2>
+        <span class="badge">{{ empresasPendientes.length }}</span>
+      </div>
+
+      <div *ngIf="cargandoEmpresas" class="loading">
+        Cargando empresas...
+      </div>
+
+      <table *ngIf="!cargandoEmpresas" class="panel-table">
+        <thead>
+          <tr>
+            <th>NIT</th>
+            <th>Empresa</th>
+            <th>Ciudad</th>
+            <th>Teléfono</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let emp of empresasPendientes">
+            <td>{{ emp.nit }}</td>
+            <td>{{ emp.companyName }}</td>
+            <td>{{ emp.city }}, {{ emp.department }}</td>
+            <td>{{ emp.companyPhoneNumber }}</td>
+            <td class="actions">
+              <button
+                class="btn btn-success"
+                [disabled]="procesandoNit === emp.nit"
+                (click)="aprobarEmpresa(emp.nit)">
+                {{ procesandoNit === emp.nit ? '...' : 'Aprobar' }}
+              </button>
+              <button
+                class="btn btn-danger"
+                [disabled]="procesandoNit === emp.nit"
+                (click)="rechazarEmpresa(emp.nit)">
+                {{ procesandoNit === emp.nit ? '...' : 'Rechazar' }}
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="empresasPendientes.length === 0">
+            <td colspan="5" class="empty">
+              No hay empresas pendientes de aprobación.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ESTUDIANTES -->
+    <section class="panel-section">
+      <div class="section-header">
+        <h2>Estudiantes registrados</h2>
+        <span class="badge">{{ estudiantes.length }}</span>
+      </div>
+
+      <div *ngIf="cargandoEstudiantes" class="loading">
+        Cargando estudiantes...
+      </div>
+
+      <table *ngIf="!cargandoEstudiantes" class="panel-table">
+        <thead>
+          <tr>
+            <th>Documento</th>
+            <th>Nombres</th>
+            <th>Apellidos</th>
+            <th>Programa</th>
+            <th>Sede</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let est of estudiantes">
+            <td>{{ est.documento || est.documentNumber }}</td>
+            <td>{{ est.nombres || est.nombreEstudiante || est.firstName }}</td>
+            <td>{{ est.apellidos || est.apellidoEstudiante || est.lastName }}</td>
+            <td>{{ est.programaAcademico || est.programa }}</td>
+            <td>{{ est.sede }}</td>
+          </tr>
+          <tr *ngIf="estudiantes.length === 0">
+            <td colspan="5" class="empty">
+              No hay estudiantes registrados aún.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+  </div>
 </main>
 
 <app-footer></app-footer>

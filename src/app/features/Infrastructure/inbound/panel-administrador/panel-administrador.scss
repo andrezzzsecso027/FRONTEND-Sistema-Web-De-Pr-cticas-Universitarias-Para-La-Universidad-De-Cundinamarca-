@@ -1,0 +1,221 @@
+﻿/* ============================================
+   PANEL ADMINISTRADOR — UdecPrac
+   ============================================ */
+
+.panel {
+  background-color: #FAFAF7;
+  min-height: calc(100vh - 200px);
+  padding: 48px 24px;
+}
+
+.panel-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* ---- HEADER ---- */
+.panel-header {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.panel-header h1 {
+  font-family: 'Century Gothic', system-ui, sans-serif;
+  font-size: 2.25rem;
+  color: #00853E;
+  margin: 0 0 12px 0;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+.panel-header p {
+  color: #666;
+  font-size: 1.05rem;
+  margin: 0;
+}
+
+/* ---- ALERTAS ---- */
+.alert {
+  padding: 16px 20px;
+  border-radius: 10px;
+  margin-bottom: 24px;
+  font-weight: 600;
+  animation: fadeIn 0.3s ease;
+}
+
+.alert-success {
+  background-color: #E5F4EB;
+  color: #006B32;
+  border-left: 4px solid #00853E;
+}
+
+.alert-error {
+  background-color: #FCEBEB;
+  color: #A8261C;
+  border-left: 4px solid #C62828;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---- SECCIONES ---- */
+.panel-section {
+  background-color: #ffffff;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  margin-bottom: 32px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #E5F4EB;
+}
+
+.section-header h2 {
+  font-family: 'Century Gothic', system-ui, sans-serif;
+  font-size: 1.35rem;
+  color: #00853E;
+  margin: 0;
+  font-weight: 700;
+}
+
+.badge {
+  background-color: #00853E;
+  color: #ffffff;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+/* ---- TABLA ---- */
+.panel-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.panel-table thead {
+  background-color: #FAFAF7;
+}
+
+.panel-table th {
+  padding: 14px 16px;
+  text-align: left;
+  font-family: 'Century Gothic', system-ui, sans-serif;
+  font-weight: 700;
+  color: #333;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid #E0E0E0;
+}
+
+.panel-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid #EEEEEE;
+  color: #333;
+}
+
+.panel-table tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+.panel-table tbody tr:hover {
+  background-color: #FAFAF7;
+}
+
+.panel-table .empty {
+  text-align: center;
+  color: #999;
+  padding: 40px 16px;
+  font-style: italic;
+}
+
+/* ---- ACCIONES ---- */
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-success {
+  background-color: #00853E;
+  color: #ffffff;
+}
+
+.btn-success:hover:not(:disabled) {
+  background-color: #006B32;
+  transform: translateY(-1px);
+}
+
+.btn-danger {
+  background-color: #C62828;
+  color: #ffffff;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background-color: #A8261C;
+  transform: translateY(-1px);
+}
+
+/* ---- LOADING ---- */
+.loading {
+  padding: 40px;
+  text-align: center;
+  color: #999;
+  font-style: italic;
+}
+
+/* ---- RESPONSIVE ---- */
+@media (max-width: 768px) {
+  .panel {
+    padding: 24px 16px;
+  }
+
+  .panel-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .panel-section {
+    padding: 20px 16px;
+  }
+
+  .panel-table {
+    font-size: 0.85rem;
+  }
+
+  .panel-table th,
+  .panel-table td {
+    padding: 10px 8px;
+  }
+
+  .actions {
+    flex-direction: column;
+  }
+
+  .btn {
+    width: 100%;
+  }
+}
