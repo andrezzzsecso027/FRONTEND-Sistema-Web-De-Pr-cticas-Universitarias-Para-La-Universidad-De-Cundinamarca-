@@ -7,6 +7,8 @@ import { RegistroEmpresa } from './features/Infrastructure/inbound/registro-empr
 import { PanelAdministrador } from './features/Infrastructure/inbound/panel-administrador/panel-administrador';
 import { OfertaLista } from './features/Infrastructure/inbound/oferta-lista/oferta-lista';
 import { adminGuard } from './core/guards/admin.guard';
+import { PanelEmpresa } from './features/Infrastructure/inbound/panel-empresa/panel-empresa';
+import { empresaGuard } from './core/guards/empresa.guard';
 
 export const routes: Routes = [
   { path: '', component: Home },
@@ -16,5 +18,6 @@ export const routes: Routes = [
   { path: 'registro-empresa', component: RegistroEmpresa },
   { path: 'ofertas', component: OfertaLista },
   { path: 'panel-administrador', component: PanelAdministrador, canActivate: [adminGuard] },
-  { path: '**', redirectTo: '', pathMatch: 'full' }
+  { path: 'panel-empresa', component: PanelEmpresa, canActivate: [empresaGuard] },
+  { path: '**', redirectTo: '', pathMatch: 'full' },
 ];

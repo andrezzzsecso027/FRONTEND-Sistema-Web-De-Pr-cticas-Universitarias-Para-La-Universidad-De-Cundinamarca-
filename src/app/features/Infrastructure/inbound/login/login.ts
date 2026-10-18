@@ -32,22 +32,26 @@ export class Login {
     }
     const { email, password } = this.loginForm.value;
 
-    this.authService.login(email,password).subscribe({
+    this.authService.login(email, password).subscribe({
       next: (response) => {
-       localStorage.setItem('token', response.token);
+        localStorage.setItem('token', response.token);
         localStorage.setItem('usuario_sesion', JSON.stringify(response));
 
-        if (response.userRol === 'administrador') {
+        const rol = response.userRol?.toLowerCase();
+
+        if (rol === 'administrador') {
           this.router.navigate(['/panel-administrador']);
+        } else if (rol === 'empresa') {
+          this.router.navigate(['/panel-empresa']);
+        } else if (rol === 'estudiante') {
+          this.router.navigate(['/oferta-lista']); // O la ruta de inicio del estudiante
         } else {
-          alert(`Bienvenido. Redirigiendo a tu perfil...`);
           this.router.navigate(['/']);
         }
-
       },
       error: (err) => {
         console.error(err);
-        alert('Credenciales inválidas. Revisa correo y contraseña.');
+        alert('Credenciales inválidas o cuenta pendiente de verificación.');
       }
     });
   }
