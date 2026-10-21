@@ -1,0 +1,61 @@
+﻿<app-navbar></app-navbar>
+
+<main class="postulaciones-page">
+  <div class="container">
+
+    <header class="postulaciones-header">
+      <h1>Mis Postulaciones</h1>
+      <p>Revisa el estado de las ofertas de práctica a las que te has postulado.</p>
+    </header>
+
+    <div *ngIf="mensajeError" class="alert alert-error">
+      {{ mensajeError }}
+    </div>
+
+    <div *ngIf="cargando" class="loading">
+      <p>Cargando tus postulaciones...</p>
+    </div>
+
+    <div *ngIf="!cargando && postulaciones.length === 0 && !mensajeError" class="empty-state">
+      <div class="empty-icon">📋</div>
+      <h3>Aún no tienes postulaciones</h3>
+      <p>Explora las ofertas disponibles y comienza tu camino profesional.</p>
+      <a routerLink="/ofertas" class="btn-primary">Ver ofertas disponibles</a>
+    </div>
+
+    <div *ngIf="!cargando && postulaciones.length > 0" class="postulaciones-list">
+      <div *ngFor="let post of postulaciones" class="postulacion-card">
+        
+        <div class="postulacion-header">
+          <div>
+            <h2 class="postulacion-title">{{ post.offerName }}</h2>
+            <p class="postulacion-company">🏢 {{ post.companyName }}</p>
+          </div>
+          <span class="badge" [ngClass]="getEstadoClase(post.state)">
+            {{ post.state.replace('_', ' ') }}
+          </span>
+        </div>
+
+        <div class="postulacion-body">
+          <div class="postulacion-info">
+            <span class="info-label">Fecha de postulación</span>
+            <span class="info-value">{{ post.applicationDate }}</span>
+          </div>
+          
+          <div class="postulacion-info" *ngIf="post.observations">
+            <span class="info-label">Observaciones</span>
+            <span class="info-value">{{ post.observations }}</span>
+          </div>
+        </div>
+
+        <div class="postulacion-actions">
+          <button class="btn-secondary">Ver historial</button>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<app-footer></app-footer>

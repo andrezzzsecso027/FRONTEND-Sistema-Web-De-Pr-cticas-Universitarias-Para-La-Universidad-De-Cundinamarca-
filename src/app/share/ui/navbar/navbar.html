@@ -5,9 +5,38 @@
     </a>
 
     <nav class="navbar-links">
+
+      <!-- SIEMPRE VISIBLE -->
       <a routerLink="/" class="nav-link">Inicio</a>
-      <a routerLink="/login" class="nav-link">Iniciar sesión</a>
-      <a routerLink="/registro" class="nav-link btn-registro">Registrarme</a>
+
+      <!-- SI NO HAY SESIÓN -->
+      <ng-container *ngIf="!isLoggedIn">
+        <a routerLink="/login" class="nav-link">Iniciar sesión</a>
+        <a routerLink="/registro" class="nav-link btn-registro">Registrarme</a>
+      </ng-container>
+
+      <!-- SI HAY SESIÓN (ESTUDIANTE) -->
+      <ng-container *ngIf="isLoggedIn && userRole === 'estudiante'">
+        <a routerLink="/ofertas" class="nav-link">Ofertas</a>
+        <a routerLink="/mis-postulaciones" class="nav-link">Mis postulaciones</a>
+        <span class="nav-user">Hola, {{ userName }}</span>
+        <button class="nav-link btn-logout" (click)="logout()">Cerrar sesión</button>
+      </ng-container>
+
+      <!-- SI HAY SESIÓN (EMPRESA) -->
+      <ng-container *ngIf="isLoggedIn && userRole === 'empresa'">
+        <a routerLink="/mi-panel" class="nav-link">Mi panel</a>
+        <span class="nav-user">Hola, {{ userName }}</span>
+        <button class="nav-link btn-logout" (click)="logout()">Cerrar sesión</button>
+      </ng-container>
+
+      <!-- SI HAY SESIÓN (ADMINISTRADOR) -->
+      <ng-container *ngIf="isLoggedIn && userRole === 'administrador'">
+        <a routerLink="/panel-administrador" class="nav-link">Panel Admin</a>
+        <span class="nav-user">Hola, {{ userName }}</span>
+        <button class="nav-link btn-logout" (click)="logout()">Cerrar sesión</button>
+      </ng-container>
+
     </nav>
   </div>
 </header>

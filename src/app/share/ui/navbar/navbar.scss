@@ -117,3 +117,34 @@
     padding: 8px 16px;
   }
 }
+
+/* ---- USUARIO LOGUEADO ---- */
+.nav-user {
+  color: #00853E;
+  font-weight: 700;
+  font-size: 0.9rem;
+  padding: 10px 16px;
+  background-color: #E5F4EB;
+  border-radius: 8px;
+  margin-left: 8px;
+}
+
+.btn-logout {
+  background-color: transparent;
+  color: #C62828;
+  border: 1.5px solid #C62828;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-left: 8px;
+  font-family: inherit;
+}
+
+.btn-logout:hover {
+  background-color: #C62828;
+  color: #ffffff;
+  transform: translateY(-1px);
+}

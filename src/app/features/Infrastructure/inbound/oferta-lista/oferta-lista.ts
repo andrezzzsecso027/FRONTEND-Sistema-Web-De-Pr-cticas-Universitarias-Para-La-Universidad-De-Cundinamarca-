@@ -10,7 +10,7 @@ import { Auth } from '../../../../core/services/auth';
 @Component({
   selector: 'app-oferta-lista',
   standalone: true,
-  imports: [CommonModule, RouterLink, Navbar, Footer],
+  imports: [CommonModule, Navbar, Footer],
   styleUrl: './oferta-lista.scss',
   templateUrl: './oferta-lista.html',
 })
