@@ -1,0 +1,135 @@
+﻿.verificar-page {
+  background-color: #FAFAF7;
+  min-height: calc(100vh - 200px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+}
+
+.verificar-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 48px 40px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  max-width: 480px;
+  width: 100%;
+  text-align: center;
+  border-top: 4px solid #B7930A;
+}
+
+.verificar-icon {
+  font-size: 3rem;
+  margin-bottom: 16px;
+}
+
+.verificar-card h1 {
+  font-family: 'Century Gothic', system-ui, sans-serif;
+  font-size: 1.75rem;
+  color: #00853E;
+  margin: 0 0 8px 0;
+  font-weight: 800;
+}
+
+.verificar-subtitle {
+  color: #666;
+  font-size: 0.95rem;
+  margin: 0 0 32px 0;
+  line-height: 1.6;
+}
+
+.alert {
+  padding: 14px 18px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-align: left;
+}
+
+.alert-success {
+  background-color: #E5F4EB;
+  color: #006B32;
+  border-left: 4px solid #00853E;
+}
+
+.alert-error {
+  background-color: #FCEBEB;
+  color: #A8261C;
+  border-left: 4px solid #C62828;
+}
+
+.verificar-form {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.verificar-form label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin-top: 16px;
+  margin-bottom: 6px;
+  color: #1A1A1A;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.verificar-form input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid #E0E0E0;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-family: inherit;
+  transition: all 0.25s ease;
+  box-sizing: border-box;
+}
+
+.verificar-form input:focus {
+  outline: none;
+  border-color: #00853E;
+  box-shadow: 0 0 0 4px rgba(0, 133, 62, 0.12);
+}
+
+.verificar-form button {
+  margin-top: 28px;
+  padding: 16px;
+  background: linear-gradient(135deg, #00853E 0%, #006B32 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.25s ease;
+}
+
+.verificar-form button:not(:disabled):hover {
+  background: linear-gradient(135deg, #00A04A 0%, #00853E 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 133, 62, 0.35);
+}
+
+.verificar-form button:disabled {
+  background: #CCCCCC;
+  cursor: not-allowed;
+}
+
+.verificar-footer {
+  margin-top: 24px;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.verificar-footer a {
+  color: #00853E;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.verificar-footer a:hover {
+  text-decoration: underline;
+}
