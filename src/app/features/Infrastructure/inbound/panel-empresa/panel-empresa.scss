@@ -711,3 +711,81 @@
   background-color: #e6efe9 !important;
   border-color: #8fa99b !important;
 }
+
+.timeout-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 32, 18, 0.72);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.timeout-modal {
+  background: #f2f6f3;
+  border: 2px solid var(--udec-gold);
+  border-radius: 16px;
+  padding: 2.25rem;
+  max-width: 440px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.9rem;
+
+  .timeout-icon {
+    font-size: 3rem;
+    background: #fff3cd;
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--udec-gold);
+  }
+
+  h2 {
+    margin: 0;
+    color: var(--udec-green-dark);
+    font-size: 1.4rem;
+  }
+
+  p {
+    margin: 0;
+    color: #374151;
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+
+  small {
+    color: #6b7280;
+    font-style: italic;
+  }
+
+  button {
+    margin-top: 0.5rem;
+    width: 100%;
+  }
+}
+
+.pdf-success-text {
+  color: #15803d;
+  font-weight: 700;
+}
+
+.link-ver-pdf {
+  display: inline-block;
+  margin-top: 0.6rem;
+  color: var(--udec-green-main);
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-decoration: none;
+  &:hover {
+    text-decoration: underline;
+  }
+}

@@ -1,4 +1,4 @@
-import { Component, OnInit,ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, FormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -13,7 +13,7 @@ import { Empresa } from '../../../../core/services/empresa/empresa';
   templateUrl: './panel-empresa.html',
   styleUrl: './panel-empresa.scss'
 })
-export class PanelEmpresa implements OnInit {
+export class PanelEmpresa implements OnInit, OnDestroy {
   vistaActual: 'inicio' | 'crear-oferta' | 'mis-ofertas' | 'postulantes' | 'perfil' = 'inicio';
   menuPerfilAbierto = false;
 
@@ -22,12 +22,11 @@ export class PanelEmpresa implements OnInit {
   nombreEmpresa = 'Cargando empresa...';
   nitEmpresa = '';
   correoEmpresa = '';
+  ccRepresentanteLegal = '';
 
-  // Perfil Corporativo
+  // Perfil Corporativo y Archivos en Cloudinary
   perfilForm: FormGroup;
   logoPreviewUrl: string | null = null;
-  archivoLogoSeleccionado: File | null = null;
-  archivoPdfNitSeleccionado: File | null = null;
   nombreArchivoPdfNit = '';
 
   // Ofertas y Postulaciones
@@ -40,6 +39,13 @@ export class PanelEmpresa implements OnInit {
   cargando = false;
   mensajeExito = '';
   mensajeError = '';
+
+  // Control de Timeout por Inactividad
+  sesionExpiradaModal = false;
+  private timeoutInactividad: any;
+  // Tiempo límite de inactividad en milisegundos: 10 minutos (600000 ms).
+  // TIP: Para probarlo rápido en sustentación puedes poner 15000 (15 segundos).
+  private readonly TIEMPO_LIMITE_MS = 10 * 60 * 1000;
 
   ofertaForm: FormGroup;
 
@@ -106,9 +112,50 @@ export class PanelEmpresa implements OnInit {
 
   ngOnInit(): void {
     this.inicializarPanelEmpresa();
+    this.reiniciarTemporizadorInactividad();
   }
 
-  // Decodifica el payload del JWT para extraer idUser o email si no vienen sueltos en usuario_sesion
+  ngOnDestroy(): void {
+    if (this.timeoutInactividad) {
+      clearTimeout(this.timeoutInactividad);
+    }
+  }
+
+  // --- DETECTOR DE INACTIVIDAD (TIMEOUT DE SESIÓN) ---
+  @HostListener('window:mousemove')
+  @HostListener('window:keydown')
+  @HostListener('window:click')
+  @HostListener('window:scroll')
+  reiniciarTemporizadorInactividad(): void {
+    if (this.sesionExpiradaModal) return;
+
+    if (this.timeoutInactividad) {
+      clearTimeout(this.timeoutInactividad);
+    }
+
+    this.timeoutInactividad = setTimeout(() => {
+      this.mostrarAlertaSesionExpirada();
+    }, this.TIEMPO_LIMITE_MS);
+  }
+
+  private mostrarAlertaSesionExpirada(): void {
+    this.sesionExpiradaModal = true;
+    localStorage.removeItem('token');
+    localStorage.removeItem('usuario_sesion');
+    localStorage.removeItem('nitEmpresa');
+    localStorage.removeItem('nombreEmpresaReal');
+    this.cdr.detectChanges();
+
+    // Redirige automáticamente al login después de mostrar el anuncio durante 4 segundos
+    setTimeout(() => {
+      this.router.navigate(['/login']);
+    }, 4000);
+  }
+
+  irAlLoginAhora(): void {
+    this.router.navigate(['/login']);
+  }
+
   private decodificarJwt(token: string): any {
     try {
       const payloadBase64 = token.split('.')[1];
@@ -127,30 +174,21 @@ export class PanelEmpresa implements OnInit {
     if (sesionStr) {
       try {
         const sesion = JSON.parse(sesionStr);
-
-        // 1. Extraemos correo, idUser y NIT EXCLUSIVAMENTE de la sesión actual (no de llaves viejas)
         this.correoEmpresa = sesion.email || sesion.correoElectronico || jwtData?.sub || jwtData?.email || '';
         this.idUsuarioSesion = sesion.idUser || sesion.idUsuario || sesion.id || jwtData?.idUser || jwtData?.id || null;
         this.nitEmpresa = sesion.nit || sesion.nitCompany || jwtData?.nit || '';
 
-        // 2. Nombre provisional basado en la cuenta actual mientras responde la BD
         if (sesion.companyName || sesion.nombreEmpresa) {
           this.nombreEmpresa = sesion.companyName || sesion.nombreEmpresa;
         } else if (this.correoEmpresa.includes('@')) {
           const base = this.correoEmpresa.split('@')[0].replace(/[._-]/g, ' ');
           this.nombreEmpresa = base.replace(/\b\w/g, l => l.toUpperCase());
         }
-
-        // Cargamos logo y PDF guardados específicamente para este correo
-        this.logoPreviewUrl = localStorage.getItem(`logo_${this.correoEmpresa}`);
-        this.nombreArchivoPdfNit = localStorage.getItem(`pdf_${this.correoEmpresa}`) || '';
-
       } catch (e) {
         console.error('Error al leer usuario_sesion', e);
       }
     }
 
-    // 3. Primero sincronizamos los datos de la empresa en BD y LUEGO cargamos sus ofertas
     this.sincronizarDatosCorporativosBD();
   }
 
@@ -159,35 +197,45 @@ export class PanelEmpresa implements OnInit {
     this.empresaService.obtenerTodasLasEmpresas().subscribe({
       next: (empresas) => {
         if (empresas && empresas.length > 0) {
-          // Buscamos la empresa que coincida exactamente con la sesión actual
           const encontrada = empresas.find(emp => {
             const matchId = this.idUsuarioSesion && Number(emp.idUser) === Number(this.idUsuarioSesion);
             const matchNit = this.nitEmpresa && emp.nit === this.nitEmpresa;
-            const matchCorreo = this.correoEmpresa &&
-              (emp.email?.toLowerCase() === this.correoEmpresa.toLowerCase() ||
-               emp.correoElectronico?.toLowerCase() === this.correoEmpresa.toLowerCase());
-            return matchId || matchNit || matchCorreo;
+            const matchNombre = !this.idUsuarioSesion && !this.nitEmpresa &&
+              emp.companyName?.toLowerCase().replace(/\s+/g, '') === this.correoEmpresa.split('@')[0]?.toLowerCase();
+            return matchId || matchNit || matchNombre;
           });
 
           if (encontrada) {
             this.nombreEmpresa = encontrada.companyName || this.nombreEmpresa;
             this.nitEmpresa = encontrada.nit || this.nitEmpresa;
 
-            const descGuardada = localStorage.getItem(`desc_${this.nitEmpresa}`);
+            // 1. Cargamos Foto (Logo) y PDF del NIT directamente desde PostgreSQL (con respaldo en localStorage)
+            this.logoPreviewUrl = encontrada.logoUrl || localStorage.getItem(`logo_${this.nitEmpresa}`) || null;
+            this.nombreArchivoPdfNit = encontrada.rutPdfUrl || localStorage.getItem(`pdf_${this.nitEmpresa}`) || '';
+
+            // 2. Extraemos el objeto anidado legalRepresentative que viene del Backend
+            const repLegal = encontrada.legalRepresentative || {};
+            this.ccRepresentanteLegal = repLegal.numberDocument || '';
+
+            // Normalizamos el tipo de empresa (ej. "privada" -> "Privada")
+            const tipoNormalizado = encontrada.companyType
+              ? encontrada.companyType.charAt(0).toUpperCase() + encontrada.companyType.slice(1).toLowerCase()
+              : 'Privada';
 
             this.perfilForm.patchValue({
               companyName: encontrada.companyName || this.nombreEmpresa,
-              businessName: encontrada.businessName || encontrada.companyName || '',
+              businessName: encontrada.legalName || encontrada.businessName || encontrada.companyName || '',
               nit: this.nitEmpresa,
               email: this.correoEmpresa,
-              companyType: encontrada.companyType || 'Privada',
-              phone: encontrada.companyPhone || encontrada.phone || '',
+              companyType: tipoNormalizado,
+              phone: encontrada.companyPhoneNumber || encontrada.companyPhone || '',
               department: encontrada.department || 'Cundinamarca',
               city: encontrada.city || 'Fusagasugá',
-              address: encontrada.companyAddress || encontrada.address || '',
-              legalRepName: encontrada.nameLegalRepresentative || '',
-              legalRepLastName: encontrada.lastNameLegalRepresentative || '',
-              ...(descGuardada ? { companyDescription: descGuardada } : {})
+              address: encontrada.companyAddress || '',
+              legalRepName: repLegal.nameRepresentative || '',
+              legalRepLastName: repLegal.lastNameRepresentative || '',
+              companyDescription: encontrada.companyDescription ||
+                'Somos una organización aliada de la Universidad de Cundinamarca comprometida con la formación profesional y tecnológica de practicantes universitarios.'
             });
           } else {
             this.rellenarPerfilDesdeSesionActual();
@@ -196,7 +244,6 @@ export class PanelEmpresa implements OnInit {
           this.rellenarPerfilDesdeSesionActual();
         }
 
-        // Una vez tenemos el NIT correcto de la empresa actual, cargamos sus ofertas inmediatamente
         this.cargarMisOfertas();
       },
       error: () => {
@@ -223,7 +270,6 @@ export class PanelEmpresa implements OnInit {
           ? lista.filter(o => o.nitCompanyAssociated === this.nitEmpresa)
           : lista;
         this.cargando = false;
-        // Forzamos la actualización inmediata en la pantalla de Inicio sin tener que cambiar de pestaña
         this.cdr.detectChanges();
       },
       error: () => {
@@ -348,55 +394,93 @@ export class PanelEmpresa implements OnInit {
   onSeleccionarLogo(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (!input.files || input.files.length === 0) return;
-
     const file = input.files[0];
-    if (!file.type.startsWith('image/')) {
-      this.mensajeError = 'Por favor selecciona una imagen válida (PNG, JPG o WEBP) para el logo.';
-      return;
-    }
 
-    this.archivoLogoSeleccionado = file;
-    const reader = new FileReader();
-    reader.onload = () => {
-      this.logoPreviewUrl = reader.result as string;
-      if (this.correoEmpresa) {
-        localStorage.setItem(`logo_${this.correoEmpresa}`, this.logoPreviewUrl);
+    this.cargando = true;
+    this.limpiarMensajes();
+    this.empresaService.subirArchivoCloudinary(file, 'empresas_logos').subscribe({
+      next: (res: { url: string }) => {
+        this.logoPreviewUrl = res.url;
+        if (this.nitEmpresa) {
+          localStorage.setItem(`logo_${this.nitEmpresa}`, res.url);
+        }
+        this.cargando = false;
+        // Guardamos automáticamente en la BD apenas sube la foto para que no se pierda si refresca
+        this.guardarPerfilCorporativo(true);
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.cargando = false;
+        this.mensajeError = 'Error al subir el logo a Cloudinary.';
+        this.cdr.detectChanges();
       }
-      this.cdr.detectChanges();
-    };
-    reader.readAsDataURL(file);
+    });
   }
 
   onSeleccionarPdfNit(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (!input.files || input.files.length === 0) return;
-
     const file = input.files[0];
-    if (file.type !== 'application/pdf') {
-      this.mensajeError = 'El certificado RUT / Cámara de Comercio debe estar en formato PDF.';
-      return;
-    }
 
-    this.archivoPdfNitSeleccionado = file;
-    this.nombreArchivoPdfNit = file.name;
-    if (this.correoEmpresa) {
-      localStorage.setItem(`pdf_${this.correoEmpresa}`, file.name);
-    }
+    this.cargando = true;
+    this.limpiarMensajes();
+    this.empresaService.subirArchivoCloudinary(file, 'empresas_nit').subscribe({
+      next: (res: { url: string }) => {
+        this.nombreArchivoPdfNit = res.url;
+        if (this.nitEmpresa) {
+          localStorage.setItem(`pdf_${this.nitEmpresa}`, res.url);
+        }
+        this.cargando = false;
+        // Guardamos automáticamente en la BD apenas sube el PDF
+        this.guardarPerfilCorporativo(true);
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.cargando = false;
+        this.mensajeError = 'Error al subir el PDF a Cloudinary.';
+        this.cdr.detectChanges();
+      }
+    });
   }
 
-  guardarPerfilCorporativo(): void {
-    if (this.perfilForm.invalid) {
-      this.mensajeError = 'Por favor revisa que el nombre y la descripción de la empresa estén completos.';
-      return;
-    }
+  guardarPerfilCorporativo(esAutoGuardadoArchivo = false): void {
+    if (!this.nitEmpresa) return;
+    const val = this.perfilForm.getRawValue();
 
-    const valores = this.perfilForm.getRawValue();
-    this.nombreEmpresa = valores.companyName;
-    if (this.nitEmpresa) {
-      localStorage.setItem(`desc_${this.nitEmpresa}`, valores.companyDescription);
-    }
+    const payload = {
+      companyName: val.companyName,
+      legalName: val.businessName,
+      companyType: val.companyType,
+      companyPhoneNumber: val.phone,
+      department: val.department,
+      city: val.city,
+      companyAddress: val.address,
+      companyDescription: val.companyDescription,
+      logoUrl: this.logoPreviewUrl,
+      rutPdfUrl: this.nombreArchivoPdfNit,
+      legalRepresentative: {
+        nameRepresentative: val.legalRepName,
+        lastNameRepresentative: val.legalRepLastName,
+        numberDocument: this.ccRepresentanteLegal
+      }
+    };
 
-    this.mensajeExito = '¡Perfil corporativo, descripción y documentos actualizados correctamente!';
+    this.cargando = true;
+    this.empresaService.actualizarPerfilEmpresa(this.nitEmpresa, payload).subscribe({
+      next: (actualizada: any) => {
+        this.cargando = false;
+        this.nombreEmpresa = actualizada.companyName || this.nombreEmpresa;
+        this.mensajeExito = esAutoGuardadoArchivo
+          ? '¡Archivo subido a Cloudinary y vinculado a tu perfil en la Base de Datos!'
+          : '¡Perfil corporativo y documentos guardados exitosamente en la Base de Datos!';
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.cargando = false;
+        this.mensajeError = 'No se pudo actualizar el perfil en la base de datos.';
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   get totalCuposDisponibles(): number {
@@ -409,7 +493,6 @@ export class PanelEmpresa implements OnInit {
   }
 
   cerrarSesion(): void {
-    // Limpiamos llaves viejas para que nunca se crucen sesiones de distintas empresas
     localStorage.removeItem('token');
     localStorage.removeItem('usuario_sesion');
     localStorage.removeItem('nitEmpresa');

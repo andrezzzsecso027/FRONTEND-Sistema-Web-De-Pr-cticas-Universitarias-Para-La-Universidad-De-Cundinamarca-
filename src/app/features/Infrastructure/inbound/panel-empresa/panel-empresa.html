@@ -330,12 +330,17 @@
             <h4>📄 Soporte Legal del NIT (RUT / Cámara de Comercio)</h4>
             <p>Sube o actualiza el documento oficial en PDF para respaldo institucional.</p>
 
-            <label class="pdf-dropzone">
+           <label class="pdf-dropzone">
               <span class="pdf-icon">📑</span>
               <span *ngIf="!nombreArchivoPdfNit">Seleccionar archivo PDF del NIT</span>
-              <strong *ngIf="nombreArchivoPdfNit">{{ nombreArchivoPdfNit }}</strong>
+              <span *ngIf="nombreArchivoPdfNit" class="pdf-success-text">
+                ✓ Certificado PDF cargado correctamente
+              </span>
               <input type="file" accept="application/pdf" (change)="onSeleccionarPdfNit($event)" hidden />
             </label>
+            <a *ngIf="nombreArchivoPdfNit.startsWith('http')" [href]="nombreArchivoPdfNit" target="_blank" class="link-ver-pdf">
+              🔗 Ver PDF actual en Cloudinary
+            </a>
           </div>
         </div>
 

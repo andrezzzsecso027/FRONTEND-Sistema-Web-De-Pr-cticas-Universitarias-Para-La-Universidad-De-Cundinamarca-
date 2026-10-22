@@ -18,6 +18,19 @@ export class Empresa {
   obtenerEmpresaPorNit(nit: string): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/nit/${nit}`);
   }
+  
+  subirArchivoCloudinary(archivo: File, carpeta: string): Observable<{ url: string }> {
+    const formData = new FormData();
+    formData.append('file', archivo);
+    return this.http.post<{ url: string }>(
+      `${environment.baseUrl}/archivos/subir?carpeta=${carpeta}`,
+      formData
+    );
+  }
+
+  actualizarPerfilEmpresa(nit: string, datos: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/nit/${nit}/perfil`, datos);
+  }
 
   obtenerEmpresas(): Observable<any[]> {
     return this.http.get<any[]>(this.apiUrl);
