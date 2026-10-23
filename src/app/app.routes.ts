@@ -8,8 +8,10 @@ import { PanelAdministrador } from './features/Infrastructure/inbound/panel-admi
 import { OfertaLista } from './features/Infrastructure/inbound/oferta-lista/oferta-lista';
 import { MisPostulaciones } from './features/Infrastructure/inbound/mis-postulaciones/mis-postulaciones';
 import { VerificarCuenta } from './features/Infrastructure/inbound/verificar-cuenta/verificar-cuenta';
+import { PanelEmpresa } from './features/Infrastructure/inbound/panel-empresa/panel-empresa';
 import { adminGuard } from './core/guards/admin.guard';
 import { estudianteGuard } from './core/guards/estudiante.guard';
+import { empresaGuard } from './core/guards/empresa.guard';
 
 export const routes: Routes = [
   { path: '', component: Home },
@@ -21,5 +23,6 @@ export const routes: Routes = [
   { path: 'ofertas', component: OfertaLista, canActivate: [estudianteGuard] },
   { path: 'mis-postulaciones', component: MisPostulaciones, canActivate: [estudianteGuard] },
   { path: 'panel-administrador', component: PanelAdministrador, canActivate: [adminGuard] },
+  { path: 'panel-empresa', component: PanelEmpresa, canActivate: [empresaGuard] },
   { path: '**', redirectTo: '', pathMatch: 'full' }
 ];

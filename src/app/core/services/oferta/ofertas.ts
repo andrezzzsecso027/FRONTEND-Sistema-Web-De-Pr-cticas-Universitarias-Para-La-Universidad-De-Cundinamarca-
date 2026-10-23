@@ -1,9 +1,9 @@
-﻿import { Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 
-export interface Offer {
+export interface OfferRequestDTO {
   idOffer?: number;
   practiceName: string;
   nitCompanyAssociated: string;
@@ -15,23 +15,25 @@ export interface Offer {
   availableSpots: number;
   closingDate: string;
   publicationDate?: string;
-  offerStatus?: string;
+  offerStatus?: boolean;
 }
 
 @Injectable({
   providedIn: 'root'
 })
-export class Oferta {
+export class OfertaService {
   private apiUrl = `${environment.baseUrl}${environment.endpoints.ofertas}`;
 
   constructor(private http: HttpClient) {}
 
-  crearOferta(datosOferta: Offer): Observable<Offer> {
-    console.log('[Oferta] Creando oferta:', datosOferta);
-    return this.http.post<Offer>(`${this.apiUrl}/crear`, datosOferta);
+  crearOferta(datosOferta: OfferRequestDTO): Observable<any> {
+    return this.http.post(`${this.apiUrl}/crear`, datosOferta);
+  }
+  listarOfertasActivas(): Observable<OfferRequestDTO[]> {
+    return this.http.get<OfferRequestDTO[]>(`${this.apiUrl}/estudiantes`);
   }
 
-  obtenerOfertasActivas(): Observable<Offer[]> {
-    return this.http.get<Offer[]>(`${this.apiUrl}/estudiantes`);
+ obtenerOfertasActivas(): Observable<OfferRequestDTO[]> {
+    return this.http.get<OfferRequestDTO[]>(`${this.apiUrl}/estudiantes`);
   }
 }

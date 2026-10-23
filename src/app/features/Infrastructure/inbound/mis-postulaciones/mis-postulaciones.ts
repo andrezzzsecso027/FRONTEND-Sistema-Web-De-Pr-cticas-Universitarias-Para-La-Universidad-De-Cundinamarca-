@@ -4,7 +4,7 @@ import { RouterLink } from '@angular/router';
 import { Navbar } from '../../../../share/ui/navbar/navbar';
 import { Footer } from '../../../../share/ui/footer/footer';
 import { Auth } from '../../../../core/services/auth';
-import { Postulacion } from '../../../../core/services/postulacion/postulacion';
+import { PostulacionService } from '../../../../core/services/postulacion/postulacion';
 
 export interface MiPostulacion {
   idPostulation: number;
@@ -30,7 +30,7 @@ export class MisPostulaciones implements OnInit {
 
   constructor(
     private authService: Auth,
-    private postulacionService: Postulacion
+    private postulacionService: PostulacionService
   ) {}
 
   ngOnInit(): void {

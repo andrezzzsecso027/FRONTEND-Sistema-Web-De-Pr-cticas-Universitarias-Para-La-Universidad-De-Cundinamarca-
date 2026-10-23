@@ -1,10 +1,9 @@
 ﻿import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
 import { Navbar } from '../../../../share/ui/navbar/navbar';
 import { Footer } from '../../../../share/ui/footer/footer';
-import { Oferta, Offer } from '../../../../core/services/oferta/oferta';
-import { Postulacion } from '../../../../core/services/postulacion/postulacion';
+import { OfertaService, OfferRequestDTO } from '../../../../core/services/oferta/ofertas';
+import { PostulacionService } from '../../../../core/services/postulacion/postulacion';
 import { Auth } from '../../../../core/services/auth';
 
 @Component({
@@ -14,16 +13,17 @@ import { Auth } from '../../../../core/services/auth';
   styleUrl: './oferta-lista.scss',
   templateUrl: './oferta-lista.html',
 })
+
 export class OfertaLista implements OnInit {
-  ofertas: Offer[] = [];
+  ofertas: OfferRequestDTO[] = [];
   cargando = true;
   mensajeExito = '';
   mensajeError = '';
   procesandoId: number | null = null;
 
   constructor(
-    private ofertaService: Oferta,
-    private postulacionService: Postulacion,
+    private ofertaService: OfertaService,
+    private postulacionService: PostulacionService,
     private authService: Auth
   ) {}
 
@@ -34,11 +34,11 @@ export class OfertaLista implements OnInit {
   cargarOfertas(): void {
     this.cargando = true;
     this.ofertaService.obtenerOfertasActivas().subscribe({
-      next: (data) => {
-        this.ofertas = data;
+      next: (data: OfferRequestDTO[]) => {
+        this.ofertas = data || [];
         this.cargando = false;
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('[OfertaLista] Error:', err);
         this.cargando = false;
         if (err.status === 204) {
@@ -50,7 +50,7 @@ export class OfertaLista implements OnInit {
     });
   }
 
-  postularme(oferta: Offer): void {
+  postularme(oferta: OfferRequestDTO): void {
     const usuario = this.authService.getUsuarioActual();
     if (!usuario) {
       this.mensajeError = 'Debes iniciar sesión para postularte.';
@@ -66,7 +66,7 @@ export class OfertaLista implements OnInit {
       return;
     }
 
-    this.procesandoId = oferta.idOffer || null;
+    this.procesandoId = oferta.idOffer ?? null;
     this.mensajeError = '';
     this.mensajeExito = '';
 

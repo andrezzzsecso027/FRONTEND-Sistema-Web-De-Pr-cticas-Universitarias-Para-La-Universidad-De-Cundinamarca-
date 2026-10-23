@@ -42,9 +42,20 @@ __screenshots__/
 # System files
 .DS_Store
 Thumbs.db
-
+node_modules/
+dist/
+.angular/
+.git/
+.gitignore
+.vscode/
+*.log
+*.md
+Dockerfile
 # Variables de entorno locales
 src/environments/*
 
 # Archivos temporales de analisis
 codigo_completo.txt
+
+# SonarQube
+sonar-project.properties
