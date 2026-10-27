@@ -1,111 +1,828 @@
-﻿<app-navbar></app-navbar>
-
-<main class="panel">
-  <div class="panel-container">
-
-    <header class="panel-header">
-      <h1>Panel de Administrador</h1>
-      <p>Gestiona estudiantes, empresas y ofertas de la plataforma.</p>
-    </header>
-
-    <!-- MENSAJES -->
-    <div *ngIf="mensajeExito" class="alert alert-success">
-      {{ mensajeExito }}
-    </div>
-    <div *ngIf="mensajeError" class="alert alert-error">
-      {{ mensajeError }}
+﻿<div class="admin-layout">
+  <!-- BARRA SUPERIOR STICKY -->
+  <header class="admin-topbar">
+    <div class="brand-area" (click)="cambiarVista('pendientes')">
+      <span class="udec-badge">UdeC</span>
+      <span class="brand-title">UdecPrac <small>Administración</small></span>
     </div>
 
-    <!-- EMPRESAS PENDIENTES -->
-    <section class="panel-section">
+    <nav class="admin-nav">
+      <button [class.active]="vistaActual === 'pendientes'" (click)="cambiarVista('pendientes')">
+        Por Aprobar
+        <span class="counter-pill" *ngIf="empresasPendientes.length > 0">{{ empresasPendientes.length }}</span>
+      </button>
+      <button [class.active]="vistaActual === 'empresas'" (click)="cambiarVista('empresas')">
+        Empresas Aprobadas ({{ empresasAprobadas.length }})
+      </button>
+      <button [class.active]="vistaActual === 'estudiantes'" (click)="cambiarVista('estudiantes')">
+        Estudiantes ({{ estudiantes.length }})
+      </button>
+      <button [class.active]="vistaActual === 'ofertas'" (click)="cambiarVista('ofertas')">
+        Ofertas ({{ ofertas.length }})
+      </button>
+      <button [class.active]="vistaActual === 'practicas'" (click)="cambiarVista('practicas')">
+        En Prácticas ({{ alumnosEnPractica.length }})
+      </button>
+      <button [class.active]="vistaActual === 'comentarios'" (click)="cambiarVista('comentarios')">
+        Comentarios
+        <span class="counter-pill" *ngIf="comentariosPendientes.length > 0">{{ comentariosPendientes.length }}</span>
+      </button>
+    </nav>
+
+    <div class="admin-profile-menu">
+      <button class="avatar-btn" (click)="menuAdminAbierto = !menuAdminAbierto" title="Perfil Administrador">
+        <img *ngIf="avatarAdminUrl" [src]="avatarAdminUrl" alt="Avatar Administrador" class="avatar-img" />
+        <span *ngIf="!avatarAdminUrl" class="avatar-initials">AD</span>
+      </button>
+
+      <div class="dropdown-menu" *ngIf="menuAdminAbierto">
+        <div class="dropdown-header">
+          <strong>Coordinación Prácticas UdeC</strong>
+          <small>{{ correoAdmin }}</small>
+        </div>
+        <label class="dropdown-item upload-label">
+          📷 Cambiar foto de perfil
+          <input type="file" accept="image/*" (change)="onSeleccionarFotoAdmin($event)" hidden />
+        </label>
+        <button class="dropdown-item danger" (click)="cerrarSesion()">
+          🚪 Cerrar sesión
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="admin-content">
+    <!-- TARJETAS KPI RESUMEN -->
+    <section class="kpi-grid">
+      <div class="kpi-card" [class.active-kpi]="vistaActual === 'pendientes'" (click)="cambiarVista('pendientes')">
+        <span class="kpi-label">Empresas por aprobar</span>
+        <strong class="kpi-value highlight">{{ empresasPendientes.length }}</strong>
+      </div>
+      <div class="kpi-card" [class.active-kpi]="vistaActual === 'empresas'" (click)="cambiarVista('empresas')">
+        <span class="kpi-label">Empresas aprobadas</span>
+        <strong class="kpi-value">{{ empresasAprobadas.length }}</strong>
+      </div>
+      <div class="kpi-card" [class.active-kpi]="vistaActual === 'estudiantes'" (click)="cambiarVista('estudiantes')">
+        <span class="kpi-label">Estudiantes UdeC</span>
+        <strong class="kpi-value">{{ estudiantes.length }}</strong>
+      </div>
+      <div class="kpi-card" [class.active-kpi]="vistaActual === 'practicas'" (click)="cambiarVista('practicas')">
+        <span class="kpi-label">Alumnos en práctica</span>
+        <strong class="kpi-value">{{ alumnosEnPractica.length }}</strong>
+      </div>
+    </section>
+
+    <!-- ALERTAS -->
+    <div *ngIf="mensajeExito" class="alert alert-success">{{ mensajeExito }}</div>
+    <div *ngIf="mensajeError" class="alert alert-error">{{ mensajeError }}</div>
+
+    <!-- 1. VISTA: EMPRESAS PENDIENTES DE APROBACIÓN (COLUMNAS SIMPLIFICADAS) -->
+    <section class="card-section" *ngIf="vistaActual === 'pendientes'">
       <div class="section-header">
-        <h2>Empresas pendientes de aprobación</h2>
-        <span class="badge">{{ empresasPendientes.length }}</span>
+        <div>
+          <h2>Solicitudes de Empresas Pendientes de Aprobación</h2>
+          <p>Inspecciona los datos del registro legal de la organización antes de autorizar su acceso.</p>
+        </div>
       </div>
 
-      <div *ngIf="cargandoEmpresas" class="loading">
-        Cargando empresas...
-      </div>
-
-      <table *ngIf="!cargandoEmpresas" class="panel-table">
+      <table class="admin-table">
         <thead>
           <tr>
+            <th>Logo</th>
             <th>NIT</th>
-            <th>Empresa</th>
-            <th>Ciudad</th>
-            <th>Teléfono</th>
+            <th>Nombre / Tipo de Empresa</th>
             <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let emp of empresasPendientes">
-            <td>{{ emp.nit }}</td>
-            <td>{{ emp.companyName }}</td>
-            <td>{{ emp.city }}, {{ emp.department }}</td>
-            <td>{{ emp.companyPhoneNumber }}</td>
-            <td class="actions">
-              <button
-                class="btn btn-success"
-                [disabled]="procesandoNit === emp.nit"
-                (click)="aprobarEmpresa(emp.nit)">
-                {{ procesandoNit === emp.nit ? '...' : 'Aprobar' }}
+            <td>
+              <img *ngIf="emp.logoUrl" [src]="emp.logoUrl" alt="Logo empresa" class="table-logo" />
+              <div *ngIf="!emp.logoUrl" class="table-logo-placeholder">{{ emp.companyName.charAt(0) }}</div>
+            </td>
+            <td><strong>{{ emp.nit }}</strong></td>
+            <td>
+              <div><strong>{{ emp.companyName }}</strong></div>
+              <small class="text-muted">{{ obtenerEtiquetaTipoEmpresa(emp.companyType) }}</small>
+            </td>
+            <td class="actions-cell">
+              <button class="btn-outline" (click)="abrirModalPerfilEmpresa(emp)">
+                📋 Ver Información
               </button>
-              <button
-                class="btn btn-danger"
-                [disabled]="procesandoNit === emp.nit"
-                (click)="rechazarEmpresa(emp.nit)">
-                {{ procesandoNit === emp.nit ? '...' : 'Rechazar' }}
+              <button class="btn-approve" [disabled]="procesandoId === emp.nit" (click)="aprobarEmpresa(emp.nit)">
+                ✓ Aceptar
+              </button>
+              <button class="btn-reject" [disabled]="procesandoId === emp.nit" (click)="rechazarEmpresa(emp.nit)">
+                ✕ Rechazar
               </button>
             </td>
           </tr>
           <tr *ngIf="empresasPendientes.length === 0">
-            <td colspan="5" class="empty">
-              No hay empresas pendientes de aprobación.
-            </td>
+            <td colspan="4" class="empty-row">No hay empresas pendientes de aprobación en este momento.</td>
           </tr>
         </tbody>
       </table>
     </section>
 
-    <!-- ESTUDIANTES -->
-    <section class="panel-section">
+    <!-- 2. VISTA: EMPRESAS APROBADAS CON COMBOBOX OFICIAL DE REGISTRO -->
+    <section class="card-section" *ngIf="vistaActual === 'empresas'">
       <div class="section-header">
-        <h2>Estudiantes registrados</h2>
-        <span class="badge">{{ estudiantes.length }}</span>
+        <div>
+          <h2>Directorio de Empresas Aprobadas</h2>
+          <p>Empresas verificadas activas en el sistema. Filtra por tipo de sociedad, ciudad o NIT.</p>
+        </div>
+
+        <div class="filters-bar">
+          <input
+            type="text"
+            class="search-input"
+            placeholder="🔍 Buscar por nombre o NIT..."
+            [(ngModel)]="filtroEmpresaTexto"
+            (ngModelChange)="resetearPaginaEmpresas()" />
+
+          <select class="filter-select" [(ngModel)]="filtroEmpresaTipo" (ngModelChange)="resetearPaginaEmpresas()">
+            <option value="TODOS">Todos los Tipos de Empresa</option>
+            <option *ngFor="let tipo of tiposEmpresaCatalogo" [value]="tipo.valor">
+              {{ tipo.etiqueta }}
+            </option>
+          </select>
+
+          <select class="filter-select" [(ngModel)]="filtroEmpresaCiudad" (ngModelChange)="resetearPaginaEmpresas()">
+            <option value="TODAS">Todas las ciudades</option>
+            <option *ngFor="let ciudad of ciudadesEmpresaDisponibles" [value]="ciudad">{{ ciudad }}</option>
+          </select>
+        </div>
       </div>
 
-      <div *ngIf="cargandoEstudiantes" class="loading">
-        Cargando estudiantes...
-      </div>
-
-      <table *ngIf="!cargandoEstudiantes" class="panel-table">
+      <table class="admin-table">
         <thead>
           <tr>
-            <th>Documento</th>
-            <th>Nombres</th>
-            <th>Apellidos</th>
-            <th>Programa</th>
-            <th>Sede</th>
+            <th>Logo</th>
+            <th>NIT</th>
+            <th>Empresa / Tipo de Sociedad</th>
+            <th>Ciudad</th>
+            <th>Estado</th>
+            <th>Información</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let est of estudiantes">
-            <td>{{ est.documento || est.documentNumber }}</td>
-            <td>{{ est.nombres || est.nombreEstudiante || est.firstName }}</td>
-            <td>{{ est.apellidos || est.apellidoEstudiante || est.lastName }}</td>
-            <td>{{ est.programaAcademico || est.programa }}</td>
-            <td>{{ est.sede }}</td>
-          </tr>
-          <tr *ngIf="estudiantes.length === 0">
-            <td colspan="5" class="empty">
-              No hay estudiantes registrados aún.
+          <tr *ngFor="let emp of empresasPaginadas">
+            <td>
+              <img *ngIf="emp.logoUrl" [src]="emp.logoUrl" alt="Logo de la empresa" class="table-logo" />
+              <div *ngIf="!emp.logoUrl" class="table-logo-placeholder">{{ emp.companyName.charAt(0) }}</div>
             </td>
+            <td><strong>{{ emp.nit }}</strong></td>
+            <td>
+              <div><strong>{{ emp.companyName }}</strong></div>
+              <small class="text-muted">{{ obtenerEtiquetaTipoEmpresa(emp.companyType) }}</small>
+            </td>
+            <td>{{ emp.city || 'Fusagasugá' }}</td>
+            <td>
+              <span class="status-badge aprobada">APROBADA</span>
+            </td>
+            <td>
+              <button class="btn-outline" (click)="abrirModalPerfilEmpresa(emp)">
+                📋 Ver Información
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="empresasAprobadasFiltradas.length === 0">
+            <td colspan="6" class="empty-row">No se encontraron empresas aprobadas con esos filtros.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="pagination-bar" *ngIf="empresasAprobadasFiltradas.length > 0">
+        <span class="pagination-info">
+          Mostrando {{ empresasPaginadas.length }} de {{ empresasAprobadasFiltradas.length }} empresas aprobadas
+        </span>
+        <div class="pagination-controls">
+          <button class="btn-page" [disabled]="paginaEmpresas === 1" (click)="paginaEmpresas = paginaEmpresas - 1">
+            ← Anterior
+          </button>
+          <span class="page-indicator">Página {{ paginaEmpresas }} de {{ totalPaginasEmpresas }}</span>
+          <button class="btn-page" [disabled]="paginaEmpresas === totalPaginasEmpresas" (click)="paginaEmpresas = paginaEmpresas + 1">
+            Siguiente →
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. VISTA: ESTUDIANTES CON TODAS LAS SEDES Y PROGRAMAS UDEC -->
+    <section class="card-section" *ngIf="vistaActual === 'estudiantes'">
+      <div class="section-header">
+        <div>
+          <h2>Estudiantes Registrados en UdecPrac</h2>
+          <p>Filtra por cualquiera de las 6 sedes universitarias y todos los programas académicos de la UdeC.</p>
+        </div>
+
+        <div class="filters-bar">
+          <input
+            type="text"
+            class="search-input"
+            placeholder="🔍 Cédula o nombre..."
+            [(ngModel)]="filtroEstudianteTexto"
+            (ngModelChange)="resetearPaginaEstudiantes()" />
+
+          <select class="filter-select" [(ngModel)]="filtroEstudianteSede" (ngModelChange)="onCambioSedeFiltroEstudiante()">
+            <option value="TODAS">Todas las sedes UdeC</option>
+            <option *ngFor="let s of sedesCatalogo" [value]="s.valor">{{ s.etiqueta }}</option>
+          </select>
+
+          <select class="filter-select" [(ngModel)]="filtroEstudiantePrograma" (ngModelChange)="resetearPaginaEstudiantes()">
+            <option value="TODOS">Todos los programas académicos</option>
+            <option *ngFor="let prog of programasFiltroEstudianteDisponibles" [value]="prog">{{ prog }}</option>
+          </select>
+        </div>
+      </div>
+
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>CC</th>
+            <th>Nombres y Apellidos</th>
+            <th>Programa Académico</th>
+            <th>Sede</th>
+            <th>Teléfono</th>
+            <th>Hoja de Vida / Perfil</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let est of estudiantesPaginados">
+            <td><strong>{{ est.document || est.documento }}</strong></td>
+            <td>{{ est.name || est.nombres }} {{ est.lastName || est.apellidos }}</td>
+            <td><span class="chip-tag">{{ est.academicProgram || est.programaAcademico }}</span></td>
+            <td>{{ est.headquarters || est.sede | titlecase }}</td>
+            <td>{{ est.phoneNumber || est.telefono || 'No registrado' }}</td>
+            <td>
+              <button class="btn-outline" (click)="abrirModalPerfilEstudiante(est)">
+                🎓 Ver Perfil
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="estudiantesFiltrados.length === 0">
+            <td colspan="6" class="empty-row">No se encontraron estudiantes con los filtros seleccionados.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="pagination-bar" *ngIf="estudiantesFiltrados.length > 0">
+        <span class="pagination-info">
+          Mostrando {{ estudiantesPaginados.length }} de {{ estudiantesFiltrados.length }} estudiantes
+        </span>
+        <div class="pagination-controls">
+          <button class="btn-page" [disabled]="paginaEstudiantes === 1" (click)="paginaEstudiantes = paginaEstudiantes - 1">
+            ← Anterior
+          </button>
+          <span class="page-indicator">Página {{ paginaEstudiantes }} de {{ totalPaginasEstudiantes }}</span>
+          <button class="btn-page" [disabled]="paginaEstudiantes === totalPaginasEstudiantes" (click)="paginaEstudiantes = paginaEstudiantes + 1">
+            Siguiente →
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. VISTA: OFERTAS (ACTUALES VS HISTORIAL MOSTRANDO NOMBRE DE EMPRESA) -->
+    <!-- 4. VISTA: OFERTAS CON FILTROS POR MODALIDAD, PROFESIÓN Y PAGINACIÓN -->
+    <section class="card-section" *ngIf="vistaActual === 'ofertas'">
+      <div class="section-header">
+        <div>
+          <h2>Supervisión e Historial de Ofertas de Práctica</h2>
+          <p>Filtra las convocatorias por modalidad de trabajo o profesión requerida.</p>
+        </div>
+
+        <div class="filters-bar">
+          <select class="filter-select" [(ngModel)]="filtroOfertaModalidad" (ngModelChange)="resetearPaginaOfertas()">
+            <option value="TODAS">Todas las modalidades</option>
+            <option *ngFor="let mod of modalidadesCatalogo" [value]="mod">{{ mod }}</option>
+          </select>
+
+          <select class="filter-select" [(ngModel)]="filtroOfertaProfesion" (ngModelChange)="resetearPaginaOfertas()">
+            <option value="TODAS">Todas las profesiones / programas</option>
+            <option *ngFor="let prof of profesionesOfertaCatalogo" [value]="prof">{{ prof }}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="subtabs-bar">
+        <button
+          class="subtab-btn"
+          [class.active]="subVistaOfertas === 'actuales'"
+          (click)="cambiarSubVistaOfertas('actuales')">
+          🟢 Ofertas Actuales Disponibles ({{ ofertasActualesFiltradas.length }})
+        </button>
+        <button
+          class="subtab-btn"
+          [class.active]="subVistaOfertas === 'historial'"
+          (click)="cambiarSubVistaOfertas('historial')">
+          📁 Historial de Ofertas Cerradas / Completadas ({{ ofertasHistorialFiltradas.length }})
+        </button>
+      </div>
+
+      <!-- TABLA A: OFERTAS ACTUALES PAGINADAS -->
+      <table class="admin-table" *ngIf="subVistaOfertas === 'actuales'">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Convocatoria / Cargo</th>
+            <th>Empresa Oferente</th>
+            <th>Programa Destino</th>
+            <th>Modalidad</th>
+            <th>Cupos Disponibles</th>
+            <th>Estado</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let of of ofertasActualesPaginadas">
+            <td>#{{ of.idOffer }}</td>
+            <td>
+              <strong>{{ of.practiceName }}</strong>
+              <div class="text-muted">{{ of.practiceDescription | slice:0:65 }}...</div>
+            </td>
+            <td>
+              <strong>{{ obtenerNombreEmpresaPorNit(of.nitCompanyAssociated) }}</strong>
+            </td>
+            <td><span class="chip-tag">{{ of.profession }}</span></td>
+            <td>{{ of.modality }}</td>
+            <td>
+              <span class="spots-pill">{{ of.availableSpots }} de {{ calcularCuposIniciales(of) }}</span>
+            </td>
+            <td>
+              <span class="status-badge activa">DISPONIBLE</span>
+            </td>
+            <td>
+              <button
+                class="btn-reject"
+                [disabled]="procesandoId === of.idOffer"
+                (click)="rechazarOCerrarOferta(of)">
+                🚫 Rechazar / Cerrar
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="ofertasActualesFiltradas.length === 0">
+            <td colspan="8" class="empty-row">No se encontraron ofertas disponibles con los filtros seleccionados.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- TABLA B: HISTORIAL DE OFERTAS PAGINADAS -->
+      <table class="admin-table" *ngIf="subVistaOfertas === 'historial'">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Convocatoria / Cargo</th>
+            <th>Empresa Oferente</th>
+            <th>Programa Destino</th>
+            <th>Cupos Iniciales</th>
+            <th>Seleccionados</th>
+            <th>Estado Final</th>
+            <th>Practicantes Elegidos</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let of of ofertasHistorialPaginadas">
+            <td>#{{ of.idOffer }}</td>
+            <td>
+              <strong>{{ of.practiceName }}</strong>
+              <div class="text-muted">{{ of.practiceDescription | slice:0:65 }}...</div>
+            </td>
+            <td>
+              <strong>{{ obtenerNombreEmpresaPorNit(of.nitCompanyAssociated) }}</strong>
+            </td>
+            <td><span class="chip-tag">{{ of.profession }}</span></td>
+            <td>
+              <strong>{{ calcularCuposIniciales(of) }} cupo(s)</strong>
+            </td>
+            <td>
+              <span class="chip-tag">
+                {{ obtenerEstudiantesAceptadosPorOferta(of.idOffer).length }} aceptado(s)
+              </span>
+            </td>
+            <td>
+              <span class="status-badge cerrada">
+                {{ of.availableSpots === 0 ? 'CUPOS COMPLETADOS' : 'CERRADA' }}
+              </span>
+            </td>
+            <td>
+              <button class="btn-outline" (click)="abrirModalSeleccionadosOferta(of)">
+                👨‍🎓 Ver Seleccionados ({{ obtenerEstudiantesAceptadosPorOferta(of.idOffer).length }})
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="ofertasHistorialFiltradas.length === 0">
+            <td colspan="8" class="empty-row">No se encontraron ofertas en el historial con esos filtros.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- CONTROLES DE PAGINACIÓN DE OFERTAS -->
+      <div class="pagination-bar" *ngIf="listaOfertasActivaSegunPestana.length > 0">
+        <span class="pagination-info">
+          Mostrando {{ subVistaOfertas === 'actuales' ? ofertasActualesPaginadas.length : ofertasHistorialPaginadas.length }}
+          de {{ listaOfertasActivaSegunPestana.length }} ofertas
+        </span>
+        <div class="pagination-controls">
+          <button class="btn-page" [disabled]="paginaOfertas === 1" (click)="paginaOfertas = paginaOfertas - 1">
+            ← Anterior
+          </button>
+          <span class="page-indicator">Página {{ paginaOfertas }} de {{ totalPaginasOfertas }}</span>
+          <button class="btn-page" [disabled]="paginaOfertas === totalPaginasOfertas" (click)="paginaOfertas = paginaOfertas + 1">
+            Siguiente →
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. VISTA: ALUMNOS EN PRÁCTICAS (CON NOMBRE DE EMPRESA Y MODAL DE INFORMACIÓN DE PRÁCTICA) -->
+    <section class="card-section" *ngIf="vistaActual === 'practicas'">
+      <div class="section-header">
+        <div>
+          <h2>Seguimiento de Prácticas Profesionales Activas</h2>
+          <p>Consulta la empresa vinculada, modalidad, fechas y condiciones de la oferta de cada practicante.</p>
+        </div>
+      </div>
+
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Práctica</th>
+            <th>Estudiante Vinculado</th>
+            <th>Empresa Vinculada</th>
+            <th>Convocatoria / Cargo</th>
+            <th>Modalidad</th>
+            <th>Estado</th>
+            <th>Información de la Práctica</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let al of alumnosEnPractica">
+            <td><strong>#{{ al.idPractice }}</strong></td>
+            <td>
+              <div><strong>{{ al.studentFullName }}</strong></div>
+              <small class="text-muted">CC: {{ al.studentDocument }} — {{ al.studentProgram }}</small>
+            </td>
+            <td><strong>{{ al.companyName }}</strong></td>
+            <td>{{ al.offerName }}</td>
+            <td><span class="chip-tag">{{ al.modality }}</span></td>
+            <td>
+              <span class="status-badge activa">{{ al.statusPractice }}</span>
+            </td>
+            <td>
+              <button class="btn-outline" (click)="abrirModalDetallePractica(al)">
+                📋 Ver Información de Práctica
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="alumnosEnPractica.length === 0">
+            <td colspan="7" class="empty-row">No hay prácticas profesionales registradas en este momento.</td>
           </tr>
         </tbody>
       </table>
     </section>
 
-  </div>
-</main>
+    <!-- 6. VISTA: MODERACIÓN DE COMENTARIOS -->
+    <section class="card-section" *ngIf="vistaActual === 'comentarios'">
+      <div class="section-header">
+        <div>
+          <h2>Moderación de Comentarios y Calificaciones</h2>
+          <p>Aprueba o rechaza las reseñas enviadas por los practicantes antes de hacerlas públicas.</p>
+        </div>
+      </div>
 
-<app-footer></app-footer>
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Estudiante</th>
+            <th>Empresa Evaluada</th>
+            <th>Calificación</th>
+            <th>Comentario</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let c of comentariosPendientes">
+            <td><strong>{{ c.studentName }}</strong></td>
+            <td><strong>{{ obtenerNombreEmpresaPorNit(c.nitCompany) }}</strong></td>
+            <td>⭐ {{ c.rating }} / 5</td>
+            <td>{{ c.content }}</td>
+            <td class="actions-cell">
+              <button class="btn-approve" [disabled]="procesandoId === c.idComment" (click)="moderarComentario(c, true)">
+                ✓ Publicar
+              </button>
+              <button class="btn-reject" [disabled]="procesandoId === c.idComment" (click)="moderarComentario(c, false)">
+                ✕ Rechazar
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="comentariosPendientes.length === 0">
+            <td colspan="5" class="empty-row">No hay comentarios pendientes de moderación.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <!-- MODAL 1: INFORMACIÓN COMPLETA DE LA EMPRESA (PENDIENTE O APROBADA) -->
+  <div class="modal-backdrop" *ngIf="empresaSeleccionadaModal" (click)="cerrarModalEmpresa()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-profile-head">
+          <img
+            *ngIf="empresaSeleccionadaModal.logoUrl"
+            [src]="empresaSeleccionadaModal.logoUrl"
+            alt="Logo Empresa"
+            class="modal-avatar" />
+          <div *ngIf="!empresaSeleccionadaModal.logoUrl" class="modal-avatar-placeholder">
+            {{ empresaSeleccionadaModal.companyName.charAt(0) }}
+          </div>
+          <div>
+            <h3>{{ empresaSeleccionadaModal.companyName }}</h3>
+            <span class="nit-tag">NIT: {{ empresaSeleccionadaModal.nit }}</span>
+          </div>
+        </div>
+        <button class="close-btn" (click)="cerrarModalEmpresa()">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <p class="company-desc" *ngIf="empresaSeleccionadaModal.companyDescription">
+          {{ empresaSeleccionadaModal.companyDescription }}
+        </p>
+
+        <div class="info-grid">
+          <div>
+            <strong>Nombre Comercial:</strong><br />
+            {{ empresaSeleccionadaModal.companyName }}
+          </div>
+          <div>
+            <strong>Razón Social (Legal):</strong><br />
+            {{ empresaSeleccionadaModal.legalName || empresaSeleccionadaModal.companyName }}
+          </div>
+          <div>
+            <strong>Tipo de Empresa:</strong><br />
+            {{ obtenerEtiquetaTipoEmpresa(empresaSeleccionadaModal.companyType) }}
+          </div>
+          <div>
+            <strong>Correo Electrónico:</strong><br />
+            {{ obtenerCorreoEmpresa(empresaSeleccionadaModal) }}
+          </div>
+          <div>
+            <strong>Departamento y Ciudad:</strong><br />
+            {{ empresaSeleccionadaModal.city || 'Fusagasugá' }}, {{ empresaSeleccionadaModal.department || 'Cundinamarca' }}
+          </div>
+          <div>
+            <strong>Dirección Física:</strong><br />
+            {{ empresaSeleccionadaModal.companyAddress || 'No especificada en registro' }}
+          </div>
+          <div>
+            <strong>Teléfono de Contacto:</strong><br />
+            {{ empresaSeleccionadaModal.companyPhoneNumber || 'No registrado' }}
+          </div>
+          <div>
+            <strong>Representante Legal:</strong><br />
+            {{ empresaSeleccionadaModal.legalRepresentative?.nameRepresentative || empresaSeleccionadaModal.nameRepresentive || 'Representante' }}
+            {{ empresaSeleccionadaModal.legalRepresentative?.lastNameRepresentative || empresaSeleccionadaModal.lastNameRepresentive || 'Legal' }}
+            <span class="text-muted">
+              (CC: {{ empresaSeleccionadaModal.legalRepresentative?.numberDocument || empresaSeleccionadaModal.numberDocument || 'En registro' }})
+            </span>
+          </div>
+        </div>
+
+        <div class="document-box">
+          <strong>📑 Soporte Legal (RUT / Certificado NIT):</strong>
+          <a
+            *ngIf="obtenerUrlPdfNit(empresaSeleccionadaModal)"
+            [href]="obtenerUrlPdfNit(empresaSeleccionadaModal)!"
+            target="_blank"
+            class="pdf-link">
+            🔗 Ver Documento PDF del NIT
+          </a>
+          <span *ngIf="!obtenerUrlPdfNit(empresaSeleccionadaModal)" class="text-muted">
+            La empresa aún no ha cargado el soporte PDF del NIT en su perfil.
+          </span>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button
+          *ngIf="empresaSeleccionadaModal.verificationStatus !== 'APROBADA'"
+          class="btn-approve"
+          (click)="aprobarEmpresa(empresaSeleccionadaModal.nit)">
+          ✓ Aceptar Empresa
+        </button>
+        <button
+          *ngIf="empresaSeleccionadaModal.verificationStatus !== 'APROBADA'"
+          class="btn-reject"
+          (click)="rechazarEmpresa(empresaSeleccionadaModal.nit)">
+          ✕ Rechazar Solicitud
+        </button>
+        <button
+          *ngIf="empresaSeleccionadaModal.verificationStatus === 'APROBADA'"
+          class="btn-reject"
+          (click)="rechazarEmpresa(empresaSeleccionadaModal.nit)">
+          🚫 Inhabilitar Empresa (Incumplimiento de normas)
+        </button>
+        <button class="btn-outline" (click)="cerrarModalEmpresa()">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: PERFIL DEL ESTUDIANTE (CON CORREO Y CC) -->
+  <div class="modal-backdrop" *ngIf="estudianteSeleccionadoModal" (click)="cerrarModalEstudiante()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-profile-head">
+          <img
+            *ngIf="perfilEstudianteModal?.photoUrl"
+            [src]="perfilEstudianteModal?.photoUrl"
+            alt="Foto Estudiante"
+            class="modal-avatar" />
+          <div *ngIf="!perfilEstudianteModal?.photoUrl" class="modal-avatar-placeholder">
+            {{ (estudianteSeleccionadoModal.name || estudianteSeleccionadoModal.nombres || 'E').charAt(0) }}
+          </div>
+          <div>
+            <h3>
+              {{ estudianteSeleccionadoModal.name || estudianteSeleccionadoModal.nombres }}
+              {{ estudianteSeleccionadoModal.lastName || estudianteSeleccionadoModal.apellidos }}
+            </h3>
+            <span class="nit-tag">
+              CC: {{ estudianteSeleccionadoModal.document || estudianteSeleccionadoModal.documento }}
+            </span>
+          </div>
+        </div>
+        <button class="close-btn" (click)="cerrarModalEstudiante()">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="info-grid">
+          <div>
+            <strong>Correo Institucional:</strong><br />
+            {{ obtenerCorreoEstudiante(estudianteSeleccionadoModal) }}
+          </div>
+          <div>
+            <strong>Programa Académico:</strong><br />
+            {{ estudianteSeleccionadoModal.academicProgram || estudianteSeleccionadoModal.programaAcademico }}
+          </div>
+          <div>
+            <strong>Sede Universitaria:</strong><br />
+            {{ (estudianteSeleccionadoModal.headquarters || estudianteSeleccionadoModal.sede) | titlecase }}
+          </div>
+          <div>
+            <strong>Teléfono:</strong><br />
+            {{ estudianteSeleccionadoModal.phoneNumber || estudianteSeleccionadoModal.telefono || 'No registrado' }}
+          </div>
+          <div>
+            <strong>Dirección de Residencia:</strong><br />
+            {{ estudianteSeleccionadoModal.addres || estudianteSeleccionadoModal.direccion || 'No registrada' }}
+          </div>
+        </div>
+
+        <hr class="divider" />
+
+        <div *ngIf="cargandoPerfilEstudiante" class="text-muted">Consultando hoja de vida del estudiante...</div>
+
+        <div *ngIf="!cargandoPerfilEstudiante && perfilEstudianteModal">
+          <p class="company-desc">
+            <strong>Perfil Profesional:</strong><br />
+            {{ perfilEstudianteModal.aboutMe || 'Sin descripción registrada.' }}
+          </p>
+          <div class="info-grid">
+            <div><strong>Habilidades (Skills):</strong> {{ perfilEstudianteModal.skills || 'No especificadas' }}</div>
+            <div><strong>Nivel de Inglés:</strong> {{ perfilEstudianteModal.englishLevel || 'No especificado' }}</div>
+            <div *ngIf="perfilEstudianteModal.githubUrl">
+              <strong>Portafolio GitHub:</strong><br />
+              <a [href]="perfilEstudianteModal.githubUrl" target="_blank">{{ perfilEstudianteModal.githubUrl }}</a>
+            </div>
+          </div>
+          <div class="document-box" *ngIf="perfilEstudianteModal.linkLifesheet">
+            <strong>📄 Hoja de Vida (CV):</strong>
+            <a [href]="perfilEstudianteModal.linkLifesheet" target="_blank" class="pdf-link">
+              🔗 Abrir Hoja de Vida en PDF
+            </a>
+          </div>
+        </div>
+
+        <div *ngIf="!cargandoPerfilEstudiante && !perfilEstudianteModal" class="empty-profile-msg">
+          El estudiante ya está matriculado en la plataforma, pero aún no ha subido su Hoja de Vida extendida.
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-outline" (click)="cerrarModalEstudiante()">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 3: DETALLE DE LA PRÁCTICA Y OFERTA VINCULADA -->
+  <div class="modal-backdrop" *ngIf="practicaSeleccionadaModal" (click)="cerrarModalDetallePractica()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div>
+          <h3>Información de la Práctica Profesional #{{ practicaSeleccionadaModal.idPractice }}</h3>
+          <span class="nit-tag">Convocatoria: {{ practicaSeleccionadaModal.offerName }}</span>
+        </div>
+        <button class="close-btn" (click)="cerrarModalDetallePractica()">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <p class="company-desc">
+          <strong>Descripción de funciones de la oferta:</strong><br />
+          {{ practicaSeleccionadaModal.offerDescription }}
+        </p>
+
+        <div class="info-grid">
+          <div>
+            <strong>Empresa Vinculada:</strong><br />
+            {{ practicaSeleccionadaModal.companyName }} (NIT: {{ practicaSeleccionadaModal.nitCompany }})
+          </div>
+          <div>
+            <strong>Modalidad de Trabajo:</strong><br />
+            {{ practicaSeleccionadaModal.modality }} ({{ practicaSeleccionadaModal.location }})
+          </div>
+          <div>
+            <strong>Apoyo Económico / Salario:</strong><br />
+            {{ practicaSeleccionadaModal.salary > 0 ? ('$' + (practicaSeleccionadaModal.salary | number) + ' COP') : 'Auxilio de sostenimiento / A convenir' }}
+          </div>
+          <div>
+            <strong>Estado Actual:</strong><br />
+            <span class="status-badge activa">{{ practicaSeleccionadaModal.statusPractice }}</span>
+          </div>
+          <div>
+            <strong>Fecha de Inicio:</strong><br />
+            {{ practicaSeleccionadaModal.startDate }}
+          </div>
+          <div>
+            <strong>Fecha de Cierre / Finalización:</strong><br />
+            {{ practicaSeleccionadaModal.endDate }}
+          </div>
+          <div>
+            <strong>Practicante Asignado:</strong><br />
+            {{ practicaSeleccionadaModal.studentFullName }} (CC: {{ practicaSeleccionadaModal.studentDocument }})
+          </div>
+          <div>
+            <strong>Programa Académico:</strong><br />
+            {{ practicaSeleccionadaModal.studentProgram }}
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-outline" (click)="cerrarModalDetallePractica()">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 4: ESTUDIANTES SELECCIONADOS EN HISTORIAL DE OFERTAS -->
+  <div class="modal-backdrop" *ngIf="ofertaHistorialModal" (click)="cerrarModalSeleccionadosOferta()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div>
+          <h3>Estudiantes Seleccionados — {{ ofertaHistorialModal.practiceName }}</h3>
+          <small class="text-muted">
+            Empresa: <strong>{{ obtenerNombreEmpresaPorNit(ofertaHistorialModal.nitCompanyAssociated) }}</strong> |
+            Cupos ofertados al inicio: <strong>{{ calcularCuposIniciales(ofertaHistorialModal) }}</strong>
+          </small>
+        </div>
+        <button class="close-btn" (click)="cerrarModalSeleccionadosOferta()">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div *ngIf="seleccionadosOfertaModal.length === 0" class="empty-profile-msg">
+          Esta oferta fue cerrada sin estudiantes seleccionados.
+        </div>
+
+        <div class="selected-student-card" *ngFor="let sel of seleccionadosOfertaModal">
+          <div class="selected-student-info">
+            <strong>🎓 {{ sel.studentFullName }}</strong>
+            <span>
+              CC: {{ sel.studentDocument || sel.documentStudent || buscarDocumentoPorNombre(sel.studentFullName) }} |
+              Programa: {{ sel.studentAcademicProgram || sel.academicProgram || ofertaHistorialModal.profession }}
+            </span>
+            <small *ngIf="sel.skills || sel.studentSkills">
+              Habilidades: {{ sel.skills || sel.studentSkills }}
+              (Inglés: {{ sel.englishLevel || sel.studentEnglishLevel || 'B1' }})
+            </small>
+          </div>
+          <div class="selected-student-actions">
+            <a
+              *ngIf="sel.lifesheet || sel.linkLifesheet || sel.studentResumeLink"
+              [href]="sel.lifesheet || sel.linkLifesheet || sel.studentResumeLink"
+              target="_blank"
+              class="btn-outline">
+              📄 CV PDF
+            </a>
+            <button
+              class="btn-approve"
+              (click)="cerrarModalSeleccionadosOferta(); abrirPerfilEstudiantePorDocumento(sel.studentDocument || sel.documentStudent || '', sel.studentFullName, sel.studentAcademicProgram || sel.academicProgram)">
+              Ver Perfil Completo
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-outline" (click)="cerrarModalSeleccionadosOferta()">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>

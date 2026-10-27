@@ -9,16 +9,27 @@ export interface PostulationRequest {
 }
 
 export interface PostulationDetailResponse {
-  idPostulation: number;
-  datePostulation: string;
-  statusPostulation: string;
-  documentStudent: string;
+idPostulation: number;
+  idOffer?: number;
+  studentDocument?: string;
+  documentStudent?: string;
   studentFullName: string;
-  studentEmail: string;
-  skills: string;
-  englishLevel: string;
-  lifesheet: string;
-  githubUrl: string;
+  studentEmail?: string;
+  studentAcademicProgram?: string;
+  academicProgram?: string;
+  statusPostulation: string;
+  postulationDate?: string;
+  // Propiedades de hoja de vida y perfil usadas en PanelEmpresa y PanelAdministrador
+  lifesheet?: string;
+  linkLifesheet?: string;
+  studentResumeLink?: string;
+  skills?: string;
+  studentSkills?: string;
+  englishLevel?: string;
+  studentEnglishLevel?: string;
+  githubUrl?: string;
+  aboutMe?: string;
+  photoUrl?: string;
 }
 
 @Injectable({
