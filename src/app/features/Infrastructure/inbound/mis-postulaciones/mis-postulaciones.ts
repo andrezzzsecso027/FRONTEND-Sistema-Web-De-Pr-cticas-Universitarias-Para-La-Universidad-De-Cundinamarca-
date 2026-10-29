@@ -33,7 +33,7 @@ export class MisPostulaciones implements OnInit {
     private postulacionService: PostulacionService
   ) {}
 
-  ngOnInit(): void {
+    ngOnInit(): void {
     const usuario = this.authService.getUsuarioActual();
     if (usuario) {
       this.usuarioDocumento = (usuario as any).documento || (usuario as any).documentNumber || '';
@@ -45,12 +45,12 @@ export class MisPostulaciones implements OnInit {
     this.cargando = true;
     this.mensajeError = '';
 
-    // Mock temporal: cuando el backend tenga el endpoint real, reemplazamos esto
-    setTimeout(() => {
-      this.postulaciones = [];
-      this.cargando = false;
-    }, 800);
+    // Si aún no hay endpoint real en el backend, mostramos la vista vacía de inmediato
+    // para que no se quede cargando para siempre.
+    this.postulaciones = [];
+    this.cargando = false;
   }
+  
 
   getEstadoClase(estado: string): string {
     const est = estado.toUpperCase();
