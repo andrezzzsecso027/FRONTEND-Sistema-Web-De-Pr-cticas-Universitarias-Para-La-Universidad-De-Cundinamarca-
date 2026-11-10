@@ -1,10 +1,14 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef, HostListener } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, FormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { OfertaService, OfferRequestDTO } from '../../../../core/services/oferta/ofertas';
 import { PostulacionService, PostulationDetailResponse } from '../../../../core/services/postulacion/postulacion';
 import { Empresa } from '../../../../core/services/empresa/empresa';
+import { UpdatePasswordService } from '../../../../core/services/update-pasword/update.password';
+import { IaSeguridadService } from '../../../../core/services/ia-seguridad/ia-seguridad';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-panel-empresa',
@@ -16,6 +20,15 @@ import { Empresa } from '../../../../core/services/empresa/empresa';
 export class PanelEmpresa implements OnInit, OnDestroy {
   vistaActual: 'inicio' | 'crear-oferta' | 'mis-ofertas' | 'postulantes' | 'perfil' = 'inicio';
   menuPerfilAbierto = false;
+
+  // --- CAMBIO DE CONTRASEÑA (EMPRESA) ---
+  mostrarModalPassword = false;
+  passwordActual = '';
+  passwordNueva = '';
+  passwordConfirmar = '';
+  mensajePasswordExito = '';
+  mensajePasswordError = '';
+  cargandoPassword = false;
 
   // Datos de la sesión actual
   idUsuarioSesion: number | null = null;
@@ -73,12 +86,15 @@ export class PanelEmpresa implements OnInit, OnDestroy {
   modalidades: string[] = ['Presencial', 'Remoto', 'Híbrido'];
 
   constructor(
-    private fb: FormBuilder,
+   private fb: FormBuilder,
     private ofertaService: OfertaService,
     private postulacionService: PostulacionService,
     private empresaService: Empresa,
+    private updatePasswordService: UpdatePasswordService,
+    private iaSeguridadService: IaSeguridadService,
     private router: Router,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private http: HttpClient
   ) {
     this.ofertaForm = this.fb.group({
       practiceName: ['', [Validators.required, Validators.minLength(5)]],
@@ -349,8 +365,33 @@ export class PanelEmpresa implements OnInit, OnDestroy {
 
     this.postulacionService.verPostuladosPorOferta(oferta.idOffer!).subscribe({
       next: (postulantes) => {
-        this.postulantesOfertaSeleccionada = postulantes || [];
+        const listaValida = (postulantes || []).filter(
+          p => p.studentFullName && p.studentFullName.trim().length > 0
+        );
+        this.postulantesOfertaSeleccionada = listaValida;
         this.cargando = false;
+
+        // Enriquecer cada postulante con su foto, inglés, GitHub, CV y resumen desde perfiles_estudiantes
+        this.postulantesOfertaSeleccionada.forEach((post: any) => {
+          const doc = post.documentStudent || post.studentDocument;
+          if (doc) {
+            this.http.get<any>(`${environment.baseUrl}/registro/estudiantes/perfil/${doc}`).subscribe({
+              next: (perfil) => {
+                if (perfil) {
+                  post.photoUrl = perfil.photoUrl || post.photoUrl;
+                  post.skills = perfil.skills || post.skills;
+                  post.englishLevel = perfil.englishLevel || post.englishLevel;
+                  post.githubUrl = perfil.githubUrl || post.githubUrl;
+                  post.lifesheet = perfil.linkLifesheet || post.lifesheet;
+                  post.aboutMe = perfil.aboutMe || post.aboutMe;
+                  this.cdr.detectChanges();
+                }
+              },
+              error: () => {}
+            });
+          }
+        });
+
         this.cdr.detectChanges();
       },
       error: () => {
@@ -498,5 +539,101 @@ export class PanelEmpresa implements OnInit, OnDestroy {
     localStorage.removeItem('nitEmpresa');
     localStorage.removeItem('nombreEmpresaReal');
     this.router.navigate(['/login']);
+  }
+
+  abrirModalPassword(): void {
+    this.mostrarModalPassword = true;
+    this.menuPerfilAbierto = false;
+    this.passwordActual = '';
+    this.passwordNueva = '';
+    this.passwordConfirmar = '';
+    this.mensajePasswordExito = '';
+    this.mensajePasswordError = '';
+  }
+
+  cerrarModalPassword(): void {
+    this.mostrarModalPassword = false;
+  }
+
+  guardarNuevaContrasena(): void {
+    this.mensajePasswordExito = '';
+    this.mensajePasswordError = '';
+
+    if (!this.passwordActual || !this.passwordNueva || !this.passwordConfirmar) {
+      this.mensajePasswordError = 'Todos los campos son obligatorios.';
+      return;
+    }
+    if (this.passwordNueva !== this.passwordConfirmar) {
+      this.mensajePasswordError = 'La nueva contraseña y su confirmación no coinciden.';
+      return;
+    }
+    if (this.passwordNueva.length < 6) {
+      this.mensajePasswordError = 'La nueva contraseña debe tener al menos 6 caracteres.';
+      return;
+    }
+
+    const email = this.correoEmpresa || this.updatePasswordService.obtenerEmailDeSesion();
+    this.cargandoPassword = true;
+
+    this.updatePasswordService.cambiarContrasena({
+      email,
+      currentPassword: this.passwordActual,
+      newPassword: this.passwordNueva
+    }).subscribe({
+      next: (res) => {
+        this.cargandoPassword = false;
+        this.mensajePasswordExito = res || 'Contraseña actualizada exitosamente.';
+        this.passwordActual = '';
+        this.passwordNueva = '';
+        this.passwordConfirmar = '';
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.cargandoPassword = false;
+        this.mensajePasswordError = typeof err.error === 'string' && err.error
+          ? err.error
+          : 'La contraseña actual es incorrecta.';
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  // --- RANKING DE CANDIDATOS CON IA (EMPRESA) ---
+  mostrarModalRankingIa = false;
+  cargandoRankingIa = false;
+  nombreOfertaRankingIa = '';
+  totalPostuladosAnalizadosIa = 0;
+  resultadoRankingIa = '';
+  errorRankingIa = '';
+
+  generarRankingIaDeOferta(oferta?: OfferRequestDTO | null): void {
+    const target = oferta || this.ofertaSeleccionada;
+    if (!target || !target.idOffer) return;
+
+    this.mostrarModalRankingIa = true;
+    this.cargandoRankingIa = true;
+    this.nombreOfertaRankingIa = target.practiceName;
+    this.resultadoRankingIa = '';
+    this.errorRankingIa = '';
+    this.cdr.detectChanges();
+
+    this.iaSeguridadService.obtenerRankingPostulados(target.idOffer).subscribe({
+      next: (res) => {
+        this.cargandoRankingIa = false;
+        this.nombreOfertaRankingIa = res.practiceName || target.practiceName;
+        this.totalPostuladosAnalizadosIa = res.totalCandidatesAnalyzed;
+        this.resultadoRankingIa = res.aiRankingAnalysis;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.cargandoRankingIa = false;
+        this.errorRankingIa = 'No se pudo generar el ranking con IA para esta oferta.';
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  cerrarModalRankingIa(): void {
+    this.mostrarModalRankingIa = false;
   }
 }   

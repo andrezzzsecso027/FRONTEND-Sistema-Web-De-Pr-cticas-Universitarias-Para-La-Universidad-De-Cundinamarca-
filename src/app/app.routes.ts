@@ -12,6 +12,7 @@ import { PanelEmpresa } from './features/Infrastructure/inbound/panel-empresa/pa
 import { adminGuard } from './core/guards/admin.guard';
 import { estudianteGuard } from './core/guards/estudiante.guard';
 import { empresaGuard } from './core/guards/empresa.guard';
+import { PerfilEstudiante } from './features/Infrastructure/inbound/perfil-estudiante/perfil-estudiante';
 
 export const routes: Routes = [
   { path: '', component: Home },
@@ -23,6 +24,7 @@ export const routes: Routes = [
   { path: 'ofertas', component: OfertaLista, canActivate: [estudianteGuard] },
   { path: 'mis-postulaciones', component: MisPostulaciones, canActivate: [estudianteGuard] },
   { path: 'panel-administrador', component: PanelAdministrador, canActivate: [adminGuard] },
+  { path: 'mi-perfil', component: PerfilEstudiante },
   { path: 'panel-empresa', component: PanelEmpresa, canActivate: [empresaGuard] },
   { path: '**', redirectTo: '', pathMatch: 'full' }
 ];
