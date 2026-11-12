@@ -456,6 +456,14 @@
   position: sticky;
   top: 0;
   z-index: 1000;
+  background: linear-gradient(90deg, var(--udec-green-dark), var(--udec-green-main));
+  color: #fff;
+  padding: 0.85rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
 }
 
 .filters-bar {
@@ -587,4 +595,15 @@
     gap: 0.5rem;
     align-items: center;
   }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
 }

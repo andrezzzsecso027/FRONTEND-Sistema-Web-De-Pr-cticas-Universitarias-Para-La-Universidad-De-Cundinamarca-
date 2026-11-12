@@ -6,6 +6,13 @@
     <header class="ofertas-header">
       <h1>Ofertas de Práctica Disponibles</h1>
       <p>Encuentra la oportunidad que impulse tu carrera profesional.</p>
+
+      <!-- BARRA DE HERRAMIENTAS DEL ESTUDIANTE (UX DORADO Y VERDE UDEC) -->
+      <div class="student-toolbar">
+        <button type="button" class="btn-gold-ia" (click)="solicitarRecomendacionIa()">
+          ✨ Recomendar Ofertas según mi Perfil (IA)
+        </button>
+      </div>
     </header>
 
     <!-- MENSAJES -->
@@ -73,5 +80,138 @@
 
   </div>
 </main>
+
+<!-- MODAL 1: PERFIL PROFESIONAL DEL ESTUDIANTE -->
+<div *ngIf="mostrarModalPerfilEstudiante" class="modal-overlay" (click)="cerrarModalPerfil()">
+  <div class="modal-card-udec" (click)="$event.stopPropagation()">
+    <div class="modal-header-udec">
+      <div>
+        <span class="gold-pill">PERFIL DEL ESTUDIANTE</span>
+        <h3>👤 Mi Hoja de Vida y Competencias</h3>
+      </div>
+      <button type="button" class="btn-cerrar-modal" (click)="cerrarModalPerfil()">✕</button>
+    </div>
+
+    <div class="modal-body-udec">
+      <div class="form-row-2">
+        <div class="form-group-ia">
+          <label>Documento de Identidad</label>
+          <input type="text" [(ngModel)]="perfilEstudiante.documentStudent" disabled />
+        </div>
+        <div class="form-group-ia">
+          <label>Nivel de Inglés (MCER)</label>
+          <select [(ngModel)]="perfilEstudiante.englishLevel">
+            <option value="A1 - Principiante">A1 - Principiante</option>
+            <option value="A2 - Básico">A2 - Básico</option>
+            <option value="B1 - Intermedio">B1 - Intermedio</option>
+            <option value="B2 - Intermedio Alto">B2 - Intermedio Alto</option>
+            <option value="C1 - Avanzado">C1 - Avanzado</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group-ia">
+        <label>Habilidades Técnicas y Blandas (Usadas por la IA para calcular tu Match)</label>
+        <input type="text" [(ngModel)]="perfilEstudiante.skills" placeholder="Ej: Java, Spring Boot, Angular, SQL, Liderazgo" />
+      </div>
+
+      <div class="form-row-2">
+        <div class="form-group-ia">
+          <label>Portafolio / GitHub URL</label>
+          <input type="url" [(ngModel)]="perfilEstudiante.githubUrl" placeholder="https://github.com/tu-usuario" />
+        </div>
+        <div class="form-group-ia">
+          <label>Enlace Hoja de Vida (PDF / Drive)</label>
+          <input type="url" [(ngModel)]="perfilEstudiante.resumeLink" placeholder="https://..." />
+        </div>
+      </div>
+
+      <div class="form-group-ia">
+        <label>Perfil Profesional (Sobre mí)</label>
+        <textarea rows="3" [(ngModel)]="perfilEstudiante.aboutMe" placeholder="Describe tus intereses de práctica profesional..."></textarea>
+      </div>
+
+      <div *ngIf="mensajePerfilExito" class="alerta-exito-ia">{{ mensajePerfilExito }}</div>
+      <div *ngIf="mensajePerfilError" class="alerta-error-ia">{{ mensajePerfilError }}</div>
+    </div>
+
+    <div class="modal-footer-ia">
+      <button type="button" class="btn-cancelar-ia" (click)="cerrarModalPerfil()">Cerrar</button>
+      <button type="button" class="btn-confirmar-ia" [disabled]="guardandoPerfil" (click)="guardarPerfilEstudiante()">
+        {{ guardandoPerfil ? 'Guardando...' : '💾 Guardar Mi Perfil' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL 2: ASISTENTE IA GEMINI -->
+<div *ngIf="mostrarModalIaEstudiante" class="modal-overlay" (click)="cerrarModalIaEstudiante()">
+  <div class="modal-card-udec" (click)="$event.stopPropagation()">
+    <div class="modal-header-udec">
+      <div>
+        <span class="gold-pill">INTELIGENCIA ARTIFICIAL GEMINI</span>
+        <h3>🤖 Recomendación de Prácticas para tu Perfil</h3>
+      </div>
+      <button type="button" class="btn-cerrar-modal" (click)="cerrarModalIaEstudiante()">✕</button>
+    </div>
+
+    <div class="modal-body-udec">
+      <div *ngIf="cargandoIaEstudiante" class="estado-carga-ia">
+        <p>⏳ Analizando tus habilidades ({{ perfilEstudiante.skills }}) frente a las ofertas activas...</p>
+      </div>
+      <div *ngIf="!cargandoIaEstudiante && errorIaEstudiante" class="alerta-error-ia">
+        {{ errorIaEstudiante }}
+      </div>
+      <div *ngIf="!cargandoIaEstudiante && !errorIaEstudiante">
+        <div class="badge-ia-info">
+          Ofertas activas evaluadas por IA: <strong>{{ totalOfertasAnalizadasIa }}</strong>
+        </div>
+        <div class="resultado-texto-ia">{{ recomendacionIaTexto }}</div>
+      </div>
+    </div>
+
+    <div class="modal-footer-ia">
+      <button type="button" class="btn-confirmar-ia" (click)="cerrarModalIaEstudiante()">Entendido</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL 3: CAMBIAR CONTRASEÑA -->
+<div *ngIf="mostrarModalPassword" class="modal-overlay" (click)="cerrarModalPassword()">
+  <div class="modal-card-udec" (click)="$event.stopPropagation()">
+    <div class="modal-header-udec">
+      <div>
+        <span class="gold-pill">SEGURIDAD DE CUENTA</span>
+        <h3>🔒 Actualizar Contraseña</h3>
+      </div>
+      <button type="button" class="btn-cerrar-modal" (click)="cerrarModalPassword()">✕</button>
+    </div>
+
+    <div class="modal-body-udec">
+      <div class="form-group-ia">
+        <label>Contraseña Actual</label>
+        <input type="password" [(ngModel)]="passwordActual" placeholder="Ingresa tu contraseña actual" />
+      </div>
+      <div class="form-group-ia">
+        <label>Nueva Contraseña</label>
+        <input type="password" [(ngModel)]="passwordNueva" placeholder="Mínimo 6 caracteres" />
+      </div>
+      <div class="form-group-ia">
+        <label>Confirmar Nueva Contraseña</label>
+        <input type="password" [(ngModel)]="passwordConfirmar" placeholder="Repite la nueva contraseña" />
+      </div>
+
+      <div *ngIf="mensajePasswordError" class="alerta-error-ia">{{ mensajePasswordError }}</div>
+      <div *ngIf="mensajePasswordExito" class="alerta-exito-ia">{{ mensajePasswordExito }}</div>
+    </div>
+
+    <div class="modal-footer-ia">
+      <button type="button" class="btn-cancelar-ia" (click)="cerrarModalPassword()">Cancelar</button>
+      <button type="button" class="btn-confirmar-ia" [disabled]="cargandoPassword" (click)="guardarNuevaContrasena()">
+        {{ cargandoPassword ? 'Actualizando...' : 'Actualizar Contraseña' }}
+      </button>
+    </div>
+  </div>
+</div>
 
 <app-footer></app-footer>

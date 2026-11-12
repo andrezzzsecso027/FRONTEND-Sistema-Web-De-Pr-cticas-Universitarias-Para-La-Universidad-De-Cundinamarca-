@@ -16,7 +16,8 @@
       <button class="nav-link" [class.active]="vistaActual === 'inicio'" (click)="cambiarVista('inicio')">
         Inicio
       </button>
-      <button class="nav-link" [class.active]="vistaActual === 'mis-ofertas' || vistaActual === 'postulantes'" (click)="cambiarVista('mis-ofertas')">
+      <button class="nav-link" [class.active]="vistaActual === 'mis-ofertas' || vistaActual === 'postulantes'"
+        (click)="cambiarVista('mis-ofertas')">
         Mis Ofertas
         <span class="badge-count">{{ misOfertas.length }}</span>
       </button>
@@ -29,7 +30,8 @@
 
       <!-- ICONO DE PERFIL CON LOGO O INICIAL -->
       <div class="profile-menu-container">
-        <button class="profile-avatar-btn" (click)="menuPerfilAbierto = !menuPerfilAbierto" title="Mi Perfil Corporativo">
+        <button class="profile-avatar-btn" (click)="menuPerfilAbierto = !menuPerfilAbierto"
+          title="Mi Perfil Corporativo">
           <img *ngIf="logoPreviewUrl" [src]="logoPreviewUrl" alt="Logo Empresa" class="avatar-img" />
           <span *ngIf="!logoPreviewUrl" class="avatar-circle">{{ nombreEmpresa.charAt(0) | uppercase }}</span>
         </button>
@@ -41,6 +43,9 @@
             <span class="dropdown-nit" *ngIf="nitEmpresa">NIT: {{ nitEmpresa }}</span>
           </div>
           <hr />
+          <button type="button" class="btn-accion-secundario" (click)="abrirModalPassword()">
+            🔒 Cambiar Contraseña
+          </button>
           <button (click)="cambiarVista('perfil')">🏢 Mi Perfil Corporativo</button>
           <button (click)="cambiarVista('mis-ofertas')">📋 Mis Ofertas Publicadas</button>
           <button class="btn-logout" (click)="cerrarSesion()">🚪 Cerrar Sesión</button>
@@ -62,7 +67,8 @@
         <div class="hero-info">
           <span class="company-pill">NIT Asociado: {{ nitEmpresa || 'Activo' }}</span>
           <h1>Hola, {{ nombreEmpresa }}</h1>
-          <p>Gestiona tus convocatorias de práctica, evalúa hojas de vida y vincula estudiantes de la Universidad de Cundinamarca.</p>
+          <p>Gestiona tus convocatorias de práctica, evalúa hojas de vida y vincula estudiantes de la Universidad de
+            Cundinamarca.</p>
         </div>
         <button class="btn-gold-lg" (click)="cambiarVista('crear-oferta')">
           + Publicar Nueva Oferta
@@ -127,7 +133,8 @@
         <div class="section-header">
           <div>
             <h2>Publicar Nueva Oferta de Práctica</h2>
-            <p>La oferta quedará asociada automáticamente a <strong>{{ nombreEmpresa }}</strong> (NIT: <strong>{{ nitEmpresa }}</strong>).</p>
+            <p>La oferta quedará asociada automáticamente a <strong>{{ nombreEmpresa }}</strong> (NIT: <strong>{{
+                nitEmpresa }}</strong>).</p>
           </div>
           <button class="btn-outline" (click)="cambiarVista('inicio')">Volver al Inicio</button>
         </div>
@@ -136,7 +143,8 @@
           <div class="form-row">
             <div class="form-group">
               <label>Título de la Vacante / Práctica *</label>
-              <input type="text" formControlName="practiceName" placeholder="Ej. Desarrollador FullStack Spring Boot & Angular" />
+              <input type="text" formControlName="practiceName"
+                placeholder="Ej. Desarrollador FullStack Spring Boot & Angular" />
             </div>
 
             <div class="form-group">
@@ -181,7 +189,8 @@
 
           <div class="form-group">
             <label>Descripción de Funciones, Proyecto y Habilidades Esperadas *</label>
-            <textarea rows="4" formControlName="practiceDescription" placeholder="Detalla las responsabilidades que tendrá el estudiante y las herramientas o competencias requeridas..."></textarea>
+            <textarea rows="4" formControlName="practiceDescription"
+              placeholder="Detalla las responsabilidades que tendrá el estudiante y las herramientas o competencias requeridas..."></textarea>
           </div>
 
           <div class="form-actions">
@@ -203,12 +212,14 @@
             <p>Consulta los cupos disponibles y gestiona los estudiantes postulados a tus vacantes.</p>
           </div>
           <div class="search-box">
-            <input type="text" [(ngModel)]="filtroTextoOferta" placeholder="🔍 Buscar por cargo, carrera o modalidad..." />
+            <input type="text" [(ngModel)]="filtroTextoOferta"
+              placeholder="🔍 Buscar por cargo, carrera o modalidad..." />
             <button class="btn-primary-sm" (click)="cambiarVista('crear-oferta')">+ Nueva Oferta</button>
           </div>
         </div>
 
         <table class="udec-table" *ngIf="ofertasFiltradas.length > 0">
+          <caption class="sr-only">Listado de ofertas de práctica publicadas por la empresa</caption>
           <thead>
             <tr>
               <th>ID</th>
@@ -230,9 +241,14 @@
               <td>${{ oferta.salary | number }}</td>
               <td><span class="badge-spots">{{ oferta.availableSpots }}</span></td>
               <td>{{ oferta.closingDate }}</td>
-              <td>
-                <button class="btn-primary-sm" (click)="verPostulantes(oferta)">
+              <td style="display: flex; gap: 8px; align-items: center;">
+                <button type="button" class="btn-ver-postulantes" (click)="verPostulantes(oferta)">
                   Ver Postulantes
+                </button>
+                <button type="button" class="btn-gold-ia"
+                  style="padding: 8px 14px; font-size: 0.82rem; border-radius: 8px;"
+                  (click)="generarRankingIaDeOferta(oferta)">
+                  🤖 Ranking IA
                 </button>
               </td>
             </tr>
@@ -251,9 +267,16 @@
         <div class="section-header">
           <div>
             <h2>Estudiantes Postulados: {{ ofertaSeleccionada?.practiceName }}</h2>
-            <p>Carrera: <strong>{{ ofertaSeleccionada?.profession }}</strong> | Cupos disponibles: <strong>{{ ofertaSeleccionada?.availableSpots }}</strong></p>
+            <p>Carrera: <strong>{{ ofertaSeleccionada?.profession }}</strong> | Cupos disponibles: <strong>{{
+                ofertaSeleccionada?.availableSpots }}</strong></p>
           </div>
-          <button class="btn-outline" (click)="cambiarVista('mis-ofertas')">← Volver a Mis Ofertas</button>
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <button type="button" class="btn-gold-ia" style="padding: 8px 16px; font-size: 0.85rem; border-radius: 8px;"
+              (click)="generarRankingIaDeOferta(ofertaSeleccionada)">
+              🤖 Analizar Postulados con IA
+            </button>
+            <button type="button" class="btn-outline" (click)="cambiarVista('mis-ofertas')">← Volver a Mis Ofertas</button>
+          </div>
         </div>
 
         <div class="empty-state" *ngIf="postulantesOfertaSeleccionada.length === 0 && !cargando">
@@ -262,19 +285,65 @@
 
         <div class="candidates-list" *ngIf="postulantesOfertaSeleccionada.length > 0">
           <div class="candidate-card" *ngFor="let p of postulantesOfertaSeleccionada">
-            <div class="candidate-info">
-              <div class="candidate-header">
-                <h3>{{ p.studentFullName }}</h3>
-                <span class="status-pill" [ngClass]="p.statusPostulation.toLowerCase()">
-                  {{ p.statusPostulation }}
-                </span>
-              </div>
-              <p><strong>Documento:</strong> {{ p.documentStudent }} | <strong>Correo Institucional:</strong> {{ p.studentEmail }}</p>
-              <p><strong>Habilidades:</strong> {{ p.skills || 'En proceso de actualización' }} | <strong>Nivel de Inglés:</strong> {{ p.englishLevel || 'No registrado' }}</p>
+            <div class="candidate-info" style="display: flex; gap: 18px; align-items: flex-start;">
 
-              <div class="candidate-links">
-                <a *ngIf="p.lifesheet" [href]="p.lifesheet" target="_blank" class="link-cv">📄 Ver Hoja de Vida (PDF)</a>
-                <a *ngIf="p.githubUrl" [href]="p.githubUrl" target="_blank" class="link-github">💻 Repositorio / Portafolio</a>
+              <!-- FOTO DEL ESTUDIANTE -->
+              <div style="flex-shrink: 0;">
+                <img
+                  *ngIf="$any(p).photoUrl"
+                  [src]="$any(p).photoUrl"
+                  alt="Foto Estudiante"
+                  style="width: 68px; height: 68px; border-radius: 50%; object-fit: cover; border: 2.5px solid #00853E;" />
+                <div
+                  *ngIf="!$any(p).photoUrl"
+                  style="width: 68px; height: 68px; border-radius: 50%; background: #E5F4EB; color: #00853E; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.5rem; border: 2px solid #00853E;">
+                  {{ (p.studentFullName || 'E').charAt(0) | uppercase }}
+                </div>
+              </div>
+
+              <!-- DATOS COMPLETOS DEL ESTUDIANTE -->
+              <div style="flex: 1;">
+                <div class="candidate-header">
+                  <h3>{{ p.studentFullName }}</h3>
+                  <span class="status-pill" [ngClass]="p.statusPostulation.toLowerCase()">
+                    {{ p.statusPostulation }}
+                  </span>
+                </div>
+
+                <p>
+                  <strong>CC:</strong> {{ p.documentStudent || p.studentDocument }} |
+                  <strong>Correo Institucional:</strong> {{ p.studentEmail }}
+                </p>
+
+                <p *ngIf="$any(p).aboutMe" style="color: #444; font-style: italic; margin: 6px 0;">
+                  "{{ $any(p).aboutMe }}"
+                </p>
+
+                <p>
+                  <strong>Habilidades:</strong> {{ p.skills || 'Por registrar' }} |
+                  <strong>Nivel de Inglés:</strong> {{ p.englishLevel || 'Por registrar' }}
+                </p>
+
+                <div class="candidate-links" style="display: flex; gap: 12px; margin-top: 10px; flex-wrap: wrap;">
+                  <a
+                    *ngIf="p.lifesheet || $any(p).linkLifesheet"
+                    [href]="p.lifesheet || $any(p).linkLifesheet"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="link-cv"
+                    style="background: #E5F4EB; color: #006B32; padding: 6px 14px; border-radius: 8px; font-weight: 700; text-decoration: none; font-size: 0.85rem;">
+                    📄 Ver Hoja de Vida (PDF)
+                  </a>
+                  <a
+                    *ngIf="p.githubUrl"
+                    [href]="p.githubUrl"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="link-github"
+                    style="background: #F5EDCC; color: #8F7200; padding: 6px 14px; border-radius: 8px; font-weight: 700; text-decoration: none; font-size: 0.85rem;">
+                    💻 Ver Repositorio GitHub
+                  </a>
+                </div>
               </div>
             </div>
 
@@ -330,7 +399,7 @@
             <h4>📄 Soporte Legal del NIT (RUT / Cámara de Comercio)</h4>
             <p>Sube o actualiza el documento oficial en PDF para respaldo institucional.</p>
 
-           <label class="pdf-dropzone">
+            <label class="pdf-dropzone">
               <span class="pdf-icon">📑</span>
               <span *ngIf="!nombreArchivoPdfNit">Seleccionar archivo PDF del NIT</span>
               <span *ngIf="nombreArchivoPdfNit" class="pdf-success-text">
@@ -338,7 +407,8 @@
               </span>
               <input type="file" accept="application/pdf" (change)="onSeleccionarPdfNit($event)" hidden />
             </label>
-            <a *ngIf="nombreArchivoPdfNit.startsWith('http')" [href]="nombreArchivoPdfNit" target="_blank" class="link-ver-pdf">
+            <a *ngIf="nombreArchivoPdfNit.startsWith('http')" [href]="nombreArchivoPdfNit" target="_blank"
+              class="link-ver-pdf">
               🔗 Ver PDF actual en Cloudinary
             </a>
           </div>
@@ -349,16 +419,15 @@
           <div class="section-header">
             <div>
               <h2>Información Corporativa y Presentación</h2>
-              <p>Estos datos serán visibles para los estudiantes de la Universidad de Cundinamarca al consultar tus ofertas.</p>
+              <p>Estos datos serán visibles para los estudiantes de la Universidad de Cundinamarca al consultar tus
+                ofertas.</p>
             </div>
           </div>
 
           <form [formGroup]="perfilForm" (ngSubmit)="guardarPerfilCorporativo()" class="offer-form">
             <div class="form-group">
               <label>Acerca de la Empresa (Misión, Sector y Cultura de Trabajo) *</label>
-              <textarea
-                rows="4"
-                formControlName="companyDescription"
+              <textarea rows="4" formControlName="companyDescription"
                 placeholder="Cuéntales a los estudiantes a qué se dedica tu empresa, qué tecnologías o procesos manejan y qué aprenderán durante su práctica...">
               </textarea>
             </div>
@@ -435,6 +504,77 @@
 
       </div>
     </section>
+   <!-- MODAL CAMBIAR CONTRASEÑA EMPRESA -->
+    <div class="modal-overlay" *ngIf="mostrarModalPassword" (click)="cerrarModalPassword()">
+      <div class="modal-card-udec" (click)="$event.stopPropagation()">
+        <div class="modal-header-udec">
+          <div>
+            <span class="gold-pill">SEGURIDAD CORPORATIVA</span>
+            <h3>🔒 Actualizar Contraseña</h3>
+          </div>
+          <button type="button" class="btn-cerrar-modal" (click)="cerrarModalPassword()">✕</button>
+        </div>
 
+        <div class="modal-body-udec">
+          <div class="form-group-ia">
+            <label>Contraseña Actual</label>
+            <input type="password" [(ngModel)]="passwordActual" placeholder="Ingresa tu contraseña actual" />
+          </div>
+
+          <div class="form-group-ia">
+            <label>Nueva Contraseña</label>
+            <input type="password" [(ngModel)]="passwordNueva" placeholder="Mínimo 6 caracteres" />
+          </div>
+
+          <div class="form-group-ia">
+            <label>Confirmar Nueva Contraseña</label>
+            <input type="password" [(ngModel)]="passwordConfirmar" placeholder="Repite la nueva contraseña" />
+          </div>
+
+          <div *ngIf="mensajePasswordError" class="alerta-error-ia">{{ mensajePasswordError }}</div>
+          <div *ngIf="mensajePasswordExito" class="alerta-exito-ia">{{ mensajePasswordExito }}</div>
+        </div>
+
+        <div class="modal-footer-ia">
+          <button type="button" class="btn-cancelar-ia" (click)="cerrarModalPassword()">Cancelar</button>
+          <button type="button" class="btn-confirmar-ia" [disabled]="cargandoPassword"
+            (click)="guardarNuevaContrasena()">
+            {{ cargandoPassword ? 'Actualizando...' : 'Actualizar Contraseña' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL RANKING IA DE CANDIDATOS (GEMINI) -->
+    <div class="modal-overlay" *ngIf="mostrarModalRankingIa" (click)="cerrarModalRankingIa()">
+      <div class="modal-card-udec" (click)="$event.stopPropagation()">
+        <div class="modal-header-udec">
+          <div>
+            <span class="gold-pill">INTELIGENCIA ARTIFICIAL GEMINI</span>
+            <h3>📊 Ranking IA — {{ nombreOfertaRankingIa }}</h3>
+          </div>
+          <button type="button" class="btn-cerrar-modal" (click)="cerrarModalRankingIa()">✕</button>
+        </div>
+
+        <div class="modal-body-udec">
+          <div *ngIf="cargandoRankingIa" class="estado-carga-ia">
+            <p>⏳ Evaluando competencias técnicas, inglés y perfiles de los postulados con Gemini IA...</p>
+          </div>
+          <div *ngIf="!cargandoRankingIa && errorRankingIa" class="alerta-error-ia">
+            {{ errorRankingIa }}
+          </div>
+          <div *ngIf="!cargandoRankingIa && !errorRankingIa">
+            <div class="badge-ia-info">
+              Candidatos analizados en esta convocatoria: <strong>{{ totalPostuladosAnalizadosIa }}</strong>
+            </div>
+            <div class="resultado-texto-ia">{{ resultadoRankingIa }}</div>
+          </div>
+        </div>
+
+        <div class="modal-footer-ia">
+          <button type="button" class="btn-confirmar-ia" (click)="cerrarModalRankingIa()">Cerrar Análisis</button>
+        </div>
+      </div>
+    </div>
   </main>
 </div>

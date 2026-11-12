@@ -1,53 +1,137 @@
 <app-navbar></app-navbar>
 
-<main class="auth">
-  <h1>Registro de Estudiante</h1>
+<main class="reg-shell">
+  <div class="reg-container">
+    <div class="reg-card">
+      <div class="reg-header">
+        <div class="eyebrow-tag">
+          <span class="led-dot"></span>
+          <span>EXPEDIENTE ACADÉMICO · UDEC</span>
+        </div>
+        <h1>Registro de estudiante</h1>
+        <p>Completa tus datos institucionales para habilitar tu postulación a prácticas profesionales.</p>
+      </div>
 
-  <form class="auth-form" [formGroup]="formularioEstudiante" (ngSubmit)="onSubmit()">
-    
-    <label for="documento">Documento de Identidad</label>
-    <input type="text" id="documento" formControlName="documento">
+      <form class="reg-form" [formGroup]="formularioEstudiante" (ngSubmit)="onSubmit()">
+        <div class="reg-grid-2">
+          <div class="field-group">
+            <label>Documento de identidad (CC)</label>
+            <input type="text" formControlName="documento" placeholder="Ej. 1003558974" />
+          </div>
 
-    <label for="nombreEstudiante">Nombres</label>
-    <input type="text" id="nombreEstudiante" formControlName="nombreEstudiante">
+          <div class="field-group">
+            <label>Teléfono móvil</label>
+            <input type="text" formControlName="telefono" placeholder="Ej. 3101234567" />
+          </div>
 
-    <label for="apellidoEstudiante">Apellidos</label>
-    <input type="text" id="apellidoEstudiante" formControlName="apellidoEstudiante">
+          <div class="field-group">
+            <label>Nombres</label>
+            <input type="text" formControlName="nombreEstudiante" placeholder="Tus nombres" />
+          </div>
 
-   <label for="sede">Sede Universitaria</label>
-  <select id="sede" formControlName="sede" (change)="onSedeChange($event)">
-    <option value="" disabled selected>Selecciona tu sede</option>
-    <option value="fusagasuga">Fusagasugá</option>
-    <option value="chia">Chía</option>
-    <option value="soacha">Soacha</option>
-    <option value="zipaquira">Zipaquirá</option>
-    <option value="girardot">Girardot</option>
-    <option value="ubate">Ubaté</option>
-  </select>
+          <div class="field-group">
+            <label>Apellidos</label>
+            <input type="text" formControlName="apellidoEstudiante" placeholder="Tus apellidos" />
+          </div>
 
-  <label for="programaAcademico">Programa Académico</label>
-  <select id="programaAcademico" formControlName="programaAcademico">
-    <option value="" disabled selected>Selecciona tu programa</option>
-    <option *ngFor="let programa of programasDisponibles" [value]="programa">
-      {{ programa }}
-    </option>
-  </select>
-    <label for="direccion">Dirección</label>
-    <input type="text" id="direccion" formControlName="direccion">
+          <div class="field-group">
+            <label>Sede universitaria</label>
+            <select formControlName="sede" (change)="onSedeChange($event)">
+              <option value="" disabled>Selecciona tu sede</option>
+              <option value="fusagasuga">Fusagasugá</option>
+              <option value="chia">Chía</option>
+              <option value="soacha">Soacha</option>
+              <option value="zipaquira">Zipaquirá</option>
+              <option value="girardot">Girardot</option>
+              <option value="ubate">Ubaté</option>
+            </select>
+          </div>
 
-    <label for="telefono">Teléfono</label>
-    <input type="tel" id="telefono" formControlName="telefono">
+          <div class="field-group">
+            <label>Programa académico</label>
+            <select formControlName="programaAcademico">
+              <option value="" disabled>Selecciona tu carrera</option>
+              <option *ngFor="let programa of programasDisponibles" [value]="programa">
+                {{ programa }}
+              </option>
+            </select>
+          </div>
 
-    <label for="correo">Correo Institucional</label>
-    <input type="email" id="correo" formControlName="correo">
+          <div class="field-group">
+            <label>Dirección de residencia</label>
+            <input type="text" formControlName="direccion" placeholder="Dirección actual" />
+          </div>
 
-    <label for="contrasenia">Contraseña</label>
-    <input type="password" id="contrasenia" formControlName="contrasenia">
+          <div class="field-group">
+            <label>Correo institucional (@ucundinamarca.edu.co)</label>
+            <input type="email" formControlName="correo" placeholder="usuario@ucundinamarca.edu.co" />
+          </div>
+        </div>
 
-    <button type="submit" [disabled]="formularioEstudiante.invalid">Registrarse</button>
-  </form>
+        <div class="field-group">
+          <label>Contraseña de acceso</label>
+          <input type="password" formControlName="contrasenia" placeholder="Mínimo 6 caracteres" />
+        </div>
 
-  <p class="auth-link">¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión</a></p>
+        <div class="reg-actions">
+          <a routerLink="/login" class="chromatic-link">¿Ya tienes cuenta? Iniciar sesión ›</a>
+          <button type="submit" class="btn-submit-arch" [disabled]="cargando">
+            <span>{{ cargando ? 'Procesando registro...' : 'Crear expediente estudiantil' }}</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 </main>
+
+<!-- MODAL DE VERIFICACIÓN DE 6 DÍGITOS (SIN NGMODEL, 100% NATIVO) -->
+<div class="arch-modal-backdrop" *ngIf="mostrarModalVerificacion">
+  <div class="arch-modal-card" (click)="$event.stopPropagation()">
+    <div class="arch-modal-header">
+      <span class="eyebrow-tag">
+        <span class="led-dot"></span>
+        <span>VALIDACIÓN DE CORREO INSTITUCIONAL</span>
+      </span>
+      <h3>Ingresa el código de seguridad</h3>
+    </div>
+
+    <div class="arch-modal-body">
+      <p>
+        Se ha enviado un código de 6 dígitos a <strong>{{ correoParaVerificar }}</strong>:
+      </p>
+
+      <div class="field-group">
+        <label>Código de verificación</label>
+        <input
+          type="text"
+          maxlength="6"
+          class="code-otp-input"
+          [value]="codigoVerificacion"
+          (input)="codigoVerificacion = $any($event.target).value"
+          placeholder="000000" />
+      </div>
+
+      <div *ngIf="mensajeVerificacionError" class="auth-alert-error">
+        <span>{{ mensajeVerificacionError }}</span>
+      </div>
+      <div *ngIf="mensajeVerificacionExito" class="auth-alert-success">
+        <span>{{ mensajeVerificacionExito }}</span>
+      </div>
+    </div>
+
+    <div class="arch-modal-actions">
+      <button type="button" class="btn-ghost-sm" (click)="mostrarModalVerificacion = false">
+        Cerrar
+      </button>
+      <button
+        type="button"
+        class="btn-submit-arch"
+        [disabled]="verificandoCodigo"
+        (click)="confirmarCodigoEstudiante()">
+        {{ verificandoCodigo ? 'Verificando...' : 'Confirmar y activar' }}
+      </button>
+    </div>
+  </div>
+</div>
 
 <app-footer></app-footer>

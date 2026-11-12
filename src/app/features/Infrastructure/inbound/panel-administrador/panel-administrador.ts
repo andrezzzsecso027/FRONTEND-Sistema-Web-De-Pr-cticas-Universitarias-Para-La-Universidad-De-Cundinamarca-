@@ -9,10 +9,14 @@ import {
   OfferAdminDTO,
   CommentAdminDTO,
   PracticeAdminDTO,
-  AlumnoEnPracticaView
+  AlumnoEnPracticaView,
+  
 } from '../../../../core/services/admin/admin';
 
 import { PostulacionService, PostulationDetailResponse } from '../../../../core/services/postulacion/postulacion';
+import {PROGRAMAS_POR_SEDE,SEDES_CATALOGO,TIPOS_EMPRESA_CATALOGO} from '../../../../core/constants/catalogos-udec';
+import { UpdatePasswordService } from '../../../../core/services/update-pasword/update.password'; 
+import { IaSeguridadService } from '../../../../core/services/ia-seguridad/ia-seguridad';
 
 type VistaAdmin =
   | 'pendientes'
@@ -38,64 +42,23 @@ vistaActual: VistaAdmin = 'pendientes';
   idUsuarioAdmin: number | null = null;
   avatarAdminUrl: string | null = null;
 
+
+  // --- CAMBIO DE CONTRASEÑA (ADMIN) ---
+  mostrarModalPassword = false;
+  passwordActual = '';
+  passwordNueva = '';
+  passwordConfirmar = '';
+  mensajePasswordExito = '';
+  mensajePasswordError = '';
+  cargandoPassword = false;
+
   // Catálogo oficial de Tipos de Empresa (idéntico a registro-empresa)
-  readonly tiposEmpresaCatalogo = [
-    { valor: 'SAS', etiqueta: 'S.A.S. (Sociedad por Acciones Simplificada)' },
-    { valor: 'LTDA', etiqueta: 'Sociedad Limitada (Ltda.)' },
-    { valor: 'SA', etiqueta: 'Sociedad Anónima (S.A.)' },
-    { valor: 'ESAL', etiqueta: 'Fundación / ONG (Sin Ánimo de Lucro)' },
-    { valor: 'PUBLICA', etiqueta: 'Entidad del Estado / Pública' }
-  ];
+  readonly tiposEmpresaCatalogo = TIPOS_EMPRESA_CATALOGO;
 
   // Catálogo oficial de Sedes y Programas UdeC (idéntico a registro-estudiante)
-  readonly sedesCatalogo = [
-    { valor: 'fusagasuga', etiqueta: 'Fusagasugá' },
-    { valor: 'chia', etiqueta: 'Chía' },
-    { valor: 'soacha', etiqueta: 'Soacha' },
-    { valor: 'zipaquira', etiqueta: 'Zipaquirá' },
-    { valor: 'girardot', etiqueta: 'Girardot' },
-    { valor: 'ubate', etiqueta: 'Ubaté' }
-  ];
+  readonly sedesCatalogo = SEDES_CATALOGO;
 
-  readonly programasPorSede: { [key: string]: string[] } = {
-    fusagasuga: [
-      'Ingeniería de Sistemas',
-      'Ingeniería Electrónica',
-      'Administración de Empresas',
-      'Ingeniería Agronómica',
-      'Zootecnia',
-      'Contaduría Pública',
-      'Licenciatura en Ciencias Sociales',
-      'Licenciatura en Educación Física'
-    ],
-    chia: [
-      'Ingeniería de Sistemas',
-      'Contaduría Pública',
-      'Ingeniería Industrial',
-      'Ingeniería Mecatrónica'
-    ],
-    soacha: [
-      'Administración de Empresas',
-      'Contaduría Pública',
-      'Profesional en Ciencias del Deporte',
-      'Ingeniería Industrial',
-      'Ingeniería de Software',
-      'Ingeniería Topográfica y Geomática'
-    ],
-    zipaquira: ['Música'],
-    girardot: [
-      'Enfermería',
-      'Administración de Empresas',
-      'Ingeniería Ambiental',
-      'Ingeniería de Software'
-    ],
-    ubate: [
-      'Administración de Empresas',
-      'Contaduría Pública',
-      'Ingeniería de Sistemas y Computación',
-      'Medicina Veterinaria y Zootecnia'
-    ]
-  };
+  readonly programasPorSede = PROGRAMAS_POR_SEDE;
 
   // Listados de datos
   todasLasEmpresas: Company[] = [];
@@ -150,6 +113,8 @@ vistaActual: VistaAdmin = 'pendientes';
   constructor(
     private adminService: Admin,
     private postulacionService: PostulacionService,
+    private updatePasswordService: UpdatePasswordService,
+    private iaSeguridadService: IaSeguridadService,
     private router: Router,
     private cdr: ChangeDetectorRef
   ) {}
@@ -774,5 +739,62 @@ vistaActual: VistaAdmin = 'pendientes';
     localStorage.removeItem('token');
     localStorage.removeItem('usuario_sesion');
     this.router.navigate(['/login']);
+  }
+
+  abrirModalPassword(): void {
+    this.mostrarModalPassword = true;
+    this.menuAdminAbierto = false;
+    this.passwordActual = '';
+    this.passwordNueva = '';
+    this.passwordConfirmar = '';
+    this.mensajePasswordExito = '';
+    this.mensajePasswordError = '';
+  }
+
+  cerrarModalPassword(): void {
+    this.mostrarModalPassword = false;
+  }
+
+  guardarNuevaContrasena(): void {
+    this.mensajePasswordExito = '';
+    this.mensajePasswordError = '';
+
+    if (!this.passwordActual || !this.passwordNueva || !this.passwordConfirmar) {
+      this.mensajePasswordError = 'Todos los campos son obligatorios.';
+      return;
+    }
+    if (this.passwordNueva !== this.passwordConfirmar) {
+      this.mensajePasswordError = 'La nueva contraseña y su confirmación no coinciden.';
+      return;
+    }
+    if (this.passwordNueva.length < 6) {
+      this.mensajePasswordError = 'La nueva contraseña debe tener al menos 6 caracteres.';
+      return;
+    }
+
+    const email = this.correoAdmin || this.updatePasswordService.obtenerEmailDeSesion();
+    this.cargandoPassword = true;
+
+    this.updatePasswordService.cambiarContrasena({
+      email,
+      currentPassword: this.passwordActual,
+      newPassword: this.passwordNueva
+    }).subscribe({
+      next: (res) => {
+        this.cargandoPassword = false;
+        this.mensajePasswordExito = res || 'Contraseña actualizada exitosamente.';
+        this.passwordActual = '';
+        this.passwordNueva = '';
+        this.passwordConfirmar = '';
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.cargandoPassword = false;
+        this.mensajePasswordError = typeof err.error === 'string' && err.error
+          ? err.error
+          : 'La contraseña actual es incorrecta.';
+        this.cdr.detectChanges();
+      }
+    });
   }
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Router } from '@angular/router';
 import { Navbar } from '../../../../share/ui/navbar/navbar';
@@ -7,6 +7,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Empresa } from '../../../../core/services/empresa/empresa';
 import { HttpClient } from '@angular/common/http';
+
 
 
 
@@ -25,13 +26,22 @@ export class RegistroEmpresa implements OnInit {
   departamentos: string[] = [];
   municipiosFiltrados: string[] = [];
 
+  urlPdfNitSubido = '';
+  nombrePdfSeleccionado = '';
+  subiendoPdf = false;
+  enviandoRegistro = false;
+
+  mensajeError = '';
+  mensajeExito = '';
+
   constructor(
-    private fb: FormBuilder, 
+    private fb: FormBuilder,
     private empresa: Empresa,
     private router: Router,
-    private http: HttpClient
+    private http: HttpClient,
+    private empresaService: Empresa,
+    private cdr: ChangeDetectorRef
   ) {
-    // 1. Construimos el formulario exactamente con los nombres que espera Spring Boot
     this.formularioEmpresa = this.fb.group({
       nit: ['', Validators.required],
       nombreEmpresa: ['', Validators.required],
@@ -39,7 +49,7 @@ export class RegistroEmpresa implements OnInit {
       direccionEmpresa: ['', Validators.required],
       telefonoEmpresa: ['', Validators.required],
       correo: ['', [Validators.required, Validators.email]],
-      contrasenia: ['', Validators.required],
+      contrasenia: ['', [Validators.required, Validators.minLength(6)]],
       nameRepresentive: ['', Validators.required],
       lastNameRepresentive: ['', Validators.required],
       numberDocument: ['', Validators.required],
@@ -48,61 +58,118 @@ export class RegistroEmpresa implements OnInit {
       city: ['', Validators.required]
     });
   }
-  ngOnInit() {
+
+  ngOnInit(): void {
     this.cargarUbicaciones();
   }
-  cargarUbicaciones() {
-    // Usamos el archivo estático alojado en GitHub (Nunca se cae y responde instantáneamente)
-    const urlApi = 'https://raw.githubusercontent.com/marcovega/colombia-json/master/colombia.min.json'; 
-    
+
+  cargarUbicaciones(): void {
+    const urlApi = 'https://raw.githubusercontent.com/marcovega/colombia-json/master/colombia.min.json';
+
     this.http.get<any[]>(urlApi).subscribe({
       next: (data) => {
-        // Guardamos el JSON completo en memoria
-        this.datosColombia = data;
-        
-        // Extraemos solo los nombres de los departamentos y los ordenamos alfabéticamente
-        this.departamentos = data.map(item => item.departamento).sort();
+        this.datosColombia = data || [];
+        this.departamentos = this.datosColombia.map(item => item.departamento).sort();
+        this.cdr.detectChanges();
       },
       error: (err) => {
-        console.error('Error cargando la API de GitHub', err);
-        alert('Hubo un problema cargando los departamentos.');
+        console.error('Error cargando departamentos', err);
       }
     });
   }
 
-  // Se ejecuta cuando el usuario selecciona un departamento en el HTML
-  onDepartamentoChange(event: Event) {
+  onDepartamentoChange(event: Event): void {
     const deptoSeleccionado = (event.target as HTMLSelectElement).value;
-    
-    // Buscamos el departamento exacto que eligió el usuario
-    const departamentoEncontrado = this.datosColombia.find(item => item.departamento === deptoSeleccionado);
-    
+    const departamentoEncontrado = this.datosColombia.find(
+      item => item.departamento === deptoSeleccionado
+    );
+
     if (departamentoEncontrado) {
-      // Si lo encuentra, extrae su lista de ciudades y las ordena
-      this.municipiosFiltrados = departamentoEncontrado.ciudades.sort();
+      this.municipiosFiltrados = [...departamentoEncontrado.ciudades].sort();
+    } else {
+      this.municipiosFiltrados = [];
     }
 
-    // Reseteamos el campo ciudad por si la empresa se arrepiente y cambia de departamento
     this.formularioEmpresa.get('city')?.setValue('');
+    this.cdr.detectChanges();
   }
 
+  onSeleccionarPdfRegistro(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
 
-  // 2. Función que se ejecuta al darle "Solicitar registro"
-  onSubmit() {
-    if (this.formularioEmpresa.valid) {
-      this.empresa.registrarEmpresa(this.formularioEmpresa.value).subscribe({
-        next: (respuesta) => {
-          alert('¡Empresa registrada con éxito! Esperando aprobación.');
-          this.formularioEmpresa.reset();
-          this.router.navigate(['/login']); // Redirige al login
-        },
-        error: (err) => {
-          console.error(err);
-          alert('Hubo un error al registrar la empresa. Revisa la consola.');
+    const file = input.files[0];
+    this.nombrePdfSeleccionado = file.name;
+    this.subiendoPdf = true;
+    this.mensajeError = '';
+    this.cdr.detectChanges();
+
+    this.empresaService.subirArchivoCloudinary(file, 'empresas_nit').subscribe({
+      next: (res: { url: string }) => {
+        this.urlPdfNitSubido = res.url;
+        this.subiendoPdf = false;
+
+        const nitActual = this.formularioEmpresa.get('nit')?.value;
+        if (nitActual) {
+          localStorage.setItem(`pdf_${nitActual.trim()}`, res.url);
         }
-      });
-    } else {
-      alert('Por favor, llena todos los campos correctamente.');
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.subiendoPdf = false;
+        this.mensajeError = 'No fue posible subir el archivo PDF a Cloudinary. Intenta nuevamente.';
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  onSubmit(): void {
+    this.mensajeError = '';
+    this.mensajeExito = '';
+
+    if (this.formularioEmpresa.invalid) {
+      this.formularioEmpresa.markAllAsTouched();
+      this.mensajeError = 'Por favor completa todos los campos obligatorios del formulario corporativo.';
+      return;
     }
+
+    if (!this.urlPdfNitSubido) {
+      this.mensajeError = 'Debes adjuntar el certificado RUT / NIT en formato PDF para la auditoría del administrador.';
+      return;
+    }
+
+    this.enviandoRegistro = true;
+    const valores = this.formularioEmpresa.value;
+
+    // Respaldamos en localStorage y enviamos urlPdfNit al Backend
+    if (valores.nit) {
+      localStorage.setItem(`pdf_${valores.nit.trim()}`, this.urlPdfNitSubido);
+    }
+
+    const payload = {
+      ...valores,
+      urlPdfNit: this.urlPdfNitSubido
+    };
+
+    this.empresa.registrarEmpresa(payload).subscribe({
+      next: () => {
+        this.enviandoRegistro = false;
+        this.mensajeExito = 'Solicitud corporativa registrada con éxito. Tu cuenta será habilitada tras la verificación del RUT/NIT por Coordinación UdeC.';
+        this.cdr.detectChanges();
+
+        setTimeout(() => {
+          this.formularioEmpresa.reset();
+          this.router.navigate(['/login']);
+        }, 2200);
+      },
+      error: (err) => {
+        this.enviandoRegistro = false;
+        console.error(err);
+        this.mensajeError = typeof err.error === 'string' && err.error
+          ? err.error
+          : 'Error al registrar la empresa. Verifica que el NIT o correo no estén registrados previamente.';
+        this.cdr.detectChanges();
+      }
+    });
   }
 }

@@ -1,13 +1,25 @@
 ﻿<app-navbar></app-navbar>
 
 <main class="verificar-page">
-  <div class="verificar-card">
+  <section class="verificar-card">
 
-    <div class="verificar-icon">✉️</div>
+    <div class="verificar-top">
+      <span class="eyebrow-tag">
+        <span class="led-dot"></span>
+        <span>SEGURIDAD ACADÉMICA · UDEC</span>
+      </span>
+      <div class="verificar-icon-svg">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+          <path d="M22 13V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v12c0 1.1.9 2 2 2h8"/>
+          <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+          <path d="m16 19 2 2 4-4"/>
+        </svg>
+      </div>
+    </div>
 
-    <h1>Verifica tu Cuenta</h1>
+    <h1>Verifica tu cuenta</h1>
     <p class="verificar-subtitle">
-      Ingresa el código de verificación que enviamos a tu correo institucional.
+      Ingresa el código de seguridad enviado a tu correo institucional para habilitar tu acceso.
     </p>
 
     <div *ngIf="mensajeExito" class="alert alert-success">
@@ -18,33 +30,36 @@
     </div>
 
     <form [formGroup]="verificarForm" (ngSubmit)="onSubmit()" class="verificar-form">
+      <div class="field-group">
+        <label for="email">Correo institucional</label>
+        <input
+          type="email"
+          id="email"
+          formControlName="email"
+          placeholder="tu.nombre@ucundinamarca.edu.co" />
+      </div>
 
-      <label for="email">Correo Institucional</label>
-      <input
-        type="email"
-        id="email"
-        formControlName="email"
-        placeholder="tu.nombre@ucundinamarca.edu.co">
-
-      <label for="code">Código de Verificación</label>
-      <input
-        type="text"
-        id="code"
-        formControlName="code"
-        placeholder="Ej: 123456"
-        maxlength="10">
+      <div class="field-group">
+        <label for="code">Código de verificación</label>
+        <input
+          type="text"
+          id="code"
+          class="code-input"
+          formControlName="code"
+          placeholder="123456"
+          maxlength="10" />
+      </div>
 
       <button type="submit" [disabled]="verificarForm.invalid || cargando">
-        {{ cargando ? 'Verificando...' : 'Verificar Cuenta' }}
+        {{ cargando ? 'Verificando código...' : 'Verificar y activar cuenta' }}
       </button>
-
     </form>
 
     <p class="verificar-footer">
-      ¿Ya verificaste? <a routerLink="/login">Inicia sesión aquí</a>
+      ¿Ya verificaste tu cuenta? <a routerLink="/login">Inicia sesión aquí ›</a>
     </p>
 
-  </div>
+  </section>
 </main>
 
 <app-footer></app-footer>

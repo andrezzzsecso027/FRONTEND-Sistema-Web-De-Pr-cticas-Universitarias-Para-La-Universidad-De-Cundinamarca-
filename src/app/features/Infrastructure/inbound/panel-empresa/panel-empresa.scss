@@ -789,3 +789,126 @@
     text-decoration: underline;
   }
 }
+
+.btn-ia-gemini {
+  background: linear-gradient(135deg, #1b5e20, #2e7d32);
+  color: #ffffff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 3px 10px rgba(27, 94, 32, 0.25);
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 14px rgba(27, 94, 32, 0.35);
+  }
+}
+
+.modal-card-ia {
+  background: #ffffff;
+  border-radius: 12px;
+  width: 92%;
+  max-width: 560px;
+  padding: 24px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.22);
+}
+
+.modal-header-ia {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+
+  h3 {
+    margin: 0;
+    color: #1b5e20;
+    font-size: 1.15rem;
+  }
+}
+
+.form-group-ia {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 14px;
+
+  label {
+    font-weight: 600;
+    margin-bottom: 6px;
+    font-size: 0.9rem;
+    color: #374151;
+  }
+
+  input {
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+}
+
+.resultado-texto-ia {
+  white-space: pre-line;
+  background: #f8fafc;
+  border-left: 4px solid #2e7d32;
+  padding: 14px;
+  border-radius: 6px;
+  line-height: 1.55;
+  color: #1f2937;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.badge-ia-info {
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+  color: #4b5563;
+}
+
+.alerta-error-ia {
+  background: #fef2f2;
+  color: #b91c1c;
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin-top: 10px;
+  font-size: 0.9rem;
+}
+
+.alerta-exito-ia {
+  background: #ecfdf5;
+  color: #047857;
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin-top: 10px;
+  font-size: 0.9rem;
+}
+
+.modal-footer-ia {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.btn-confirmar-ia {
+  background: #1b5e20;
+  color: #ffffff;
+  border: none;
+  padding: 9px 18px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-cancelar-ia {
+  background: #e5e7eb;
+  color: #374151;
+  border: none;
+  padding: 9px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+}

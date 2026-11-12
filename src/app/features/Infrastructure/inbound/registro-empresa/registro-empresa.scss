@@ -1,195 +1,336 @@
-﻿/* Registro de Empresa - Diseño institucional UdeC con 2 columnas */
+﻿:host {
+  --bg-void: #080909;
+  --bg-ground: rgba(18, 21, 20, 0.90);
+  --bg-carbon: #1a1f1d;
+  --border-circuit: #364238;
+  --border-gold: rgba(212, 175, 55, 0.42);
+  --border-subtle: #1f2922;
+  --accent-primary: #7fee64;
+  --accent-gold: #d4af37;
+  --text-primary: #ddffdc;
+  --text-body: #8cab87;
+  --text-muted: #677d64;
+  --text-eyebrow: #9cbf93;
+  --font-display: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
 
-.auth {
-  max-width: 950px;
-  margin: 48px auto;
-  padding: 40px 48px;
-  background: #ffffff;
-  border-radius: 16px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
-  text-align: center;
-  border-top: 4px solid #B7930A;
-  position: relative;
+  display: block;
+  background-color: var(--bg-void);
+  font-family: var(--font-sans);
 }
 
-.auth::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, transparent, #00853E, transparent);
-  border-radius: 0 0 16px 16px;
+.corp-reg-shell {
+  min-height: calc(100vh - 140px);
+  padding: 64px 24px;
+  background-color: var(--bg-void);
+  background-image:
+    radial-gradient(circle at 50% 15%, rgba(212, 175, 55, 0.16) 0%, rgba(127, 238, 100, 0.06) 45%, rgba(8, 9, 9, 0.96) 80%),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900' width='100%25' height='100%25'><defs><linearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%23d4af37' stop-opacity='0.22'/><stop offset='50%25' stop-color='%23f3e5ab' stop-opacity='0.08'/><stop offset='100%25' stop-color='%237fee64' stop-opacity='0.14'/></linearGradient></defs><g fill='none' stroke='url(%23g)' stroke-width='1'><circle cx='800' cy='450' r='390' stroke-dasharray='6 10'/><circle cx='800' cy='450' r='470' stroke-opacity='0.4'/><line x1='0' y1='140' x2='1600' y2='140' stroke-opacity='0.2'/><line x1='0' y1='760' x2='1600' y2='760' stroke-opacity='0.2'/></g><text x='50%25' y='46%25' dominant-baseline='middle' text-anchor='middle' font-family='Space Grotesk, Inter, sans-serif' font-weight='700' font-size='270' fill='none' stroke='url(%23g)' stroke-width='2' letter-spacing='24'>UDEC</text><text x='50%25' y='67%25' dominant-baseline='middle' text-anchor='middle' font-family='Space Grotesk, Inter, sans-serif' font-weight='600' font-size='22' fill='%23d4af37' fill-opacity='0.26' letter-spacing='14'>UNIVERSIDAD DE CUNDINAMARCA</text></svg>");
+  background-size: cover, 1400px auto;
+  background-position: center, center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 }
 
-.auth h1 {
-  color: #00853E;
-  font-family: 'Century Gothic', system-ui, sans-serif;
-  font-size: 1.75rem;
-  margin-bottom: 8px;
-  font-weight: 800;
-  letter-spacing: -0.5px;
+.corp-reg-container {
+  max-width: 980px;
+  margin: 0 auto;
 }
 
-.auth-subtitle {
-  color: #666;
+.corp-reg-card {
+  background-color: var(--bg-ground);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--border-circuit);
+  border-top: 2px solid var(--accent-gold);
+  border-radius: 12px;
+  padding: 40px;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.45);
+}
+
+.corp-reg-header {
+  padding-bottom: 24px;
   margin-bottom: 32px;
-  font-size: 0.95rem;
+  border-bottom: 1px solid var(--border-subtle);
+
+  .header-top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  h1 {
+    font-family: var(--font-display);
+    font-size: clamp(1.85rem, 3vw, 2.35rem);
+    font-weight: 500;
+    letter-spacing: -0.035em;
+    color: var(--text-primary);
+    margin: 0 0 8px 0;
+  }
+
+  p {
+    font-size: 0.95rem;
+    color: var(--text-body);
+    margin: 0;
+  }
+}
+
+.eyebrow-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent-gold);
+}
+
+.led-dot-gold {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--accent-gold);
+  box-shadow: 0 0 8px var(--accent-gold);
+}
+
+.mono-badge {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--accent-gold);
+  padding: 3px 10px;
+  border-radius: 4px;
+  border: 1px solid var(--border-gold);
+  background-color: rgba(212, 175, 55, 0.08);
 }
 
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 40px;
-  text-align: left;
+  gap: 36px;
 }
 
 .form-column {
   display: flex;
   flex-direction: column;
-}
-
-.form-column h3 {
-  font-family: 'Century Gothic', system-ui, sans-serif;
-  font-size: 1.05rem;
-  color: #00853E;
-  border-bottom: 2px solid #E5F4EB;
-  padding-bottom: 10px;
-  margin-bottom: 20px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.auth-form label {
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: #1A1A1A;
-  margin-top: 16px;
-  margin-bottom: 6px;
-  display: block;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.auth-form input,
-.auth-form select {
-  width: 100%;
-  padding: 12px 14px;
-  border: 2px solid #E0E0E0;
-  border-radius: 10px;
-  font-size: 0.95rem;
-  font-family: inherit;
-  background-color: #FAFAF7;
-  color: #1A1A1A;
-  transition: all 0.25s ease;
-  box-sizing: border-box;
-}
-
-.auth-form input:hover,
-.auth-form select:hover {
-  border-color: #C0C0C0;
-  background-color: #ffffff;
-}
-
-.auth-form input:focus,
-.auth-form select:focus {
-  outline: none;
-  border-color: #00853E;
-  background-color: #ffffff;
-  box-shadow: 0 0 0 4px rgba(0, 133, 62, 0.18);
-  transform: translateY(-1px);
-}
-
-.input-row {
-  display: flex;
   gap: 16px;
-  margin-top: 8px;
 }
 
-.input-group {
-  flex: 1;
+.column-title {
   display: flex;
-  flex-direction: column;
-}
-
-.input-group label {
-  margin-top: 8px;
-}
-
-.divider {
-  border: 0;
-  height: 1px;
-  background: #E5F4EB;
-  margin: 24px 0 16px 0;
-}
-
-.form-actions {
-  margin-top: 40px;
-  display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--accent-gold);
+
+  h3 {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin: 0;
+    letter-spacing: -0.02em;
+  }
 }
 
-.submit-btn {
-  padding: 16px 40px;
-  background: linear-gradient(135deg, #00853E 0%, #006B32 100%);
-  color: #ffffff;
-  border: none;
-  border-radius: 10px;
-  font-size: 1rem;
-  font-weight: 700;
+.input-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  label {
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+
+  input,
+  select {
+    width: 100%;
+    padding: 11px 14px;
+    background-color: #080909;
+    border: 1px solid var(--border-circuit);
+    border-radius: 6px;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    transition: border-color 0.2s ease;
+
+    &::placeholder {
+      color: var(--text-muted);
+    }
+
+    &:focus {
+      outline: none;
+      border-color: var(--accent-gold);
+    }
+  }
+}
+
+/* --- CAJA DE SUBIDA DORADA RUT / NIT --- */
+.nit-upload-block {
+  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  .nit-upload-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--accent-gold);
+  }
+}
+
+.nit-dropzone-gold {
+  display: block;
+  padding: 16px;
+  background-color: rgba(212, 175, 55, 0.05);
+  border: 1.5px dashed var(--border-gold);
+  border-radius: 8px;
   cursor: pointer;
   transition: all 0.25s ease;
-  width: 100%;
-  max-width: 400px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  box-shadow: 0 4px 12px rgba(0, 133, 62, 0.25);
-}
 
-.submit-btn:hover:not(:disabled) {
-  background: linear-gradient(135deg, #00A04A 0%, #00853E 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 133, 62, 0.35);
-}
-
-.submit-btn:disabled {
-  background: #CCCCCC;
-  cursor: not-allowed;
-  box-shadow: none;
-}
-
-.auth-link {
-  margin-top: 8px;
-  font-size: 0.9rem;
-  color: #666;
-}
-
-.auth-link a {
-  color: #00853E;
-  font-weight: 700;
-  text-decoration: none;
-}
-
-.auth-link a:hover {
-  color: #006B32;
-  text-decoration: underline;
-}
-
-@media (max-width: 768px) {
-  .form-grid {
-    grid-template-columns: 1fr;
-    gap: 24px;
+  &:hover {
+    background-color: rgba(212, 175, 55, 0.11);
+    border-color: var(--accent-gold);
   }
-  .auth {
-    padding: 24px 20px;
-    margin: 24px auto;
+
+  &.uploaded {
+    background-color: rgba(127, 238, 100, 0.07);
+    border: 1.5px solid var(--accent-primary);
   }
-  .input-row {
+}
+
+.dropzone-content {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: var(--accent-gold);
+
+  &.uploading {
+    color: var(--accent-gold);
+  }
+
+  &.success {
+    color: var(--accent-primary);
+  }
+
+  .dropzone-text {
+    display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 2px;
+
+    strong {
+      font-size: 0.88rem;
+      color: var(--text-primary);
+    }
+
+    small {
+      font-size: 0.75rem;
+      color: var(--text-body);
+    }
+  }
+}
+
+@keyframes girarSvg {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.spin-icon {
+  animation: girarSvg 1s linear infinite;
+}
+
+.corp-form-actions {
+  margin-top: 28px;
+  padding-top: 22px;
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.btn-submit-arch {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 26px;
+  background-color: var(--accent-primary);
+  color: #080909;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.92rem;
+  cursor: pointer;
+  transition: all 0.2s ease-out;
+
+  &:hover:not(:disabled) {
+    background-color: #96f27e;
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
+.chromatic-link {
+  color: var(--text-primary);
+  text-decoration: none;
+  border-bottom: 1px solid var(--accent-gold);
+  padding-bottom: 2px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: var(--accent-gold);
+  }
+}
+
+.arch-alert {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 22px;
+  font-size: 0.88rem;
+
+  &.arch-alert-error {
+    background-color: rgba(220, 38, 38, 0.12);
+    border: 1px solid rgba(248, 113, 113, 0.4);
+    color: #fca5a5;
+  }
+
+  &.arch-alert-success {
+    background-color: rgba(127, 238, 100, 0.12);
+    border: 1px solid var(--accent-primary);
+    color: var(--accent-primary);
+  }
+}
+
+@media (max-width: 860px) {
+  .form-grid,
+  .input-row-2 {
+    grid-template-columns: 1fr;
+  }
+  .corp-reg-card {
+    padding: 26px 20px;
   }
 }
