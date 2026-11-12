@@ -1,42 +1,94 @@
 ﻿<header class="navbar">
   <div class="navbar-container">
     <a routerLink="/" class="navbar-logo">
+      <span class="udec-crest-badge">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+          <path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>
+        </svg>
+        <span>UDEC</span>
+      </span>
       <span class="logo-text">UdecPrac</span>
     </a>
 
     <nav class="navbar-links">
-
-      <!-- SIEMPRE VISIBLE -->
       <a routerLink="/" class="nav-link">Inicio</a>
 
-      <!-- SI NO HAY SESIÓN -->
+      <!-- SIN SESIÓN: CON MENÚ DESPLEGABLE EN REGISTRARME -->
       <ng-container *ngIf="!isLoggedIn">
         <a routerLink="/login" class="nav-link">Iniciar sesión</a>
-        <a routerLink="/registro" class="nav-link btn-registro">Registrarme</a>
+
+        <div class="nav-dropdown-wrapper" (click)="$event.stopPropagation()">
+          <button type="button" class="nav-link btn-registro" (click)="toggleMenuRegistro($event)">
+            <span>Registrarme</span>
+            <svg class="chevron-icon" [class.rotated]="menuRegistroAbierto" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </button>
+
+          <div class="register-dropdown" *ngIf="menuRegistroAbierto">
+            <div class="dropdown-caption">SELECCIONA TU PERFIL</div>
+
+            <a routerLink="/registro-estudiante" class="dropdown-option" (click)="cerrarMenuRegistro()">
+              <div class="opt-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+                  <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+                  <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+                </svg>
+              </div>
+              <div class="opt-text">
+                <strong>Como estudiante</strong>
+                <small>Crea tu expediente académico UdeC</small>
+              </div>
+            </a>
+
+            <a routerLink="/registro-empresa" class="dropdown-option" (click)="cerrarMenuRegistro()">
+              <div class="opt-icon opt-icon-gold">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+                  <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+                  <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+                </svg>
+              </div>
+              <div class="opt-text">
+                <strong>Como empresa</strong>
+                <small>Vincula tu organización y publica ofertas</small>
+              </div>
+            </a>
+          </div>
+        </div>
       </ng-container>
 
-      <!-- SI HAY SESIÓN (ESTUDIANTE) -->
+      <!-- ESTUDIANTE -->
       <ng-container *ngIf="isLoggedIn && userRole === 'estudiante'">
         <a routerLink="/ofertas" class="nav-link">Ofertas</a>
         <a routerLink="/mis-postulaciones" class="nav-link">Mis postulaciones</a>
-        <span class="nav-user">Hola, {{ userName }}</span>
-        <button class="nav-link btn-logout" (click)="logout()">Cerrar sesión</button>
+        <a routerLink="/mi-perfil" class="nav-link">Mi perfil</a>
+        <span class="nav-user">
+          <span class="nav-led"></span>
+          <span>{{ userName }}</span>
+        </span>
+        <button type="button" class="btn-logout" (click)="logout()">Cerrar sesión</button>
       </ng-container>
 
-      <!-- SI HAY SESIÓN (EMPRESA) -->
+      <!-- EMPRESA -->
       <ng-container *ngIf="isLoggedIn && userRole === 'empresa'">
-        <a routerLink="/mi-panel" class="nav-link">Mi panel</a>
-        <span class="nav-user">Hola, {{ userName }}</span>
-        <button class="nav-link btn-logout" (click)="logout()">Cerrar sesión</button>
+        <a routerLink="/panel-empresa" class="nav-link">Mi panel</a>
+        <span class="nav-user">
+          <span class="nav-led"></span>
+          <span>{{ userName }}</span>
+        </span>
+        <button type="button" class="btn-logout" (click)="logout()">Cerrar sesión</button>
       </ng-container>
 
-      <!-- SI HAY SESIÓN (ADMINISTRADOR) -->
+      <!-- ADMINISTRADOR -->
       <ng-container *ngIf="isLoggedIn && userRole === 'administrador'">
         <a routerLink="/panel-administrador" class="nav-link">Panel Admin</a>
-        <span class="nav-user">Hola, {{ userName }}</span>
-        <button class="nav-link btn-logout" (click)="logout()">Cerrar sesión</button>
+        <span class="nav-user">
+          <span class="nav-led"></span>
+          <span>{{ userName }}</span>
+        </span>
+        <button type="button" class="btn-logout" (click)="logout()">Cerrar sesión</button>
       </ng-container>
-
     </nav>
   </div>
 </header>

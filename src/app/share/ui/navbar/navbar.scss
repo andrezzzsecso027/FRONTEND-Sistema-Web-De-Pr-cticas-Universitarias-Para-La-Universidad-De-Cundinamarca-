@@ -1,23 +1,17 @@
 ﻿.navbar {
-  background-color: #ffffff;
-  border-bottom: 1px solid #e0e0e0;
+  background-color: rgba(10, 12, 11, 0.9);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.25);
   position: sticky;
   top: 0;
   z-index: 100;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-}
-
-.navbar::after {
-  content: '';
-  display: block;
-  height: 3px;
-  background: linear-gradient(90deg, #00853E 0%, #B7930A 50%, #00853E 100%);
 }
 
 .navbar-container {
-  max-width: 1200px;
+  max-width: 1240px;
   margin: 0 auto;
-  padding: 16px 24px;
+  padding: 14px 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -25,23 +19,34 @@
 }
 
 .navbar-logo {
-  display: flex;
+  display: inline-flex;
   align-items: center;
+  gap: 10px;
   text-decoration: none;
   cursor: pointer;
-  transition: all 0.3s ease;
+}
+
+.udec-crest-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: rgba(212, 175, 55, 0.12);
+  border: 1px solid rgba(212, 175, 55, 0.45);
+  color: #d4af37;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
 }
 
 .logo-text {
-  font-family: 'Century Gothic', system-ui, sans-serif;
-  font-weight: 800;
-  font-size: 1.5rem;
-  color: #00853E;
-  letter-spacing: -0.5px;
-}
-
-.navbar-logo:hover .logo-text {
-  color: #006B32;
+  font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 1.3rem;
+  color: #ddffdc;
+  letter-spacing: -0.03em;
 }
 
 .navbar-links {
@@ -52,99 +57,183 @@
 
 .nav-link {
   text-decoration: none;
-  color: #1A1A1A;
-  font-weight: 600;
-  font-size: 0.95rem;
-  padding: 10px 16px;
+  color: #8cab87;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 500;
+  font-size: 0.88rem;
+  padding: 8px 14px;
   border-radius: 8px;
-  position: relative;
-  transition: all 0.2s ease;
-}
+  transition: all 0.2s ease-out;
 
-.nav-link:not(.btn-registro)::after {
-  content: '';
-  position: absolute;
-  bottom: 4px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 0;
-  height: 2px;
-  background-color: #B7930A;
-  transition: width 0.3s ease;
-}
-
-.nav-link:not(.btn-registro):hover {
-  color: #00853E;
-}
-
-.nav-link:not(.btn-registro):hover::after {
-  width: 60%;
+  &:hover {
+    color: #ddffdc;
+    background-color: rgba(212, 175, 55, 0.08);
+  }
 }
 
 .btn-registro {
-  background-color: #00853E;
-  color: #ffffff !important;
-  padding: 10px 22px;
-  border-radius: 8px;
-  font-weight: 700;
-  box-shadow: 0 2px 6px rgba(0, 133, 62, 0.2);
-}
+  background-color: #7fee64;
+  color: #080909 !important;
+  padding: 8px 18px;
+  border-radius: 9999px;
+  font-weight: 600;
+  margin-left: 4px;
 
-.btn-registro:hover {
-  background-color: #00A04A;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 133, 62, 0.3);
-}
-
-@media (max-width: 640px) {
-  .navbar-container {
-    padding: 12px 16px;
-  }
-  .logo-text {
-    font-size: 1.25rem;
-  }
-  .nav-link {
-    padding: 8px 12px;
-    font-size: 0.875rem;
+  &:hover {
+    background-color: #96f27e !important;
+    transform: translateY(-1px);
   }
 }
 
-@media (max-width: 480px) {
-  .nav-link:not(.btn-registro) {
-    display: none;
-  }
-  .btn-registro {
-    padding: 8px 16px;
-  }
-}
-
-/* ---- USUARIO LOGUEADO ---- */
 .nav-user {
-  color: #00853E;
-  font-weight: 700;
-  font-size: 0.9rem;
-  padding: 10px 16px;
-  background-color: #E5F4EB;
-  border-radius: 8px;
-  margin-left: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #ddffdc;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.78rem;
+  padding: 6px 12px;
+  background-color: #121514;
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  border-radius: 9999px;
+  margin-left: 6px;
+
+  .nav-led {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: #7fee64;
+    box-shadow: 0 0 6px #7fee64;
+  }
 }
 
 .btn-logout {
   background-color: transparent;
-  color: #C62828;
-  border: 1.5px solid #C62828;
-  padding: 8px 16px;
+  color: #8cab87;
+  border: 1px solid #364238;
+  padding: 7px 14px;
   border-radius: 8px;
-  font-weight: 700;
-  font-size: 0.85rem;
+  font-weight: 500;
+  font-size: 0.82rem;
   cursor: pointer;
-  transition: all 0.2s ease;
-  margin-left: 8px;
-  font-family: inherit;
+  margin-left: 4px;
+  transition: all 0.2s ease-out;
+
+  &:hover {
+    border-color: #f87171;
+    color: #fca5a5;
+    background-color: rgba(220, 38, 38, 0.1);
+  }
 }
 
-.btn-logout:hover {
-  background-color: #C62828;
-  color: #ffffff;
-  transform: translateY(-1px);
+@media (max-width: 680px) {
+  .nav-user {
+    display: none;
+  }
+}
+
+.nav-dropdown-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.btn-registro {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: none;
+  cursor: pointer;
+
+  .chevron-icon {
+    transition: transform 0.2s ease;
+    &.rotated {
+      transform: rotate(180deg);
+    }
+  }
+}
+
+.register-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 290px;
+  background-color: #121514;
+  border: 1px solid #364238;
+  border-top: 2px solid #d4af37;
+  border-radius: 12px;
+  padding: 10px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.55);
+  z-index: 200;
+  animation: navDropIn 0.16s ease-out;
+}
+
+@keyframes navDropIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dropdown-caption {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: #9cbf93;
+  padding: 6px 10px 8px;
+}
+
+.dropdown-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: #1a1f1d;
+  }
+
+  .opt-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background-color: rgba(127, 238, 100, 0.1);
+    border: 1px solid rgba(127, 238, 100, 0.28);
+    color: #7fee64;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    &.opt-icon-gold {
+      background-color: rgba(212, 175, 55, 0.12);
+      border-color: rgba(212, 175, 55, 0.35);
+      color: #d4af37;
+    }
+  }
+
+  .opt-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    strong {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #ddffdc;
+    }
+
+    small {
+      font-size: 0.76rem;
+      color: #8cab87;
+      line-height: 1.35;
+    }
+  }
 }

@@ -1,135 +1,181 @@
 ﻿.verificar-page {
-  background-color: #FAFAF7;
-  min-height: calc(100vh - 200px);
+  min-height: calc(100vh - 140px);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 48px 24px;
+  padding: 64px 20px;
+  background-color: #080909;
+  background-image:
+    radial-gradient(circle at 50% 16%, rgba(212, 175, 55, 0.18) 0%, rgba(127, 238, 100, 0.06) 42%, rgba(8, 9, 9, 0.95) 78%),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900' width='100%25' height='100%25'><defs><linearGradient id='udecGold' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%23d4af37' stop-opacity='0.25'/><stop offset='50%25' stop-color='%23f5e6ab' stop-opacity='0.09'/><stop offset='100%25' stop-color='%237fee64' stop-opacity='0.16'/></linearGradient></defs><g fill='none' stroke='url(%23udecGold)' stroke-width='1.2'><circle cx='800' cy='450' r='360' stroke-dasharray='6 12'/><circle cx='800' cy='450' r='440' stroke-opacity='0.35'/></g><text x='50%25' y='44%25' dominant-baseline='middle' text-anchor='middle' font-family='Space Grotesk, Inter, sans-serif' font-weight='700' font-size='260' fill='none' stroke='url(%23udecGold)' stroke-width='2.2' letter-spacing='22'>UDEC</text><text x='50%25' y='65%25' dominant-baseline='middle' text-anchor='middle' font-family='Space Grotesk, Inter, sans-serif' font-weight='600' font-size='21' fill='%23d4af37' fill-opacity='0.32' letter-spacing='14'>UNIVERSIDAD DE CUNDINAMARCA</text></svg>");
+  background-size: cover, 1360px auto;
+  background-position: center;
+  background-repeat: no-repeat;
+  font-family: 'Inter', system-ui, sans-serif;
 }
 
 .verificar-card {
-  background: #ffffff;
-  border-radius: 16px;
-  padding: 48px 40px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
-  max-width: 480px;
   width: 100%;
-  text-align: center;
-  border-top: 4px solid #B7930A;
-}
+  max-width: 440px;
+  background-color: rgba(18, 21, 20, 0.9);
+  backdrop-filter: blur(14px);
+  border: 1px solid #364238;
+  border-top: 2px solid #d4af37;
+  border-radius: 12px;
+  padding: 36px 32px;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.5);
 
-.verificar-icon {
-  font-size: 3rem;
-  margin-bottom: 16px;
-}
+  .verificar-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+  }
 
-.verificar-card h1 {
-  font-family: 'Century Gothic', system-ui, sans-serif;
-  font-size: 1.75rem;
-  color: #00853E;
-  margin: 0 0 8px 0;
-  font-weight: 800;
-}
+  .eyebrow-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #d4af37;
+  }
 
-.verificar-subtitle {
-  color: #666;
-  font-size: 0.95rem;
-  margin: 0 0 32px 0;
-  line-height: 1.6;
-}
+  .led-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: #7fee64;
+  }
 
-.alert {
-  padding: 14px 18px;
-  border-radius: 10px;
-  margin-bottom: 20px;
-  font-weight: 600;
-  font-size: 0.9rem;
-  text-align: left;
-}
+  .verificar-icon-svg {
+    width: 42px;
+    height: 42px;
+    border-radius: 8px;
+    background-color: #1a1f1d;
+    border: 1px solid #364238;
+    color: #7fee64;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 
-.alert-success {
-  background-color: #E5F4EB;
-  color: #006B32;
-  border-left: 4px solid #00853E;
-}
+  h1 {
+    font-family: 'Space Grotesk', 'Inter', sans-serif;
+    font-size: 1.95rem;
+    font-weight: 500;
+    letter-spacing: -0.035em;
+    color: #ddffdc;
+    margin: 0 0 8px 0;
+  }
 
-.alert-error {
-  background-color: #FCEBEB;
-  color: #A8261C;
-  border-left: 4px solid #C62828;
+  .verificar-subtitle {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: #8cab87;
+    margin: 0 0 24px 0;
+  }
 }
 
 .verificar-form {
   display: flex;
   flex-direction: column;
-  text-align: left;
+  gap: 18px;
+
+  .field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  label {
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: #ddffdc;
+  }
+
+  input {
+    width: 100%;
+    padding: 11px 14px;
+    background-color: #080909;
+    border: 1px solid #364238;
+    border-radius: 6px;
+    color: #ddffdc;
+    font-size: 0.92rem;
+
+    &:focus {
+      outline: none;
+      border-color: #7fee64;
+    }
+  }
+
+  .code-input {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 1.35rem;
+    font-weight: 600;
+    letter-spacing: 0.3em;
+    text-align: center;
+    color: #7fee64;
+  }
+
+  button {
+    margin-top: 6px;
+    width: 100%;
+    padding: 12px 20px;
+    background-color: #7fee64;
+    color: #080909;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.92rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover:not(:disabled) {
+      background-color: #96f27e;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
 }
 
-.verificar-form label {
-  font-size: 0.8rem;
-  font-weight: 700;
-  margin-top: 16px;
-  margin-bottom: 6px;
-  color: #1A1A1A;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
+.alert {
+  padding: 11px 14px;
+  border-radius: 6px;
+  margin-bottom: 16px;
+  font-size: 0.85rem;
 
-.verificar-form input {
-  width: 100%;
-  padding: 14px 16px;
-  border: 2px solid #E0E0E0;
-  border-radius: 10px;
-  font-size: 1rem;
-  font-family: inherit;
-  transition: all 0.25s ease;
-  box-sizing: border-box;
-}
+  &.alert-success {
+    background-color: rgba(127, 238, 100, 0.12);
+    border: 1px solid #7fee64;
+    color: #7fee64;
+  }
 
-.verificar-form input:focus {
-  outline: none;
-  border-color: #00853E;
-  box-shadow: 0 0 0 4px rgba(0, 133, 62, 0.12);
-}
-
-.verificar-form button {
-  margin-top: 28px;
-  padding: 16px;
-  background: linear-gradient(135deg, #00853E 0%, #006B32 100%);
-  color: #ffffff;
-  border: none;
-  border-radius: 10px;
-  font-weight: 700;
-  font-size: 1rem;
-  cursor: pointer;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  transition: all 0.25s ease;
-}
-
-.verificar-form button:not(:disabled):hover {
-  background: linear-gradient(135deg, #00A04A 0%, #00853E 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 133, 62, 0.35);
-}
-
-.verificar-form button:disabled {
-  background: #CCCCCC;
-  cursor: not-allowed;
+  &.alert-error {
+    background-color: rgba(220, 38, 38, 0.12);
+    border: 1px solid rgba(248, 113, 113, 0.4);
+    color: #fca5a5;
+  }
 }
 
 .verificar-footer {
   margin-top: 24px;
-  font-size: 0.9rem;
-  color: #666;
-}
+  padding-top: 18px;
+  border-top: 1px solid #1f2922;
+  font-size: 0.85rem;
+  color: #677d64;
+  text-align: center;
 
-.verificar-footer a {
-  color: #00853E;
-  font-weight: 700;
-  text-decoration: none;
-}
-
-.verificar-footer a:hover {
-  text-decoration: underline;
+  a {
+    color: #ddffdc;
+    text-decoration: none;
+    border-bottom: 1px solid #7fee64;
+    padding-bottom: 2px;
+    font-weight: 500;
+  }
 }
