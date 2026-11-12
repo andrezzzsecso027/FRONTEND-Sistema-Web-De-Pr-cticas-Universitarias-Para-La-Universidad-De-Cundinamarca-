@@ -163,3 +163,408 @@ button:disabled {
   max-width: 600px;
   margin: 0 auto 32px;
 }
+
+/* --- BARRA DE ACCIONES ESTUDIANTE Y BOTONES DORADOS UDEC --- */
+.student-toolbar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+  margin-top: 22px;
+  flex-wrap: wrap;
+}
+
+.btn-gold-ia,
+.btn-ia-gemini {
+  background: linear-gradient(135deg, #A68912 0%, #C59B27 100%);
+  color: #ffffff;
+  border: none;
+  padding: 11px 20px;
+  border-radius: 999px;
+  font-family: 'Century Gothic', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(166, 137, 18, 0.3);
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: linear-gradient(135deg, #8F7200 0%, #A68912 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(166, 137, 18, 0.4);
+  }
+}
+
+.btn-outline-udec {
+  background: #ffffff;
+  color: #00853E;
+  border: 2px solid #00853E;
+  padding: 9px 18px;
+  border-radius: 999px;
+  font-family: 'Century Gothic', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #00853E;
+    color: #ffffff;
+    transform: translateY(-1px);
+  }
+}
+
+.btn-outline-gold {
+  background: #FFFDF5;
+  color: #8F7200;
+  border: 2px solid #C59B27;
+  padding: 9px 18px;
+  border-radius: 999px;
+  font-family: 'Century Gothic', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #F5EDCC;
+    transform: translateY(-1px);
+  }
+}
+
+/* --- OVERLAY CENTRADO PARA TODOS LOS MODALES (CORRIGE PANEL-EMPRESA) --- */
+.modal-overlay {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(15, 23, 42, 0.58);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+}
+
+.modal-card-ia,
+.modal-card-udec {
+  background: #ffffff;
+  border-radius: 16px;
+  border-top: 5px solid #C59B27;
+  width: 100%;
+  max-width: 580px;
+  padding: 28px;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.25);
+  animation: aparecerModalUdec 0.2s ease-out;
+}
+
+@keyframes aparecerModalUdec {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modal-header-ia,
+.modal-header-udec {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 1px solid #EEEEEE;
+  padding-bottom: 14px;
+  margin-bottom: 18px;
+
+  h3 {
+    margin: 4px 0 0 0;
+    font-family: 'Century Gothic', system-ui, sans-serif;
+    color: #00853E;
+    font-size: 1.25rem;
+    font-weight: 800;
+  }
+}
+
+.gold-pill {
+  display: inline-block;
+  background-color: #F5EDCC;
+  color: #8F7200;
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 999px;
+  letter-spacing: 0.5px;
+}
+
+.btn-cerrar-modal {
+  background: #F3F4F6;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-weight: 700;
+  color: #4B5563;
+  cursor: pointer;
+
+  &:hover {
+    background: #FCEBEB;
+    color: #A8261C;
+  }
+}
+
+.form-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.form-group-ia {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 14px;
+
+  label {
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: #555;
+    margin-bottom: 6px;
+    letter-spacing: 0.3px;
+  }
+
+  input,
+  select,
+  textarea {
+    padding: 10px 14px;
+    border: 1px solid #D1D5DB;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    background: #FAFAF7;
+
+    &:focus {
+      outline: none;
+      border-color: #00853E;
+      box-shadow: 0 0 0 3px rgba(0, 133, 62, 0.12);
+      background: #ffffff;
+    }
+  }
+}
+
+.resultado-texto-ia {
+  white-space: pre-line;
+  background: #FAFAF7;
+  border-left: 4px solid #C59B27;
+  padding: 16px;
+  border-radius: 10px;
+  line-height: 1.6;
+  color: #1F2937;
+  max-height: 320px;
+  overflow-y: auto;
+  font-size: 0.95rem;
+}
+
+.badge-ia-info {
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.alerta-error-ia {
+  background: #FCEBEB;
+  color: #A8261C;
+  border-left: 4px solid #C62828;
+  padding: 12px 14px;
+  border-radius: 8px;
+  margin-top: 10px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.alerta-exito-ia {
+  background: #E5F4EB;
+  color: #006B32;
+  border-left: 4px solid #00853E;
+  padding: 12px 14px;
+  border-radius: 8px;
+  margin-top: 10px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.modal-footer-ia {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 14px;
+  border-top: 1px solid #EEEEEE;
+}
+
+.btn-confirmar-ia {
+  background: #00853E;
+  color: #ffffff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #006B32;
+  }
+}
+
+.btn-cancelar-ia {
+  background: #F3F4F6;
+  color: #374151;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+/* === FONDO INSTITUCIONAL DORADO UDEC PARA LOGIN Y REGISTROS === */
+.auth-shell,
+.reg-shell {
+  background-color: #080909 !important;
+  background-image:
+    radial-gradient(circle at 50% 16%, rgba(212, 175, 55, 0.18) 0%, rgba(127, 238, 100, 0.06) 42%, rgba(8, 9, 9, 0.95) 78%),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900' width='100%25' height='100%25'><defs><linearGradient id='udecGold' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%23d4af37' stop-opacity='0.25'/><stop offset='50%25' stop-color='%23f5e6ab' stop-opacity='0.09'/><stop offset='100%25' stop-color='%237fee64' stop-opacity='0.16'/></linearGradient></defs><g fill='none' stroke='url(%23udecGold)' stroke-width='1.2'><circle cx='800' cy='450' r='360' stroke-dasharray='6 12'/><circle cx='800' cy='450' r='440' stroke-opacity='0.35'/><polygon points='800,70 1160,450 800,830 440,450' stroke-opacity='0.18'/></g><text x='50%25' y='44%25' dominant-baseline='middle' text-anchor='middle' font-family='Space Grotesk, Inter, sans-serif' font-weight='700' font-size='260' fill='none' stroke='url(%23udecGold)' stroke-width='2.2' letter-spacing='22'>UDEC</text><text x='50%25' y='65%25' dominant-baseline='middle' text-anchor='middle' font-family='Space Grotesk, Inter, sans-serif' font-weight='600' font-size='21' fill='%23d4af37' fill-opacity='0.32' letter-spacing='14'>UNIVERSIDAD DE CUNDINAMARCA</text><text x='50%25' y='70%25' dominant-baseline='middle' text-anchor='middle' font-family='IBM Plex Mono, monospace' font-weight='500' font-size='11' fill='%237fee64' fill-opacity='0.22' letter-spacing='7'>PLATAFORMA DE PRÁCTICAS PROFESIONALES</text></svg>") !important;
+  background-size: cover, 1360px auto !important;
+  background-position: center, center !important;
+  background-repeat: no-repeat !important;
+  background-attachment: fixed !important;
+}
+
+.auth-card,
+.reg-card {
+  background-color: rgba(18, 21, 20, 0.88) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  border-top: 2px solid #d4af37 !important;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* ==========================================================================
+   SISTEMA DE DISEÑO CLERK + SHADCN/UI PARA PANELES INTERNOS DE USUARIO
+   (Panel Administrador, Panel Empresa y Perfil Estudiante)
+   ========================================================================== */
+.admin-layout,
+.empresa-layout,
+.student-profile-page {
+  background-color: #f7f7f8 !important;
+  color: #131316 !important;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+}
+
+/* Topbars estilo Clerk Obsidian (#131316 con borde sutil) */
+.admin-topbar,
+.empresa-navbar {
+  background-color: #131316 !important;
+  border-bottom: 1px solid #2f3037 !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Tarjetas de contenido principales (Clerk Light Card + Hairline 1px) */
+.card-section,
+.section-box,
+.profile-sidebar-card,
+.kpi-card,
+.stat-card,
+.offer-card,
+.candidate-card {
+  background-color: #ffffff !important;
+  border: 1px solid #e4e4e7 !important;
+  border-radius: 16px !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(19, 19, 22, 0.02) !important;
+}
+
+/* Banner de bienvenida de Empresa en modo Clerk Dark Obsidian Card (#212126) */
+.hero-welcome {
+  background: #212126 !important;
+  border: 1px solid #2f3037 !important;
+  border-radius: 16px !important;
+  box-shadow: rgba(255, 255, 255, 0.04) 0px 1px 0px 0px inset !important;
+}
+
+/* Tipografía de encabezados internos con tracking negativo tipo Geist */
+.section-header h2,
+.kpi-value,
+.stat-value {
+  font-family: 'Space Grotesk', 'Inter', sans-serif !important;
+  letter-spacing: -0.03em !important;
+  color: #0a0a0a !important;
+}
+
+/* Inputs, Selects y Textareas estilo shadcn/ui (#f5f5f5 en reposo, #ffffff en foco) */
+.search-input,
+.filter-select,
+.offer-form input,
+.offer-form select,
+.offer-form textarea,
+.profile-form input,
+.profile-form select,
+.profile-form textarea {
+  background-color: #f5f5f5 !important;
+  border: 1px solid #d9d9de !important;
+  border-radius: 8px !important;
+  color: #131316 !important;
+  font-size: 0.9rem !important;
+  transition: all 0.15s ease !important;
+
+  &:focus {
+    background-color: #ffffff !important;
+    border-color: #131316 !important;
+    box-shadow: 0 0 0 3px rgba(19, 19, 22, 0.08) !important;
+    outline: none !important;
+  }
+}
+
+/* Tablas limpias estilo Clerk / Linear */
+.admin-table,
+.udec-table {
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  width: 100% !important;
+
+  thead th {
+    background-color: #f7f7f8 !important;
+    color: #5e5f6e !important;
+    font-size: 0.73rem !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    border-bottom: 1px solid #e4e4e7 !important;
+    padding: 12px 16px !important;
+  }
+
+  tbody td {
+    border-bottom: 1px solid #eeeef0 !important;
+    color: #131316 !important;
+    font-size: 0.88rem !important;
+    padding: 14px 16px !important;
+  }
+
+  tbody tr:hover td {
+    background-color: #fafafa !important;
+  }
+}
+
+/* Botones primarios y secundarios internos estilo shadcn/ui */
+.btn-outline,
+.btn-page {
+  background-color: #ffffff !important;
+  color: #131316 !important;
+  border: 1px solid #d9d9de !important;
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03) !important;
+
+  &:hover:not(:disabled) {
+    background-color: #f4f4f5 !important;
+  }
+}
