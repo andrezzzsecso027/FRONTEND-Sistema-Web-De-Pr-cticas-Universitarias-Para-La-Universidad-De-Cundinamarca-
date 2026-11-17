@@ -1,0 +1,111 @@
+<div class="pe-profile">
+  <!-- Identidad y soporte legal -->
+  <section class="ui-card">
+    <div class="ui-card__body pe-identity">
+      <span class="ui-avatar ui-avatar--sq ui-avatar--xl">
+        @if (store.logoUrl()) { <img [src]="store.logoUrl()" alt="Logo de la empresa" /> } @else { {{ store.nombreEmpresa().charAt(0) }} }
+      </span>
+      <label class="ui-btn ui-btn--ghost ui-btn--sm pe-upload">
+        <ui-icon name="camera" /> Cambiar logo
+        <input type="file" accept="image/png,image/jpeg,image/webp" hidden (change)="onSeleccionarLogo($event)" />
+      </label>
+
+      <h2>{{ store.nombreEmpresa() }}</h2>
+      <span class="ui-mono">NIT {{ store.nitEmpresa() }}</span>
+      <span class="ui-cell-sub">{{ store.correoEmpresa() }}</span>
+      <span class="ui-badge ui-badge--success" style="margin-top: 6px;">Verificada por la UdeC</span>
+
+      <hr class="ui-divider" style="width: 100%; margin: 14px 0 8px;" />
+
+      <div class="ui-file">
+        <span class="ui-file__icon"><ui-icon name="file-text" /></span>
+        <span class="ui-file__text">
+          <span class="ui-file__title">Certificado RUT / NIT</span>
+          <span class="ui-file__meta">{{ store.pdfNitUrl() ? 'Documento PDF cargado' : 'Sin documento' }}</span>
+        </span>
+        @if (store.pdfNitUrl().startsWith('http')) {
+          <a class="ui-btn ui-btn--ghost ui-btn--sm ui-btn--icon" [href]="store.pdfNitUrl()" target="_blank" rel="noopener noreferrer" aria-label="Ver certificado">
+            <ui-icon name="external-link" />
+          </a>
+        }
+      </div>
+      <label class="ui-btn ui-btn--secondary ui-btn--sm ui-btn--block pe-upload">
+        <ui-icon name="upload" /> {{ store.pdfNitUrl() ? 'Actualizar certificado' : 'Subir certificado' }}
+        <input type="file" accept="application/pdf" hidden (change)="onSeleccionarPdfNit($event)" />
+      </label>
+    </div>
+  </section>
+
+  <!-- Datos corporativos -->
+  <form class="ui-card" [formGroup]="perfilForm" (ngSubmit)="guardarPerfil()">
+    <div class="ui-card__header">
+      <div>
+        <h2>Información corporativa</h2>
+        <p>Los estudiantes ven estos datos al consultar tus ofertas.</p>
+      </div>
+    </div>
+
+    <div class="ui-card__body ui-form-grid">
+      <div class="ui-field is-full">
+        <label for="pf-desc">Acerca de la empresa</label>
+        <textarea id="pf-desc" class="ui-textarea" rows="4" formControlName="companyDescription"
+          placeholder="A qué se dedica tu empresa, qué tecnologías o procesos manejan y qué aprenderá el practicante."></textarea>
+      </div>
+
+      <div class="ui-field">
+        <label for="pf-nombre">Nombre comercial</label>
+        <input id="pf-nombre" class="ui-input" formControlName="companyName" />
+      </div>
+      <div class="ui-field">
+        <label for="pf-razon">Razón social</label>
+        <input id="pf-razon" class="ui-input" formControlName="businessName" />
+      </div>
+
+      <div class="ui-field">
+        <label for="pf-nit">NIT</label>
+        <input id="pf-nit" class="ui-input" formControlName="nit" readonly />
+      </div>
+      <div class="ui-field">
+        <label for="pf-tipo">Tipo de entidad</label>
+        <select id="pf-tipo" class="ui-select" formControlName="companyType">
+          <option value="Privada">Privada</option>
+          <option value="Pública">Pública</option>
+          <option value="Mixta">Mixta</option>
+        </select>
+      </div>
+
+      <div class="ui-field">
+        <label for="pf-tel">Teléfono de contacto</label>
+        <input id="pf-tel" class="ui-input" formControlName="phone" placeholder="Ej. 3101234567" />
+      </div>
+      <div class="ui-field">
+        <label for="pf-dir">Dirección principal</label>
+        <input id="pf-dir" class="ui-input" formControlName="address" placeholder="Ej. Calle 17 # 8-20" />
+      </div>
+
+      <div class="ui-field">
+        <label for="pf-depto">Departamento</label>
+        <input id="pf-depto" class="ui-input" formControlName="department" />
+      </div>
+      <div class="ui-field">
+        <label for="pf-ciudad">Ciudad</label>
+        <input id="pf-ciudad" class="ui-input" formControlName="city" />
+      </div>
+
+      <div class="ui-field">
+        <label for="pf-rep-nom">Representante legal · nombres</label>
+        <input id="pf-rep-nom" class="ui-input" formControlName="legalRepName" />
+      </div>
+      <div class="ui-field">
+        <label for="pf-rep-ape">Representante legal · apellidos</label>
+        <input id="pf-rep-ape" class="ui-input" formControlName="legalRepLastName" />
+      </div>
+    </div>
+
+    <div class="ui-card__footer">
+      <button type="submit" class="ui-btn ui-btn--primary" [disabled]="store.cargando()">
+        <ui-icon name="save" /> Guardar cambios
+      </button>
+    </div>
+  </form>
+</div>

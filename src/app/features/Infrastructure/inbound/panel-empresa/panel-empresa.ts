@@ -1,639 +1,107 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef, HostListener } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Component, HostListener, OnInit, ViewEncapsulation, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, FormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { OfertaService, OfferRequestDTO } from '../../../../core/services/oferta/ofertas';
-import { PostulacionService, PostulationDetailResponse } from '../../../../core/services/postulacion/postulacion';
-import { Empresa } from '../../../../core/services/empresa/empresa';
-import { UpdatePasswordService } from '../../../../core/services/update-pasword/update.password';
-import { IaSeguridadService } from '../../../../core/services/ia-seguridad/ia-seguridad';
-import { environment } from '../../../../../environments/environment';
+import { Inactividad } from '../../../../core/services/sesion/inactividad';
+import { CambiarPasswordModal } from '../../../../share/ui/cambiar-password-modal/cambiar-password-modal';
+import { Icon } from '../../../../share/ui/icon/icon';
+import { PanelEmpresaStore, VistaEmpresa } from './panel-empresa.store';
+import { EmpresaInicio } from './components/empresa-inicio/empresa-inicio';
+import { EmpresaCrearOferta } from './components/empresa-crear-oferta/empresa-crear-oferta';
+import { EmpresaMisOfertas } from './components/empresa-mis-ofertas/empresa-mis-ofertas';
+import { EmpresaPostulantes } from './components/empresa-postulantes/empresa-postulantes';
+import { EmpresaMisPracticas } from './components/empresa-mis-practicas/empresa-mis-practicas';
+import { EmpresaPerfil } from './components/empresa-perfil/empresa-perfil';
+import { EmpresaRankingIaModal } from './components/empresa-ranking-ia-modal/empresa-ranking-ia-modal';
 
+export type { PracticaEmpresaView } from './panel-empresa.store';
+
+const ENCABEZADOS: Record<Exclude<VistaEmpresa, 'inicio' | 'postulantes'>, { titulo: string; descripcion: string }> = {
+  'crear-oferta': {
+    titulo: 'Nueva oferta de práctica',
+    descripcion: 'Publica una convocatoria para estudiantes de la Universidad de Cundinamarca.'
+  },
+  'mis-ofertas': {
+    titulo: 'Mis ofertas',
+    descripcion: 'Convocatorias publicadas por tu empresa, sus cupos y los estudiantes postulados.'
+  },
+  'mis-practicas': {
+    titulo: 'Practicantes',
+    descripcion: 'Estudiantes vinculados: contrato de práctica, seguimiento y observaciones.'
+  },
+  perfil: {
+    titulo: 'Mi empresa',
+    descripcion: 'Información visible para los estudiantes y soporte legal verificado por la Universidad.'
+  }
+};
+
+/**
+ * Shell del panel de empresa: barra lateral de navegación, encabezado de la sección, alertas,
+ * cierre por inactividad, selector de vistas y modales. Cada vista es un componente en ./components
+ * y el estado compartido vive en PanelEmpresaStore. Estilos: sistema de diseño global (`ui-*`).
+ */
 @Component({
   selector: 'app-panel-empresa',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule],
+  imports: [
+    CommonModule,
+    Icon,
+    CambiarPasswordModal,
+    EmpresaInicio,
+    EmpresaCrearOferta,
+    EmpresaMisOfertas,
+    EmpresaPostulantes,
+    EmpresaMisPracticas,
+    EmpresaPerfil,
+    EmpresaRankingIaModal
+  ],
+  providers: [PanelEmpresaStore, Inactividad],
   templateUrl: './panel-empresa.html',
-  styleUrl: './panel-empresa.scss'
+  styleUrl: './panel-empresa.scss',
+  encapsulation: ViewEncapsulation.None,
+  host: { class: 'panel-empresa' }
 })
-export class PanelEmpresa implements OnInit, OnDestroy {
-  vistaActual: 'inicio' | 'crear-oferta' | 'mis-ofertas' | 'postulantes' | 'perfil' = 'inicio';
+export class PanelEmpresa implements OnInit {
+  protected readonly store = inject(PanelEmpresaStore);
+  protected readonly inactividad = inject(Inactividad);
+  private readonly router = inject(Router);
+
   menuPerfilAbierto = false;
-
-  // --- CAMBIO DE CONTRASEÑA (EMPRESA) ---
   mostrarModalPassword = false;
-  passwordActual = '';
-  passwordNueva = '';
-  passwordConfirmar = '';
-  mensajePasswordExito = '';
-  mensajePasswordError = '';
-  cargandoPassword = false;
 
-  // Datos de la sesión actual
-  idUsuarioSesion: number | null = null;
-  nombreEmpresa = 'Cargando empresa...';
-  nitEmpresa = '';
-  correoEmpresa = '';
-  ccRepresentanteLegal = '';
-
-  // Perfil Corporativo y Archivos en Cloudinary
-  perfilForm: FormGroup;
-  logoPreviewUrl: string | null = null;
-  nombreArchivoPdfNit = '';
-
-  // Ofertas y Postulaciones
-  misOfertas: OfferRequestDTO[] = [];
-  filtroTextoOferta = '';
-  postulantesOfertaSeleccionada: PostulationDetailResponse[] = [];
-  ofertaSeleccionada: OfferRequestDTO | null = null;
-  observacionesPorPostulante: { [idPostulation: number]: string } = {};
-
-  cargando = false;
-  mensajeExito = '';
-  mensajeError = '';
-
-  // Control de Timeout por Inactividad
-  sesionExpiradaModal = false;
-  private timeoutInactividad: any;
-  // Tiempo límite de inactividad en milisegundos: 10 minutos (600000 ms).
-  // TIP: Para probarlo rápido en sustentación puedes poner 15000 (15 segundos).
-  private readonly TIEMPO_LIMITE_MS = 10 * 60 * 1000;
-
-  ofertaForm: FormGroup;
-
-  programasUdec: string[] = [
-    'Administración de Empresas',
-    'Contaduría Pública',
-    'Enfermería',
-    'Ingeniería Agronómica',
-    'Ingeniería Ambiental',
-    'Ingeniería de Sistemas',
-    'Ingeniería de Sistemas y Computación',
-    'Ingeniería de Software',
-    'Ingeniería Electrónica',
-    'Ingeniería Industrial',
-    'Ingeniería Mecatrónica',
-    'Ingeniería Topográfica y Geomática',
-    'Licenciatura en Ciencias Sociales',
-    'Licenciatura en Educación Física',
-    'Medicina Veterinaria y Zootecnia',
-    'Música',
-    'Profesional en Ciencias del Deporte',
-    'Zootecnia'
-  ];
-
-  modalidades: string[] = ['Presencial', 'Remoto', 'Híbrido'];
-
-  constructor(
-   private fb: FormBuilder,
-    private ofertaService: OfertaService,
-    private postulacionService: PostulacionService,
-    private empresaService: Empresa,
-    private updatePasswordService: UpdatePasswordService,
-    private iaSeguridadService: IaSeguridadService,
-    private router: Router,
-    private cdr: ChangeDetectorRef,
-    private http: HttpClient
-  ) {
-    this.ofertaForm = this.fb.group({
-      practiceName: ['', [Validators.required, Validators.minLength(5)]],
-      profession: ['', [Validators.required]],
-      modality: ['Presencial', [Validators.required]],
-      salary: [0, [Validators.required, Validators.min(0)]],
-      location: ['Fusagasugá, Cundinamarca', [Validators.required]],
-      availableSpots: [1, [Validators.required, Validators.min(1)]],
-      closingDate: ['', [Validators.required]],
-      practiceDescription: ['', [Validators.required, Validators.minLength(15)]]
-    });
-
-    this.perfilForm = this.fb.group({
-      companyName: ['', Validators.required],
-      businessName: [''],
-      nit: [{ value: '', disabled: true }],
-      email: [{ value: '', disabled: true }],
-      companyType: ['Privada'],
-      phone: [''],
-      department: ['Cundinamarca'],
-      city: ['Fusagasugá'],
-      address: [''],
-      legalRepName: [''],
-      legalRepLastName: [''],
-      companyDescription: [
-        'Somos una organización aliada de la Universidad de Cundinamarca comprometida con la formación profesional y tecnológica de practicantes universitarios.',
-        [Validators.required, Validators.minLength(20)]
-      ]
-    });
-  }
+  /** null en Inicio y Postulantes: esas vistas tienen su propio encabezado. */
+  protected readonly encabezado = computed(() => {
+    const vista = this.store.vista();
+    return vista === 'inicio' || vista === 'postulantes' ? null : ENCABEZADOS[vista];
+  });
 
   ngOnInit(): void {
-    this.inicializarPanelEmpresa();
-    this.reiniciarTemporizadorInactividad();
+    this.store.inicializar();
+    this.inactividad.iniciar(
+      () => setTimeout(() => this.router.navigate(['/login']), 4000),
+      ['nitEmpresa', 'nombreEmpresaReal']
+    );
   }
 
-  ngOnDestroy(): void {
-    if (this.timeoutInactividad) {
-      clearTimeout(this.timeoutInactividad);
-    }
-  }
-
-  // --- DETECTOR DE INACTIVIDAD (TIMEOUT DE SESIÓN) ---
   @HostListener('window:mousemove')
   @HostListener('window:keydown')
   @HostListener('window:click')
   @HostListener('window:scroll')
-  reiniciarTemporizadorInactividad(): void {
-    if (this.sesionExpiradaModal) return;
-
-    if (this.timeoutInactividad) {
-      clearTimeout(this.timeoutInactividad);
-    }
-
-    this.timeoutInactividad = setTimeout(() => {
-      this.mostrarAlertaSesionExpirada();
-    }, this.TIEMPO_LIMITE_MS);
+  registrarActividad(): void {
+    this.inactividad.reiniciar();
   }
 
-  private mostrarAlertaSesionExpirada(): void {
-    this.sesionExpiradaModal = true;
-    localStorage.removeItem('token');
-    localStorage.removeItem('usuario_sesion');
-    localStorage.removeItem('nitEmpresa');
-    localStorage.removeItem('nombreEmpresaReal');
-    this.cdr.detectChanges();
-
-    // Redirige automáticamente al login después de mostrar el anuncio durante 4 segundos
-    setTimeout(() => {
-      this.router.navigate(['/login']);
-    }, 4000);
-  }
-
-  irAlLoginAhora(): void {
-    this.router.navigate(['/login']);
-  }
-
-  private decodificarJwt(token: string): any {
-    try {
-      const payloadBase64 = token.split('.')[1];
-      const payloadJson = atob(payloadBase64.replace(/-/g, '+').replace(/_/g, '/'));
-      return JSON.parse(payloadJson);
-    } catch {
-      return null;
-    }
-  }
-
-  inicializarPanelEmpresa(): void {
-    const sesionStr = localStorage.getItem('usuario_sesion');
-    const token = localStorage.getItem('token') || '';
-    const jwtData = token ? this.decodificarJwt(token) : null;
-
-    if (sesionStr) {
-      try {
-        const sesion = JSON.parse(sesionStr);
-        this.correoEmpresa = sesion.email || sesion.correoElectronico || jwtData?.sub || jwtData?.email || '';
-        this.idUsuarioSesion = sesion.idUser || sesion.idUsuario || sesion.id || jwtData?.idUser || jwtData?.id || null;
-        this.nitEmpresa = sesion.nit || sesion.nitCompany || jwtData?.nit || '';
-
-        if (sesion.companyName || sesion.nombreEmpresa) {
-          this.nombreEmpresa = sesion.companyName || sesion.nombreEmpresa;
-        } else if (this.correoEmpresa.includes('@')) {
-          const base = this.correoEmpresa.split('@')[0].replace(/[._-]/g, ' ');
-          this.nombreEmpresa = base.replace(/\b\w/g, l => l.toUpperCase());
-        }
-      } catch (e) {
-        console.error('Error al leer usuario_sesion', e);
-      }
-    }
-
-    this.sincronizarDatosCorporativosBD();
-  }
-
-  sincronizarDatosCorporativosBD(): void {
-    this.cargando = true;
-    this.empresaService.obtenerTodasLasEmpresas().subscribe({
-      next: (empresas) => {
-        if (empresas && empresas.length > 0) {
-          const encontrada = empresas.find(emp => {
-            const matchId = this.idUsuarioSesion && Number(emp.idUser) === Number(this.idUsuarioSesion);
-            const matchNit = this.nitEmpresa && emp.nit === this.nitEmpresa;
-            const matchNombre = !this.idUsuarioSesion && !this.nitEmpresa &&
-              emp.companyName?.toLowerCase().replace(/\s+/g, '') === this.correoEmpresa.split('@')[0]?.toLowerCase();
-            return matchId || matchNit || matchNombre;
-          });
-
-          if (encontrada) {
-            this.nombreEmpresa = encontrada.companyName || this.nombreEmpresa;
-            this.nitEmpresa = encontrada.nit || this.nitEmpresa;
-
-            // 1. Cargamos Foto (Logo) y PDF del NIT directamente desde PostgreSQL (con respaldo en localStorage)
-            this.logoPreviewUrl = encontrada.logoUrl || localStorage.getItem(`logo_${this.nitEmpresa}`) || null;
-            this.nombreArchivoPdfNit = encontrada.rutPdfUrl || localStorage.getItem(`pdf_${this.nitEmpresa}`) || '';
-
-            // 2. Extraemos el objeto anidado legalRepresentative que viene del Backend
-            const repLegal = encontrada.legalRepresentative || {};
-            this.ccRepresentanteLegal = repLegal.numberDocument || '';
-
-            // Normalizamos el tipo de empresa (ej. "privada" -> "Privada")
-            const tipoNormalizado = encontrada.companyType
-              ? encontrada.companyType.charAt(0).toUpperCase() + encontrada.companyType.slice(1).toLowerCase()
-              : 'Privada';
-
-            this.perfilForm.patchValue({
-              companyName: encontrada.companyName || this.nombreEmpresa,
-              businessName: encontrada.legalName || encontrada.businessName || encontrada.companyName || '',
-              nit: this.nitEmpresa,
-              email: this.correoEmpresa,
-              companyType: tipoNormalizado,
-              phone: encontrada.companyPhoneNumber || encontrada.companyPhone || '',
-              department: encontrada.department || 'Cundinamarca',
-              city: encontrada.city || 'Fusagasugá',
-              address: encontrada.companyAddress || '',
-              legalRepName: repLegal.nameRepresentative || '',
-              legalRepLastName: repLegal.lastNameRepresentative || '',
-              companyDescription: encontrada.companyDescription ||
-                'Somos una organización aliada de la Universidad de Cundinamarca comprometida con la formación profesional y tecnológica de practicantes universitarios.'
-            });
-          } else {
-            this.rellenarPerfilDesdeSesionActual();
-          }
-        } else {
-          this.rellenarPerfilDesdeSesionActual();
-        }
-
-        this.cargarMisOfertas();
-      },
-      error: () => {
-        this.rellenarPerfilDesdeSesionActual();
-        this.cargarMisOfertas();
-      }
-    });
-  }
-
-  rellenarPerfilDesdeSesionActual(): void {
-    this.perfilForm.patchValue({
-      companyName: this.nombreEmpresa,
-      nit: this.nitEmpresa,
-      email: this.correoEmpresa
-    });
-  }
-
-  cargarMisOfertas(): void {
-    this.cargando = true;
-    this.ofertaService.listarOfertasActivas().subscribe({
-      next: (ofertas) => {
-        const lista = ofertas || [];
-        this.misOfertas = this.nitEmpresa
-          ? lista.filter(o => o.nitCompanyAssociated === this.nitEmpresa)
-          : lista;
-        this.cargando = false;
-        this.cdr.detectChanges();
-      },
-      error: () => {
-        this.misOfertas = [];
-        this.cargando = false;
-        this.cdr.detectChanges();
-      }
-    });
-  }
-
-  cambiarVista(vista: 'inicio' | 'crear-oferta' | 'mis-ofertas' | 'postulantes' | 'perfil'): void {
-    this.vistaActual = vista;
+  irA(vista: VistaEmpresa): void {
     this.menuPerfilAbierto = false;
-    this.limpiarMensajes();
-    if (vista === 'mis-ofertas' || vista === 'inicio') {
-      this.cargarMisOfertas();
-    }
-  }
-
-  get ofertasFiltradas(): OfferRequestDTO[] {
-    if (!this.filtroTextoOferta.trim()) return this.misOfertas;
-    const busq = this.filtroTextoOferta.toLowerCase();
-    return this.misOfertas.filter(o =>
-      o.practiceName?.toLowerCase().includes(busq) ||
-      o.profession?.toLowerCase().includes(busq) ||
-      o.modality?.toLowerCase().includes(busq)
-    );
-  }
-
-  publicarOferta(): void {
-    if (this.ofertaForm.invalid) {
-      this.ofertaForm.markAllAsTouched();
-      this.mensajeError = 'Por favor completa todos los campos obligatorios de la oferta.';
-      return;
-    }
-
-    if (!this.nitEmpresa) {
-      this.mensajeError = 'No se detectó el NIT de tu empresa en la sesión.';
-      return;
-    }
-
-    this.cargando = true;
-    this.limpiarMensajes();
-
-    const payload: OfferRequestDTO = {
-      ...this.ofertaForm.value,
-      nitCompanyAssociated: this.nitEmpresa
-    };
-
-    this.ofertaService.crearOferta(payload).subscribe({
-      next: () => {
-        this.cargando = false;
-        this.mensajeExito = '¡Oferta de práctica publicada exitosamente!';
-        this.ofertaForm.reset({
-          modality: 'Presencial',
-          salary: 0,
-          location: 'Fusagasugá, Cundinamarca',
-          availableSpots: 1
-        });
-        this.cargarMisOfertas();
-        setTimeout(() => this.cambiarVista('mis-ofertas'), 1200);
-      },
-      error: (err: any) => {
-        this.cargando = false;
-        this.mensajeError = err?.error || 'No se pudo publicar la oferta.';
-        this.cdr.detectChanges();
-      }
-    });
-  }
-
-  verPostulantes(oferta: OfferRequestDTO): void {
-    this.ofertaSeleccionada = oferta;
-    this.vistaActual = 'postulantes';
-    this.cargando = true;
-    this.postulantesOfertaSeleccionada = [];
-    this.limpiarMensajes();
-
-    this.postulacionService.verPostuladosPorOferta(oferta.idOffer!).subscribe({
-      next: (postulantes) => {
-        const listaValida = (postulantes || []).filter(
-          p => p.studentFullName && p.studentFullName.trim().length > 0
-        );
-        this.postulantesOfertaSeleccionada = listaValida;
-        this.cargando = false;
-
-        // Enriquecer cada postulante con su foto, inglés, GitHub, CV y resumen desde perfiles_estudiantes
-        this.postulantesOfertaSeleccionada.forEach((post: any) => {
-          const doc = post.documentStudent || post.studentDocument;
-          if (doc) {
-            this.http.get<any>(`${environment.baseUrl}/registro/estudiantes/perfil/${doc}`).subscribe({
-              next: (perfil) => {
-                if (perfil) {
-                  post.photoUrl = perfil.photoUrl || post.photoUrl;
-                  post.skills = perfil.skills || post.skills;
-                  post.englishLevel = perfil.englishLevel || post.englishLevel;
-                  post.githubUrl = perfil.githubUrl || post.githubUrl;
-                  post.lifesheet = perfil.linkLifesheet || post.lifesheet;
-                  post.aboutMe = perfil.aboutMe || post.aboutMe;
-                  this.cdr.detectChanges();
-                }
-              },
-              error: () => {}
-            });
-          }
-        });
-
-        this.cdr.detectChanges();
-      },
-      error: () => {
-        this.postulantesOfertaSeleccionada = [];
-        this.cargando = false;
-        this.cdr.detectChanges();
-      }
-    });
-  }
-
-  decidirPostulacion(postulante: PostulationDetailResponse, nuevoEstado: 'ACEPTADA' | 'RECHAZADA'): void {
-    const observacion = this.observacionesPorPostulante[postulante.idPostulation] ||
-      (nuevoEstado === 'ACEPTADA'
-        ? 'Cumple con el perfil requerido para la práctica.'
-        : 'Perfil no seleccionado en esta convocatoria.');
-
-    this.cargando = true;
-    this.limpiarMensajes();
-
-    this.postulacionService.cambiarEstadoPostulacion(postulante.idPostulation, nuevoEstado, observacion).subscribe({
-      next: () => {
-        this.cargando = false;
-        postulante.statusPostulation = nuevoEstado;
-        this.mensajeExito = nuevoEstado === 'ACEPTADA'
-          ? `¡Has ACEPTADO a ${postulante.studentFullName}! Se creó la práctica y se envió notificación por correo.`
-          : `Se ha RECHAZADO la postulación de ${postulante.studentFullName}.`;
-
-        if (nuevoEstado === 'ACEPTADA' && this.ofertaSeleccionada && this.ofertaSeleccionada.availableSpots > 0) {
-          this.ofertaSeleccionada.availableSpots -= 1;
-        }
-        this.cdr.detectChanges();
-      },
-      error: (err: any) => {
-        this.cargando = false;
-        this.mensajeError = err?.error || 'Error al actualizar el estado de la postulación.';
-        this.cdr.detectChanges();
-      }
-    });
-  }
-
-  onSeleccionarLogo(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (!input.files || input.files.length === 0) return;
-    const file = input.files[0];
-
-    this.cargando = true;
-    this.limpiarMensajes();
-    this.empresaService.subirArchivoCloudinary(file, 'empresas_logos').subscribe({
-      next: (res: { url: string }) => {
-        this.logoPreviewUrl = res.url;
-        if (this.nitEmpresa) {
-          localStorage.setItem(`logo_${this.nitEmpresa}`, res.url);
-        }
-        this.cargando = false;
-        // Guardamos automáticamente en la BD apenas sube la foto para que no se pierda si refresca
-        this.guardarPerfilCorporativo(true);
-        this.cdr.detectChanges();
-      },
-      error: () => {
-        this.cargando = false;
-        this.mensajeError = 'Error al subir el logo a Cloudinary.';
-        this.cdr.detectChanges();
-      }
-    });
-  }
-
-  onSeleccionarPdfNit(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (!input.files || input.files.length === 0) return;
-    const file = input.files[0];
-
-    this.cargando = true;
-    this.limpiarMensajes();
-    this.empresaService.subirArchivoCloudinary(file, 'empresas_nit').subscribe({
-      next: (res: { url: string }) => {
-        this.nombreArchivoPdfNit = res.url;
-        if (this.nitEmpresa) {
-          localStorage.setItem(`pdf_${this.nitEmpresa}`, res.url);
-        }
-        this.cargando = false;
-        // Guardamos automáticamente en la BD apenas sube el PDF
-        this.guardarPerfilCorporativo(true);
-        this.cdr.detectChanges();
-      },
-      error: () => {
-        this.cargando = false;
-        this.mensajeError = 'Error al subir el PDF a Cloudinary.';
-        this.cdr.detectChanges();
-      }
-    });
-  }
-
-  guardarPerfilCorporativo(esAutoGuardadoArchivo = false): void {
-    if (!this.nitEmpresa) return;
-    const val = this.perfilForm.getRawValue();
-
-    const payload = {
-      companyName: val.companyName,
-      legalName: val.businessName,
-      companyType: val.companyType,
-      companyPhoneNumber: val.phone,
-      department: val.department,
-      city: val.city,
-      companyAddress: val.address,
-      companyDescription: val.companyDescription,
-      logoUrl: this.logoPreviewUrl,
-      rutPdfUrl: this.nombreArchivoPdfNit,
-      legalRepresentative: {
-        nameRepresentative: val.legalRepName,
-        lastNameRepresentative: val.legalRepLastName,
-        numberDocument: this.ccRepresentanteLegal
-      }
-    };
-
-    this.cargando = true;
-    this.empresaService.actualizarPerfilEmpresa(this.nitEmpresa, payload).subscribe({
-      next: (actualizada: any) => {
-        this.cargando = false;
-        this.nombreEmpresa = actualizada.companyName || this.nombreEmpresa;
-        this.mensajeExito = esAutoGuardadoArchivo
-          ? '¡Archivo subido a Cloudinary y vinculado a tu perfil en la Base de Datos!'
-          : '¡Perfil corporativo y documentos guardados exitosamente en la Base de Datos!';
-        this.cdr.detectChanges();
-      },
-      error: () => {
-        this.cargando = false;
-        this.mensajeError = 'No se pudo actualizar el perfil en la base de datos.';
-        this.cdr.detectChanges();
-      }
-    });
-  }
-
-  get totalCuposDisponibles(): number {
-    return this.misOfertas.reduce((acc, o) => acc + (o.availableSpots || 0), 0);
-  }
-
-  limpiarMensajes(): void {
-    this.mensajeExito = '';
-    this.mensajeError = '';
-  }
-
-  cerrarSesion(): void {
-    localStorage.removeItem('token');
-    localStorage.removeItem('usuario_sesion');
-    localStorage.removeItem('nitEmpresa');
-    localStorage.removeItem('nombreEmpresaReal');
-    this.router.navigate(['/login']);
+    this.store.cambiarVista(vista);
   }
 
   abrirModalPassword(): void {
-    this.mostrarModalPassword = true;
     this.menuPerfilAbierto = false;
-    this.passwordActual = '';
-    this.passwordNueva = '';
-    this.passwordConfirmar = '';
-    this.mensajePasswordExito = '';
-    this.mensajePasswordError = '';
+    this.mostrarModalPassword = true;
   }
 
-  cerrarModalPassword(): void {
-    this.mostrarModalPassword = false;
+  cerrarSesion(): void {
+    ['token', 'usuario_sesion', 'nitEmpresa', 'nombreEmpresaReal'].forEach(k => localStorage.removeItem(k));
+    this.router.navigate(['/login']);
   }
-
-  guardarNuevaContrasena(): void {
-    this.mensajePasswordExito = '';
-    this.mensajePasswordError = '';
-
-    if (!this.passwordActual || !this.passwordNueva || !this.passwordConfirmar) {
-      this.mensajePasswordError = 'Todos los campos son obligatorios.';
-      return;
-    }
-    if (this.passwordNueva !== this.passwordConfirmar) {
-      this.mensajePasswordError = 'La nueva contraseña y su confirmación no coinciden.';
-      return;
-    }
-    if (this.passwordNueva.length < 6) {
-      this.mensajePasswordError = 'La nueva contraseña debe tener al menos 6 caracteres.';
-      return;
-    }
-
-    const email = this.correoEmpresa || this.updatePasswordService.obtenerEmailDeSesion();
-    this.cargandoPassword = true;
-
-    this.updatePasswordService.cambiarContrasena({
-      email,
-      currentPassword: this.passwordActual,
-      newPassword: this.passwordNueva
-    }).subscribe({
-      next: (res) => {
-        this.cargandoPassword = false;
-        this.mensajePasswordExito = res || 'Contraseña actualizada exitosamente.';
-        this.passwordActual = '';
-        this.passwordNueva = '';
-        this.passwordConfirmar = '';
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        this.cargandoPassword = false;
-        this.mensajePasswordError = typeof err.error === 'string' && err.error
-          ? err.error
-          : 'La contraseña actual es incorrecta.';
-        this.cdr.detectChanges();
-      }
-    });
-  }
-
-  // --- RANKING DE CANDIDATOS CON IA (EMPRESA) ---
-  mostrarModalRankingIa = false;
-  cargandoRankingIa = false;
-  nombreOfertaRankingIa = '';
-  totalPostuladosAnalizadosIa = 0;
-  resultadoRankingIa = '';
-  errorRankingIa = '';
-
-  generarRankingIaDeOferta(oferta?: OfferRequestDTO | null): void {
-    const target = oferta || this.ofertaSeleccionada;
-    if (!target || !target.idOffer) return;
-
-    this.mostrarModalRankingIa = true;
-    this.cargandoRankingIa = true;
-    this.nombreOfertaRankingIa = target.practiceName;
-    this.resultadoRankingIa = '';
-    this.errorRankingIa = '';
-    this.cdr.detectChanges();
-
-    this.iaSeguridadService.obtenerRankingPostulados(target.idOffer).subscribe({
-      next: (res) => {
-        this.cargandoRankingIa = false;
-        this.nombreOfertaRankingIa = res.practiceName || target.practiceName;
-        this.totalPostuladosAnalizadosIa = res.totalCandidatesAnalyzed;
-        this.resultadoRankingIa = res.aiRankingAnalysis;
-        this.cdr.detectChanges();
-      },
-      error: () => {
-        this.cargandoRankingIa = false;
-        this.errorRankingIa = 'No se pudo generar el ranking con IA para esta oferta.';
-        this.cdr.detectChanges();
-      }
-    });
-  }
-
-  cerrarModalRankingIa(): void {
-    this.mostrarModalRankingIa = false;
-  }
-}   
+}

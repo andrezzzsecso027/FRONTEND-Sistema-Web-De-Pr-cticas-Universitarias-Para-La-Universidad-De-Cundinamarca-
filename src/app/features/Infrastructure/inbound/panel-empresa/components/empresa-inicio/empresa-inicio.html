@@ -1,0 +1,86 @@
+<section class="pe-hero">
+  <div>
+    <span class="ui-eyebrow"><ui-icon name="badge-check" [size]="14" /> Empresa aliada · NIT {{ store.nitEmpresa() || '—' }}</span>
+    <h1>Hola, {{ store.nombreEmpresa() }}</h1>
+    <p>Publica convocatorias, evalúa a los postulados y gestiona los contratos de tus practicantes de la Universidad de Cundinamarca.</p>
+  </div>
+  <button type="button" class="ui-btn ui-btn--secondary" (click)="store.cambiarVista('crear-oferta')">
+    <ui-icon name="plus" /> Publicar oferta
+  </button>
+</section>
+
+<section class="ui-stats" aria-label="Resumen">
+  <button type="button" class="ui-stat" (click)="store.cambiarVista('mis-ofertas')">
+    <span class="ui-stat__label">Ofertas publicadas <ui-icon name="briefcase" /></span>
+    <span class="ui-stat__value">{{ store.misOfertas().length }}</span>
+    <span class="ui-stat__hint">Asociadas a tu NIT</span>
+  </button>
+  <button type="button" class="ui-stat" (click)="store.cambiarVista('mis-ofertas')">
+    <span class="ui-stat__label">Cupos disponibles <ui-icon name="users" /></span>
+    <span class="ui-stat__value">{{ store.totalCuposDisponibles() }}</span>
+    <span class="ui-stat__hint">En todas tus convocatorias</span>
+  </button>
+  <button type="button" class="ui-stat" (click)="store.cambiarVista('mis-practicas')">
+    <span class="ui-stat__label">Practicantes <ui-icon name="user-check" /></span>
+    <span class="ui-stat__value">{{ store.misPracticas().length }}</span>
+    <span class="ui-stat__hint">Contratos y seguimiento</span>
+  </button>
+</section>
+
+<section class="ui-card">
+  <div class="ui-card__header">
+    <div>
+      <h2>Convocatorias recientes</h2>
+      <p>Tus últimas ofertas publicadas.</p>
+    </div>
+    @if (store.misOfertas().length > 0) {
+      <button type="button" class="ui-btn ui-btn--ghost ui-btn--sm" (click)="store.cambiarVista('mis-ofertas')">
+        Ver todas <ui-icon name="arrow-right" />
+      </button>
+    }
+  </div>
+
+  @if (store.misOfertas().length === 0 && !store.cargando()) {
+    <div class="ui-empty">
+      <span class="ui-empty__icon"><ui-icon name="briefcase" [size]="20" /></span>
+      <span class="ui-empty__title">Aún no has publicado ofertas</span>
+      <span class="ui-empty__text">Publica tu primera convocatoria para recibir postulaciones de estudiantes de la UdeC.</span>
+      <button type="button" class="ui-btn ui-btn--primary" (click)="store.cambiarVista('crear-oferta')">
+        <ui-icon name="plus" /> Publicar oferta
+      </button>
+    </div>
+  } @else {
+    <div class="ui-table-wrap">
+      <table class="ui-table">
+        <caption class="ui-sr-only">Convocatorias recientes</caption>
+        <thead>
+          <tr>
+            <th>Oferta</th>
+            <th>Modalidad</th>
+            <th class="is-num">Cupos</th>
+            <th>Cierre</th>
+            <th class="is-actions"><span class="ui-sr-only">Acciones</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (oferta of store.misOfertas().slice(0, 4); track oferta.idOffer) {
+            <tr>
+              <td>
+                <span class="ui-cell-main">{{ oferta.practiceName }}</span>
+                <span class="ui-cell-sub">{{ oferta.profession }}</span>
+              </td>
+              <td>{{ oferta.modality }}</td>
+              <td class="is-num">{{ oferta.availableSpots }}</td>
+              <td class="is-num">{{ oferta.closingDate }}</td>
+              <td class="is-actions">
+                <button type="button" class="ui-btn ui-btn--ghost ui-btn--sm" (click)="store.verPostulantes(oferta)">
+                  <ui-icon name="users" /> Postulantes
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

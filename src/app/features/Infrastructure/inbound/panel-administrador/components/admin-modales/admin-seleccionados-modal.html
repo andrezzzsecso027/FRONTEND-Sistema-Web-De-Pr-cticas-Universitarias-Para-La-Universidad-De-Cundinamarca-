@@ -1,0 +1,52 @@
+@if (store.ofertaHistorialModal(); as oferta) {
+  <div class="ui-modal-backdrop" (click)="store.ofertaHistorialModal.set(null)">
+    <div class="ui-modal" role="dialog" aria-modal="true" aria-labelledby="modal-seleccionados-titulo" (click)="$event.stopPropagation()">
+      <div class="ui-modal__header">
+        <div>
+          <span class="ui-eyebrow"><ui-icon name="users" [size]="14" /> Estudiantes seleccionados</span>
+          <h3 id="modal-seleccionados-titulo">{{ oferta.practiceName }}</h3>
+          <p>{{ store.nombreEmpresaPorNit(oferta.nitCompanyAssociated) }} · {{ store.cuposIniciales(oferta) }} cupo(s) ofertados</p>
+        </div>
+        <button type="button" class="ui-close" aria-label="Cerrar" (click)="store.ofertaHistorialModal.set(null)"><ui-icon name="x" /></button>
+      </div>
+
+      <div class="ui-modal__body">
+        @for (sel of store.seleccionadosOfertaModal(); track sel.idPostulation) {
+          @let contrato = store.documentoDePractica(sel);
+          @let cv = sel.lifesheet || sel.linkLifesheet || sel.studentResumeLink;
+          <div class="ui-file">
+            <span class="ui-avatar">{{ (sel.studentFullName || 'E').charAt(0) }}</span>
+            <span class="ui-file__text">
+              <span class="ui-file__title">{{ sel.studentFullName }}</span>
+              <span class="ui-file__meta">
+                CC {{ sel.studentDocument || sel.documentStudent || store.documentoPorNombre(sel.studentFullName) }} ·
+                {{ sel.studentAcademicProgram || sel.academicProgram || oferta.profession }}
+              </span>
+            </span>
+            @if (contrato?.fileUrl) {
+              <a class="ui-btn ui-btn--ghost ui-btn--sm" [href]="contrato.fileUrl" target="_blank" rel="noopener noreferrer">
+                <ui-icon name="file-check" /> Contrato
+              </a>
+            }
+            @if (cv) {
+              <a class="ui-btn ui-btn--ghost ui-btn--sm" [href]="cv" target="_blank" rel="noopener noreferrer">
+                <ui-icon name="file-text" /> CV
+              </a>
+            }
+            <button type="button" class="ui-btn ui-btn--secondary ui-btn--sm" (click)="verPerfil(sel)">Ver perfil</button>
+          </div>
+        } @empty {
+          <div class="ui-empty" style="padding: 24px 12px;">
+            <span class="ui-empty__icon"><ui-icon name="users" [size]="20" /></span>
+            <span class="ui-empty__title">Sin seleccionados</span>
+            <span class="ui-empty__text">Esta oferta se cerró sin estudiantes aceptados.</span>
+          </div>
+        }
+      </div>
+
+      <div class="ui-modal__footer">
+        <button type="button" class="ui-btn ui-btn--secondary" (click)="store.ofertaHistorialModal.set(null)">Cerrar</button>
+      </div>
+    </div>
+  </div>
+}

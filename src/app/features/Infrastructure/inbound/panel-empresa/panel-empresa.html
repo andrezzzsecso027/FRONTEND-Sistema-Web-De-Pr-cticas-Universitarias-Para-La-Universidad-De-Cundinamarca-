@@ -1,580 +1,139 @@
-<div class="empresa-layout">
-  <!-- NAVBAR SUPERIOR -->
-  <header class="empresa-navbar">
-    <div class="navbar-left">
-      <div class="brand-logo" (click)="cambiarVista('inicio')">
-        <span class="udec-badge">UdeC</span>
-        <span class="brand-title">UdecPrac <small>Empresas</small></span>
-      </div>
-      <div class="welcome-Banner">
-        <span>Bienvenido, <strong>{{ nombreEmpresa }}</strong> — ¿publicamos una oferta?</span>
-        <button class="btn-cta-nav" (click)="cambiarVista('crear-oferta')">+ Publicar Oferta</button>
-      </div>
-    </div>
+<div class="ui-app">
+  <!-- BARRA LATERAL -->
+  <aside class="ui-sidebar">
+    <button type="button" class="ui-brand" (click)="irA('inicio')">
+      <span class="ui-brand__mark">UdeC</span>
+      <span>
+        <span class="ui-brand__name">UdecPrac</span>
+        <span class="ui-brand__role">Portal de empresas</span>
+      </span>
+    </button>
 
-    <nav class="navbar-right">
-      <button class="nav-link" [class.active]="vistaActual === 'inicio'" (click)="cambiarVista('inicio')">
-        Inicio
-      </button>
-      <button class="nav-link" [class.active]="vistaActual === 'mis-ofertas' || vistaActual === 'postulantes'"
-        (click)="cambiarVista('mis-ofertas')">
-        Mis Ofertas
-        <span class="badge-count">{{ misOfertas.length }}</span>
-      </button>
-      <button class="nav-link" [class.active]="vistaActual === 'crear-oferta'" (click)="cambiarVista('crear-oferta')">
-        Nueva Oferta
-      </button>
-      <button class="nav-link" [class.active]="vistaActual === 'perfil'" (click)="cambiarVista('perfil')">
-        Mi Empresa
+    <nav class="ui-nav" aria-label="Secciones del panel">
+      <button type="button" class="ui-nav__item" [class.is-active]="store.vista() === 'inicio'" (click)="irA('inicio')">
+        <ui-icon name="dashboard" /> Inicio
       </button>
 
-      <!-- ICONO DE PERFIL CON LOGO O INICIAL -->
-      <div class="profile-menu-container">
-        <button class="profile-avatar-btn" (click)="menuPerfilAbierto = !menuPerfilAbierto"
-          title="Mi Perfil Corporativo">
-          <img *ngIf="logoPreviewUrl" [src]="logoPreviewUrl" alt="Logo Empresa" class="avatar-img" />
-          <span *ngIf="!logoPreviewUrl" class="avatar-circle">{{ nombreEmpresa.charAt(0) | uppercase }}</span>
-        </button>
+      <span class="ui-nav__label">Convocatorias</span>
+      <button type="button" class="ui-nav__item"
+        [class.is-active]="store.vista() === 'mis-ofertas' || store.vista() === 'postulantes'" (click)="irA('mis-ofertas')">
+        <ui-icon name="briefcase" /> Mis ofertas
+        <span class="ui-nav__count">{{ store.misOfertas().length }}</span>
+      </button>
+      <button type="button" class="ui-nav__item" [class.is-active]="store.vista() === 'crear-oferta'" (click)="irA('crear-oferta')">
+        <ui-icon name="plus" /> Nueva oferta
+      </button>
 
-        <div class="profile-dropdown" *ngIf="menuPerfilAbierto">
-          <div class="dropdown-header">
-            <strong class="dropdown-company-name">{{ nombreEmpresa }}</strong>
-            <span class="dropdown-email">{{ correoEmpresa }}</span>
-            <span class="dropdown-nit" *ngIf="nitEmpresa">NIT: {{ nitEmpresa }}</span>
-          </div>
-          <hr />
-          <button type="button" class="btn-accion-secundario" (click)="abrirModalPassword()">
-            🔒 Cambiar Contraseña
-          </button>
-          <button (click)="cambiarVista('perfil')">🏢 Mi Perfil Corporativo</button>
-          <button (click)="cambiarVista('mis-ofertas')">📋 Mis Ofertas Publicadas</button>
-          <button class="btn-logout" (click)="cerrarSesion()">🚪 Cerrar Sesión</button>
-        </div>
-      </div>
+      <span class="ui-nav__label">Practicantes</span>
+      <button type="button" class="ui-nav__item" [class.is-active]="store.vista() === 'mis-practicas'" (click)="irA('mis-practicas')">
+        <ui-icon name="user-check" /> Practicantes
+        <span class="ui-nav__count">{{ store.misPracticas().length }}</span>
+      </button>
+
+      <span class="ui-nav__label">Cuenta</span>
+      <button type="button" class="ui-nav__item" [class.is-active]="store.vista() === 'perfil'" (click)="irA('perfil')">
+        <ui-icon name="building" /> Mi empresa
+      </button>
     </nav>
-  </header>
 
-  <!-- CONTENIDO PRINCIPAL -->
-  <main class="empresa-content">
-
-    <!-- ALERTAS GLOBALES -->
-    <div class="alert alert-success" *ngIf="mensajeExito">{{ mensajeExito }}</div>
-    <div class="alert alert-error" *ngIf="mensajeError">{{ mensajeError }}</div>
-
-    <!-- ==================== VISTA 1: INICIO (DASHBOARD) ==================== -->
-    <section *ngIf="vistaActual === 'inicio'" class="dashboard-section">
-      <div class="hero-welcome">
-        <div class="hero-info">
-          <span class="company-pill">NIT Asociado: {{ nitEmpresa || 'Activo' }}</span>
-          <h1>Hola, {{ nombreEmpresa }}</h1>
-          <p>Gestiona tus convocatorias de práctica, evalúa hojas de vida y vincula estudiantes de la Universidad de
-            Cundinamarca.</p>
+    <!-- USUARIO -->
+    <div class="ui-sidebar__footer">
+      @if (menuPerfilAbierto) {
+        <div class="ui-menu" role="menu">
+          <div class="ui-menu__header">
+            <span class="ui-user__name">{{ store.nombreEmpresa() }}</span>
+            <span class="ui-user__mail">{{ store.correoEmpresa() }}</span>
+          </div>
+          <button type="button" class="ui-menu__item" role="menuitem" (click)="irA('perfil')">
+            <ui-icon name="building" /> Perfil de la empresa
+          </button>
+          <button type="button" class="ui-menu__item" role="menuitem" (click)="abrirModalPassword()">
+            <ui-icon name="key" /> Cambiar contraseña
+          </button>
+          <button type="button" class="ui-menu__item ui-menu__item--danger" role="menuitem" (click)="cerrarSesion()">
+            <ui-icon name="log-out" /> Cerrar sesión
+          </button>
         </div>
-        <button class="btn-gold-lg" (click)="cambiarVista('crear-oferta')">
-          + Publicar Nueva Oferta
-        </button>
-      </div>
+      }
+      <button type="button" class="ui-user" (click)="menuPerfilAbierto = !menuPerfilAbierto" [attr.aria-expanded]="menuPerfilAbierto">
+        <span class="ui-avatar ui-avatar--sq">
+          @if (store.logoUrl()) { <img [src]="store.logoUrl()" alt="" /> } @else { {{ store.nombreEmpresa().charAt(0) }} }
+        </span>
+        <span class="ui-user__text">
+          <span class="ui-user__name">{{ store.nombreEmpresa() }}</span>
+          <span class="ui-user__mail">{{ store.nitEmpresa() ? 'NIT ' + store.nitEmpresa() : store.correoEmpresa() }}</span>
+        </span>
+        <ui-icon name="chevron-down" [size]="14" />
+      </button>
+    </div>
+  </aside>
 
-      <!-- TARJETAS DE MÉTRICAS -->
-      <div class="stats-grid">
-        <div class="stat-card">
-          <span class="stat-label">Mis Ofertas Activas</span>
-          <span class="stat-value">{{ misOfertas.length }}</span>
-          <small>Publicadas bajo tu NIT</small>
-        </div>
-        <div class="stat-card">
-          <span class="stat-label">Total Cupos Disponibles</span>
-          <span class="stat-value">{{ totalCuposDisponibles }}</span>
-          <small>Se descuentan al aceptar practicantes</small>
-        </div>
-        <div class="stat-card" (click)="cambiarVista('perfil')" style="cursor: pointer;">
-          <span class="stat-label">Perfil y Documentos</span>
-          <span class="stat-status-ok">VERIFICADA ✓</span>
-          <small>Haz clic para editar foto, reseña y PDF del NIT</small>
-        </div>
-      </div>
-
-      <!-- RESUMEN RÁPIDO DE OFERTAS RECIENTES -->
-      <div class="section-box">
-        <div class="section-header">
+  <!-- CONTENIDO -->
+  <main class="ui-main">
+    <div class="ui-container">
+      @if (encabezado(); as enc) {
+        <header class="ui-page-header">
           <div>
-            <h2>Tus Convocatorias Activas</h2>
-            <p>Ofertas abiertas actualmente por {{ nombreEmpresa }}</p>
+            <h1>{{ enc.titulo }}</h1>
+            <p>{{ enc.descripcion }}</p>
           </div>
-          <button class="btn-outline" (click)="cambiarVista('mis-ofertas')">Ver listado completo</button>
-        </div>
-
-        <div class="empty-state" *ngIf="misOfertas.length === 0 && !cargando">
-          <p>Aún no has publicado ofertas de práctica activas.</p>
-          <button class="btn-primary" (click)="cambiarVista('crear-oferta')">Publicar mi primera oferta</button>
-        </div>
-
-        <div class="offers-grid" *ngIf="misOfertas.length > 0">
-          <div class="offer-card" *ngFor="let oferta of misOfertas.slice(0, 3)">
-            <div class="offer-card-top">
-              <span class="tag-modality">{{ oferta.modality }}</span>
-              <span class="tag-spots">Cupos: {{ oferta.availableSpots }}</span>
-            </div>
-            <h3>{{ oferta.practiceName }}</h3>
-            <p class="offer-program">{{ oferta.profession }}</p>
-            <p class="offer-desc">{{ oferta.practiceDescription }}</p>
-            <div class="offer-footer">
-              <span>Cierra: {{ oferta.closingDate }}</span>
-              <button class="btn-primary-sm" (click)="verPostulantes(oferta)">Ver Postulantes</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ==================== VISTA 2: PUBLICAR NUEVA OFERTA (SIN PEDIR NIT) ==================== -->
-    <section *ngIf="vistaActual === 'crear-oferta'" class="form-section">
-      <div class="section-box">
-        <div class="section-header">
-          <div>
-            <h2>Publicar Nueva Oferta de Práctica</h2>
-            <p>La oferta quedará asociada automáticamente a <strong>{{ nombreEmpresa }}</strong> (NIT: <strong>{{
-                nitEmpresa }}</strong>).</p>
-          </div>
-          <button class="btn-outline" (click)="cambiarVista('inicio')">Volver al Inicio</button>
-        </div>
-
-        <form [formGroup]="ofertaForm" (ngSubmit)="publicarOferta()" class="offer-form">
-          <div class="form-row">
-            <div class="form-group">
-              <label>Título de la Vacante / Práctica *</label>
-              <input type="text" formControlName="practiceName"
-                placeholder="Ej. Desarrollador FullStack Spring Boot & Angular" />
-            </div>
-
-            <div class="form-group">
-              <label>Programa Académico Requerido (Catálogo UdeC) *</label>
-              <select formControlName="profession">
-                <option value="" disabled>-- Selecciona el programa académico --</option>
-                <option *ngFor="let prog of programasUdec" [value]="prog">{{ prog }}</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="form-row three-cols">
-            <div class="form-group">
-              <label>Modalidad de Práctica *</label>
-              <select formControlName="modality">
-                <option *ngFor="let mod of modalidades" [value]="mod">{{ mod }}</option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label>Apoyo Económico Mensual (COP) *</label>
-              <input type="number" formControlName="salary" min="0" step="50000" />
-            </div>
-
-            <div class="form-group">
-              <label>Número de Cupos Disponibles *</label>
-              <input type="number" formControlName="availableSpots" min="1" max="50" />
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label>Ubicación de la Práctica (Ciudad / Departamento) *</label>
-              <input type="text" formControlName="location" placeholder="Ej. Fusagasugá, Cundinamarca o Bogotá D.C." />
-            </div>
-
-            <div class="form-group">
-              <label>Fecha Límite de Postulación *</label>
-              <input type="date" formControlName="closingDate" />
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label>Descripción de Funciones, Proyecto y Habilidades Esperadas *</label>
-            <textarea rows="4" formControlName="practiceDescription"
-              placeholder="Detalla las responsabilidades que tendrá el estudiante y las herramientas o competencias requeridas..."></textarea>
-          </div>
-
-          <div class="form-actions">
-            <button type="button" class="btn-outline" (click)="cambiarVista('inicio')">Cancelar</button>
-            <button type="submit" class="btn-primary" [disabled]="cargando">
-              {{ cargando ? 'Publicando...' : 'Publicar Oferta Ahora' }}
-            </button>
-          </div>
-        </form>
-      </div>
-    </section>
-
-    <!-- ==================== VISTA 3: LISTADO DE MIS OFERTAS (SIN FILTRO DE NIT) ==================== -->
-    <section *ngIf="vistaActual === 'mis-ofertas'" class="list-section">
-      <div class="section-box">
-        <div class="section-header">
-          <div>
-            <h2>Mis Ofertas de Práctica Publicadas</h2>
-            <p>Consulta los cupos disponibles y gestiona los estudiantes postulados a tus vacantes.</p>
-          </div>
-          <div class="search-box">
-            <input type="text" [(ngModel)]="filtroTextoOferta"
-              placeholder="🔍 Buscar por cargo, carrera o modalidad..." />
-            <button class="btn-primary-sm" (click)="cambiarVista('crear-oferta')">+ Nueva Oferta</button>
-          </div>
-        </div>
-
-        <table class="udec-table" *ngIf="ofertasFiltradas.length > 0">
-          <caption class="sr-only">Listado de ofertas de práctica publicadas por la empresa</caption>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Vacante</th>
-              <th>Programa Académico</th>
-              <th>Modalidad</th>
-              <th>Apoyo Económico</th>
-              <th>Cupos</th>
-              <th>Fecha Cierre</th>
-              <th>Candidatos</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let oferta of ofertasFiltradas">
-              <td>#{{ oferta.idOffer }}</td>
-              <td><strong>{{ oferta.practiceName }}</strong></td>
-              <td>{{ oferta.profession }}</td>
-              <td><span class="tag-modality">{{ oferta.modality }}</span></td>
-              <td>${{ oferta.salary | number }}</td>
-              <td><span class="badge-spots">{{ oferta.availableSpots }}</span></td>
-              <td>{{ oferta.closingDate }}</td>
-              <td style="display: flex; gap: 8px; align-items: center;">
-                <button type="button" class="btn-ver-postulantes" (click)="verPostulantes(oferta)">
-                  Ver Postulantes
-                </button>
-                <button type="button" class="btn-gold-ia"
-                  style="padding: 8px 14px; font-size: 0.82rem; border-radius: 8px;"
-                  (click)="generarRankingIaDeOferta(oferta)">
-                  🤖 Ranking IA
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-
-        <div class="empty-state" *ngIf="ofertasFiltradas.length === 0 && !cargando">
-          <p>No tienes ofertas que coincidan con la búsqueda actual.</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- ==================== VISTA 4: POSTULANTES POR OFERTA ==================== -->
-    <section *ngIf="vistaActual === 'postulantes'" class="postulantes-section">
-      <div class="section-box">
-        <div class="section-header">
-          <div>
-            <h2>Estudiantes Postulados: {{ ofertaSeleccionada?.practiceName }}</h2>
-            <p>Carrera: <strong>{{ ofertaSeleccionada?.profession }}</strong> | Cupos disponibles: <strong>{{
-                ofertaSeleccionada?.availableSpots }}</strong></p>
-          </div>
-          <div style="display: flex; gap: 10px; align-items: center;">
-            <button type="button" class="btn-gold-ia" style="padding: 8px 16px; font-size: 0.85rem; border-radius: 8px;"
-              (click)="generarRankingIaDeOferta(ofertaSeleccionada)">
-              🤖 Analizar Postulados con IA
-            </button>
-            <button type="button" class="btn-outline" (click)="cambiarVista('mis-ofertas')">← Volver a Mis Ofertas</button>
-          </div>
-        </div>
-
-        <div class="empty-state" *ngIf="postulantesOfertaSeleccionada.length === 0 && !cargando">
-          <p>Aún no se han postulado estudiantes a esta convocatoria.</p>
-        </div>
-
-        <div class="candidates-list" *ngIf="postulantesOfertaSeleccionada.length > 0">
-          <div class="candidate-card" *ngFor="let p of postulantesOfertaSeleccionada">
-            <div class="candidate-info" style="display: flex; gap: 18px; align-items: flex-start;">
-
-              <!-- FOTO DEL ESTUDIANTE -->
-              <div style="flex-shrink: 0;">
-                <img
-                  *ngIf="$any(p).photoUrl"
-                  [src]="$any(p).photoUrl"
-                  alt="Foto Estudiante"
-                  style="width: 68px; height: 68px; border-radius: 50%; object-fit: cover; border: 2.5px solid #00853E;" />
-                <div
-                  *ngIf="!$any(p).photoUrl"
-                  style="width: 68px; height: 68px; border-radius: 50%; background: #E5F4EB; color: #00853E; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.5rem; border: 2px solid #00853E;">
-                  {{ (p.studentFullName || 'E').charAt(0) | uppercase }}
-                </div>
-              </div>
-
-              <!-- DATOS COMPLETOS DEL ESTUDIANTE -->
-              <div style="flex: 1;">
-                <div class="candidate-header">
-                  <h3>{{ p.studentFullName }}</h3>
-                  <span class="status-pill" [ngClass]="p.statusPostulation.toLowerCase()">
-                    {{ p.statusPostulation }}
-                  </span>
-                </div>
-
-                <p>
-                  <strong>CC:</strong> {{ p.documentStudent || p.studentDocument }} |
-                  <strong>Correo Institucional:</strong> {{ p.studentEmail }}
-                </p>
-
-                <p *ngIf="$any(p).aboutMe" style="color: #444; font-style: italic; margin: 6px 0;">
-                  "{{ $any(p).aboutMe }}"
-                </p>
-
-                <p>
-                  <strong>Habilidades:</strong> {{ p.skills || 'Por registrar' }} |
-                  <strong>Nivel de Inglés:</strong> {{ p.englishLevel || 'Por registrar' }}
-                </p>
-
-                <div class="candidate-links" style="display: flex; gap: 12px; margin-top: 10px; flex-wrap: wrap;">
-                  <a
-                    *ngIf="p.lifesheet || $any(p).linkLifesheet"
-                    [href]="p.lifesheet || $any(p).linkLifesheet"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="link-cv"
-                    style="background: #E5F4EB; color: #006B32; padding: 6px 14px; border-radius: 8px; font-weight: 700; text-decoration: none; font-size: 0.85rem;">
-                    📄 Ver Hoja de Vida (PDF)
-                  </a>
-                  <a
-                    *ngIf="p.githubUrl"
-                    [href]="p.githubUrl"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="link-github"
-                    style="background: #F5EDCC; color: #8F7200; padding: 6px 14px; border-radius: 8px; font-weight: 700; text-decoration: none; font-size: 0.85rem;">
-                    💻 Ver Repositorio GitHub
-                  </a>
-                </div>
-              </div>
-            </div>
-
-            <div class="candidate-actions" *ngIf="p.statusPostulation === 'POSTULADA'">
-              <textarea
-                rows="2"
-                [(ngModel)]="observacionesPorPostulante[p.idPostulation]"
-                placeholder="Escribe un mensaje u observaciones para el estudiante (se enviará a su correo institucional)...">
-              </textarea>
-              <div class="action-buttons">
-                <button class="btn-accept" [disabled]="cargando" (click)="decidirPostulacion(p, 'ACEPTADA')">
-                  ✓ Aceptar Estudiante
-                </button>
-                <button class="btn-reject" [disabled]="cargando" (click)="decidirPostulacion(p, 'RECHAZADA')">
-                  ✕ Rechazar
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ==================== VISTA 5: MI PERFIL CORPORATIVO (FOTO, RESEÑA Y PDF DEL NIT) ==================== -->
-    <section *ngIf="vistaActual === 'perfil'" class="profile-section">
-      <div class="profile-grid">
-
-        <!-- COLUMNA IZQUIERDA: TARJETA DE IDENTIDAD Y DOCUMENTOS -->
-        <div class="profile-sidebar-card">
-          <div class="logo-upload-wrapper">
-            <div class="company-logo-preview">
-              <img *ngIf="logoPreviewUrl" [src]="logoPreviewUrl" alt="Logo Corporativo" />
-              <span *ngIf="!logoPreviewUrl" class="logo-initials">{{ nombreEmpresa.charAt(0) | uppercase }}</span>
-            </div>
-            <label class="btn-upload-photo">
-              📷 Cambiar Foto / Logo
-              <input type="file" accept="image/*" (change)="onSeleccionarLogo($event)" hidden />
-            </label>
-            <small class="upload-hint">Formatos recomendados: PNG o JPG cuadrado</small>
-          </div>
-
-          <div class="company-identity-summary">
-            <h3>{{ nombreEmpresa }}</h3>
-            <span class="nit-badge">NIT: {{ nitEmpresa }}</span>
-            <p class="email-text">{{ correoEmpresa }}</p>
-            <span class="verified-chip">✓ Empresa Verificada por UdeC</span>
-          </div>
-
-          <hr class="divider" />
-
-          <!-- CARGA DEL CERTIFICADO PDF DEL NIT / RUT -->
-          <div class="nit-pdf-box">
-            <h4>📄 Soporte Legal del NIT (RUT / Cámara de Comercio)</h4>
-            <p>Sube o actualiza el documento oficial en PDF para respaldo institucional.</p>
-
-            <label class="pdf-dropzone">
-              <span class="pdf-icon">📑</span>
-              <span *ngIf="!nombreArchivoPdfNit">Seleccionar archivo PDF del NIT</span>
-              <span *ngIf="nombreArchivoPdfNit" class="pdf-success-text">
-                ✓ Certificado PDF cargado correctamente
-              </span>
-              <input type="file" accept="application/pdf" (change)="onSeleccionarPdfNit($event)" hidden />
-            </label>
-            <a *ngIf="nombreArchivoPdfNit.startsWith('http')" [href]="nombreArchivoPdfNit" target="_blank"
-              class="link-ver-pdf">
-              🔗 Ver PDF actual en Cloudinary
-            </a>
-          </div>
-        </div>
-
-        <!-- COLUMNA DERECHA: INFORMACIÓN CORPORATIVA Y "SOBRE NOSOTROS" -->
-        <div class="section-box">
-          <div class="section-header">
-            <div>
-              <h2>Información Corporativa y Presentación</h2>
-              <p>Estos datos serán visibles para los estudiantes de la Universidad de Cundinamarca al consultar tus
-                ofertas.</p>
-            </div>
-          </div>
-
-          <form [formGroup]="perfilForm" (ngSubmit)="guardarPerfilCorporativo()" class="offer-form">
-            <div class="form-group">
-              <label>Acerca de la Empresa (Misión, Sector y Cultura de Trabajo) *</label>
-              <textarea rows="4" formControlName="companyDescription"
-                placeholder="Cuéntales a los estudiantes a qué se dedica tu empresa, qué tecnologías o procesos manejan y qué aprenderán durante su práctica...">
-              </textarea>
-            </div>
-
-            <div class="form-row">
-              <div class="form-group">
-                <label>Nombre Comercial de la Empresa *</label>
-                <input type="text" formControlName="companyName" />
-              </div>
-
-              <div class="form-group">
-                <label>Razón Social</label>
-                <input type="text" formControlName="businessName" placeholder="Ej. Antojitos & Soluciones S.A.S." />
-              </div>
-            </div>
-
-            <div class="form-row three-cols">
-              <div class="form-group">
-                <label>NIT (Identificación Tributaria)</label>
-                <input type="text" formControlName="nit" readonly class="readonly-input" />
-              </div>
-
-              <div class="form-group">
-                <label>Sector / Tipo de Entidad</label>
-                <select formControlName="companyType">
-                  <option value="Privada">Privada</option>
-                  <option value="Pública">Pública</option>
-                  <option value="Mixta">Mixta</option>
-                </select>
-              </div>
-
-              <div class="form-group">
-                <label>Teléfono de Contacto Corporativo</label>
-                <input type="text" formControlName="phone" placeholder="Ej. 3101234567" />
-              </div>
-            </div>
-
-            <div class="form-row three-cols">
-              <div class="form-group">
-                <label>Departamento</label>
-                <input type="text" formControlName="department" />
-              </div>
-
-              <div class="form-group">
-                <label>Ciudad / Municipio Principal</label>
-                <input type="text" formControlName="city" />
-              </div>
-
-              <div class="form-group">
-                <label>Dirección de Sede Principal</label>
-                <input type="text" formControlName="address" placeholder="Ej. Calle 17 # 8-20 Centro" />
-              </div>
-            </div>
-
-            <div class="form-row">
-              <div class="form-group">
-                <label>Nombres del Representante Legal</label>
-                <input type="text" formControlName="legalRepName" />
-              </div>
-
-              <div class="form-group">
-                <label>Apellidos del Representante Legal</label>
-                <input type="text" formControlName="legalRepLastName" />
-              </div>
-            </div>
-
-            <div class="form-actions">
-              <button type="submit" class="btn-primary">
-                💾 Guardar Cambios del Perfil
+          @if (store.vista() === 'mis-ofertas') {
+            <div class="ui-page-header__actions">
+              <button type="button" class="ui-btn ui-btn--primary" (click)="irA('crear-oferta')">
+                <ui-icon name="plus" /> Publicar oferta
               </button>
             </div>
-          </form>
+          }
+        </header>
+      }
+
+      @if (store.mensajeExito()) {
+        <div class="ui-alert ui-alert--success" role="status">
+          <ui-icon name="check-circle" />
+          <span>{{ store.mensajeExito() }}</span>
+          <button type="button" class="ui-alert__close" aria-label="Cerrar" (click)="store.limpiarMensajes()"><ui-icon name="x" [size]="14" /></button>
         </div>
-
-      </div>
-    </section>
-   <!-- MODAL CAMBIAR CONTRASEÑA EMPRESA -->
-    <div class="modal-overlay" *ngIf="mostrarModalPassword" (click)="cerrarModalPassword()">
-      <div class="modal-card-udec" (click)="$event.stopPropagation()">
-        <div class="modal-header-udec">
-          <div>
-            <span class="gold-pill">SEGURIDAD CORPORATIVA</span>
-            <h3>🔒 Actualizar Contraseña</h3>
-          </div>
-          <button type="button" class="btn-cerrar-modal" (click)="cerrarModalPassword()">✕</button>
+      }
+      @if (store.mensajeError()) {
+        <div class="ui-alert ui-alert--error" role="alert">
+          <ui-icon name="alert" />
+          <span>{{ store.mensajeError() }}</span>
+          <button type="button" class="ui-alert__close" aria-label="Cerrar" (click)="store.limpiarMensajes()"><ui-icon name="x" [size]="14" /></button>
         </div>
+      }
 
-        <div class="modal-body-udec">
-          <div class="form-group-ia">
-            <label>Contraseña Actual</label>
-            <input type="password" [(ngModel)]="passwordActual" placeholder="Ingresa tu contraseña actual" />
-          </div>
-
-          <div class="form-group-ia">
-            <label>Nueva Contraseña</label>
-            <input type="password" [(ngModel)]="passwordNueva" placeholder="Mínimo 6 caracteres" />
-          </div>
-
-          <div class="form-group-ia">
-            <label>Confirmar Nueva Contraseña</label>
-            <input type="password" [(ngModel)]="passwordConfirmar" placeholder="Repite la nueva contraseña" />
-          </div>
-
-          <div *ngIf="mensajePasswordError" class="alerta-error-ia">{{ mensajePasswordError }}</div>
-          <div *ngIf="mensajePasswordExito" class="alerta-exito-ia">{{ mensajePasswordExito }}</div>
-        </div>
-
-        <div class="modal-footer-ia">
-          <button type="button" class="btn-cancelar-ia" (click)="cerrarModalPassword()">Cancelar</button>
-          <button type="button" class="btn-confirmar-ia" [disabled]="cargandoPassword"
-            (click)="guardarNuevaContrasena()">
-            {{ cargandoPassword ? 'Actualizando...' : 'Actualizar Contraseña' }}
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- MODAL RANKING IA DE CANDIDATOS (GEMINI) -->
-    <div class="modal-overlay" *ngIf="mostrarModalRankingIa" (click)="cerrarModalRankingIa()">
-      <div class="modal-card-udec" (click)="$event.stopPropagation()">
-        <div class="modal-header-udec">
-          <div>
-            <span class="gold-pill">INTELIGENCIA ARTIFICIAL GEMINI</span>
-            <h3>📊 Ranking IA — {{ nombreOfertaRankingIa }}</h3>
-          </div>
-          <button type="button" class="btn-cerrar-modal" (click)="cerrarModalRankingIa()">✕</button>
-        </div>
-
-        <div class="modal-body-udec">
-          <div *ngIf="cargandoRankingIa" class="estado-carga-ia">
-            <p>⏳ Evaluando competencias técnicas, inglés y perfiles de los postulados con Gemini IA...</p>
-          </div>
-          <div *ngIf="!cargandoRankingIa && errorRankingIa" class="alerta-error-ia">
-            {{ errorRankingIa }}
-          </div>
-          <div *ngIf="!cargandoRankingIa && !errorRankingIa">
-            <div class="badge-ia-info">
-              Candidatos analizados en esta convocatoria: <strong>{{ totalPostuladosAnalizadosIa }}</strong>
-            </div>
-            <div class="resultado-texto-ia">{{ resultadoRankingIa }}</div>
-          </div>
-        </div>
-
-        <div class="modal-footer-ia">
-          <button type="button" class="btn-confirmar-ia" (click)="cerrarModalRankingIa()">Cerrar Análisis</button>
-        </div>
-      </div>
+      @switch (store.vista()) {
+        @case ('inicio') { <app-empresa-inicio /> }
+        @case ('crear-oferta') { <app-empresa-crear-oferta /> }
+        @case ('mis-ofertas') { <app-empresa-mis-ofertas /> }
+        @case ('postulantes') { <app-empresa-postulantes /> }
+        @case ('mis-practicas') { <app-empresa-mis-practicas /> }
+        @case ('perfil') { <app-empresa-perfil /> }
+      }
     </div>
   </main>
+
+  @if (mostrarModalPassword) {
+    <app-cambiar-password-modal [email]="store.correoEmpresa()" (cerrar)="mostrarModalPassword = false" />
+  }
+
+  @if (store.rankingIa().abierto) {
+    <app-empresa-ranking-ia-modal />
+  }
+
+  @if (inactividad.expirada()) {
+    <div class="ui-modal-backdrop">
+      <div class="ui-modal ui-modal--sm" role="alertdialog" aria-labelledby="sesion-expirada">
+        <div class="ui-modal__header">
+          <div>
+            <h3 id="sesion-expirada">Tu sesión expiró</h3>
+            <p>Por seguridad cerramos la sesión tras 10 minutos de inactividad. Te llevaremos al inicio de sesión.</p>
+          </div>
+        </div>
+        <div class="ui-modal__footer">
+          <button type="button" class="ui-btn ui-btn--dark" (click)="cerrarSesion()">Iniciar sesión de nuevo</button>
+        </div>
+      </div>
+    </div>
+  }
 </div>

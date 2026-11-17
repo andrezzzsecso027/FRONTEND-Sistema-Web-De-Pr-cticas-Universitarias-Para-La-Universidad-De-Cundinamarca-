@@ -1,0 +1,102 @@
+<section class="ui-card">
+  <div class="ui-card__header">
+    <div>
+      <h2>Practicantes vinculados</h2>
+      <p>Adjunta el contrato de práctica en PDF; la Coordinación UdeC lo revisa desde su panel.</p>
+    </div>
+    <button type="button" class="ui-btn ui-btn--secondary ui-btn--sm" (click)="actualizar()">
+      <ui-icon name="refresh" /> Actualizar
+    </button>
+  </div>
+
+  @if (store.misPracticas().length === 0 && !store.cargando()) {
+    <div class="ui-empty">
+      <span class="ui-empty__icon"><ui-icon name="user-check" [size]="20" /></span>
+      <span class="ui-empty__title">Aún no tienes practicantes</span>
+      <span class="ui-empty__text">Cuando aceptes a un estudiante en una de tus ofertas, aparecerá aquí para gestionar su contrato.</span>
+      <button type="button" class="ui-btn ui-btn--secondary" (click)="store.cambiarVista('mis-ofertas')">Revisar postulados</button>
+    </div>
+  }
+
+  @for (prac of store.misPracticas(); track prac.idPostulation) {
+    @let contrato = store.contratosPorPostulacion()[prac.idPostulation];
+    <article class="pe-person">
+      <div class="pe-person__head">
+        <span class="ui-avatar ui-avatar--lg">
+          @if (prac.photoUrl) { <img [src]="prac.photoUrl" alt="" /> } @else { {{ (prac.studentFullName || 'E').charAt(0) }} }
+        </span>
+        <div class="pe-person__info">
+          <span class="pe-person__name">
+            {{ prac.studentFullName }}
+            @switch (contrato?.trackingStatus) {
+              @case ('FINALIZADA') { <span class="ui-badge ui-badge--neutral">Finalizada</span> }
+              @case ('CONTRATO_FIRMADO') { <span class="ui-badge ui-badge--success">Contrato firmado</span> }
+              @default { <span class="ui-badge ui-badge--info">En curso</span> }
+            }
+          </span>
+          <span class="pe-person__meta">
+            <span><ui-icon name="briefcase" [size]="14" /> {{ prac.offerName }} · {{ prac.modality }}</span>
+            <span><ui-icon name="user" [size]="14" /> CC {{ prac.studentDocument }}</span>
+            <span><ui-icon name="graduation-cap" [size]="14" /> Inglés {{ prac.studentEnglishLevel }}</span>
+          </span>
+          <span class="ui-cell-sub"><strong>Habilidades:</strong> {{ prac.studentSkills }}</span>
+          <div class="pe-person__links">
+            @if (prac.studentCvUrl) {
+              <a class="ui-btn ui-btn--secondary ui-btn--sm" [href]="prac.studentCvUrl" target="_blank" rel="noopener noreferrer">
+                <ui-icon name="file-text" /> Hoja de vida
+              </a>
+            }
+            @if (prac.studentGithubUrl) {
+              <a class="ui-btn ui-btn--secondary ui-btn--sm" [href]="prac.studentGithubUrl" target="_blank" rel="noopener noreferrer">
+                <ui-icon name="repo" /> Portafolio
+              </a>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Contrato de práctica -->
+      <div class="ui-file">
+        <span class="ui-file__icon"><ui-icon name="file-check" /></span>
+        <span class="ui-file__text">
+          <span class="ui-file__title">Contrato de práctica</span>
+          <span class="ui-file__meta">
+            {{ subiendoContratoId === prac.idPostulation ? 'Subiendo PDF…' : (contrato?.fileUrl ? (contrato.fileName || 'Documento PDF') : 'Aún no has cargado el contrato') }}
+          </span>
+        </span>
+        @if (contrato?.fileUrl) {
+          <a class="ui-btn ui-btn--ghost ui-btn--sm" [href]="contrato.fileUrl" target="_blank" rel="noopener noreferrer">
+            <ui-icon name="external-link" /> Ver
+          </a>
+        }
+        <label class="ui-btn ui-btn--secondary ui-btn--sm pe-upload" [class.is-disabled]="subiendoContratoId === prac.idPostulation">
+          <ui-icon name="upload" /> {{ contrato?.fileUrl ? 'Reemplazar' : 'Subir PDF' }}
+          <input type="file" accept="application/pdf" hidden
+            [disabled]="subiendoContratoId === prac.idPostulation"
+            (change)="onSeleccionarContratoPdf($event, prac)" />
+        </label>
+      </div>
+
+      <!-- Seguimiento -->
+      <div class="pe-tracking">
+        <div class="ui-field">
+          <label [for]="'estado-' + prac.idPostulation">Estado del seguimiento</label>
+          <select [id]="'estado-' + prac.idPostulation" class="ui-select" [(ngModel)]="store.estadoSeguimientoContrato[prac.idPostulation]">
+            <option value="EN_CURSO">En curso</option>
+            <option value="CONTRATO_FIRMADO">Contrato firmado</option>
+            <option value="FINALIZADA">Práctica finalizada</option>
+          </select>
+        </div>
+        <div class="ui-field">
+          <label [for]="'obs-' + prac.idPostulation">Observaciones</label>
+          <input [id]="'obs-' + prac.idPostulation" class="ui-input" [(ngModel)]="store.comentariosContrato[prac.idPostulation]"
+            placeholder="Desempeño, novedades del contrato…" />
+        </div>
+        <button type="button" class="ui-btn ui-btn--dark" [disabled]="guardandoSeguimientoId === prac.idPostulation"
+          (click)="guardarSeguimiento(prac)">
+          <ui-icon name="save" /> {{ guardandoSeguimientoId === prac.idPostulation ? 'Guardando…' : 'Guardar' }}
+        </button>
+      </div>
+    </article>
+  }
+</section>

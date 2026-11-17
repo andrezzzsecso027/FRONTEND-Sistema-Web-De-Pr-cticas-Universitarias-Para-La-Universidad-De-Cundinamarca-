@@ -1,217 +1,83 @@
-﻿<app-navbar></app-navbar>
-
-<main class="ofertas-page">
-  <div class="container">
-
-    <header class="ofertas-header">
-      <h1>Ofertas de Práctica Disponibles</h1>
-      <p>Encuentra la oportunidad que impulse tu carrera profesional.</p>
-
-      <!-- BARRA DE HERRAMIENTAS DEL ESTUDIANTE (UX DORADO Y VERDE UDEC) -->
-      <div class="student-toolbar">
-        <button type="button" class="btn-gold-ia" (click)="solicitarRecomendacionIa()">
-          ✨ Recomendar Ofertas según mi Perfil (IA)
-        </button>
-      </div>
-    </header>
-
-    <!-- MENSAJES -->
-    <div *ngIf="mensajeExito" class="alert alert-success">
-      {{ mensajeExito }}
-    </div>
-    <div *ngIf="mensajeError" class="alert alert-error">
-      {{ mensajeError }}
-    </div>
-
-    <!-- LOADING -->
-    <div *ngIf="cargando" class="loading">
-      <p>Cargando ofertas disponibles...</p>
-    </div>
-
-    <!-- SIN OFERTAS -->
-    <div *ngIf="!cargando && ofertas.length === 0" class="empty-state">
-      <div class="empty-icon">📭</div>
-      <h3>No hay ofertas disponibles</h3>
-      <p>Vuelve pronto, estamos actualizando las oportunidades.</p>
-    </div>
-
-    <!-- GRID DE OFERTAS -->
-    <div *ngIf="!cargando && ofertas.length > 0" class="ofertas-grid">
-      <article *ngFor="let oferta of ofertas" class="oferta-card">
-
-        <div class="oferta-badge">{{ oferta.modality }}</div>
-
-        <h2 class="oferta-title">{{ oferta.practiceName }}</h2>
-
-        <p class="oferta-profession">{{ oferta.profession }}</p>
-
-        <p class="oferta-description">
-          {{ oferta.practiceDescription }}
-        </p>
-
-        <ul class="oferta-details">
-          <li>
-            <span class="detail-label">Salario</span>
-            <span class="detail-value">{{ formatearSalario(oferta.salary) }}</span>
-          </li>
-          <li>
-            <span class="detail-label">Ubicación</span>
-            <span class="detail-value">{{ oferta.location }}</span>
-          </li>
-          <li>
-            <span class="detail-label">Cupos</span>
-            <span class="detail-value">{{ oferta.availableSpots }}</span>
-          </li>
-          <li>
-            <span class="detail-label">Cierra</span>
-            <span class="detail-value">{{ oferta.closingDate }}</span>
-          </li>
-        </ul>
-
-        <button
-          class="btn-postular"
-          [disabled]="procesandoId === oferta.idOffer"
-          (click)="postularme(oferta)">
-          {{ procesandoId === oferta.idOffer ? 'Postulando...' : 'Postularme' }}
-        </button>
-
-      </article>
-    </div>
-
+﻿<header class="ui-page-header">
+  <div>
+    <h1>Ofertas de práctica</h1>
+    <p>Convocatorias abiertas de empresas verificadas por la Universidad de Cundinamarca.</p>
   </div>
-</main>
-
-<!-- MODAL 1: PERFIL PROFESIONAL DEL ESTUDIANTE -->
-<div *ngIf="mostrarModalPerfilEstudiante" class="modal-overlay" (click)="cerrarModalPerfil()">
-  <div class="modal-card-udec" (click)="$event.stopPropagation()">
-    <div class="modal-header-udec">
-      <div>
-        <span class="gold-pill">PERFIL DEL ESTUDIANTE</span>
-        <h3>👤 Mi Hoja de Vida y Competencias</h3>
-      </div>
-      <button type="button" class="btn-cerrar-modal" (click)="cerrarModalPerfil()">✕</button>
-    </div>
-
-    <div class="modal-body-udec">
-      <div class="form-row-2">
-        <div class="form-group-ia">
-          <label>Documento de Identidad</label>
-          <input type="text" [(ngModel)]="perfilEstudiante.documentStudent" disabled />
-        </div>
-        <div class="form-group-ia">
-          <label>Nivel de Inglés (MCER)</label>
-          <select [(ngModel)]="perfilEstudiante.englishLevel">
-            <option value="A1 - Principiante">A1 - Principiante</option>
-            <option value="A2 - Básico">A2 - Básico</option>
-            <option value="B1 - Intermedio">B1 - Intermedio</option>
-            <option value="B2 - Intermedio Alto">B2 - Intermedio Alto</option>
-            <option value="C1 - Avanzado">C1 - Avanzado</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="form-group-ia">
-        <label>Habilidades Técnicas y Blandas (Usadas por la IA para calcular tu Match)</label>
-        <input type="text" [(ngModel)]="perfilEstudiante.skills" placeholder="Ej: Java, Spring Boot, Angular, SQL, Liderazgo" />
-      </div>
-
-      <div class="form-row-2">
-        <div class="form-group-ia">
-          <label>Portafolio / GitHub URL</label>
-          <input type="url" [(ngModel)]="perfilEstudiante.githubUrl" placeholder="https://github.com/tu-usuario" />
-        </div>
-        <div class="form-group-ia">
-          <label>Enlace Hoja de Vida (PDF / Drive)</label>
-          <input type="url" [(ngModel)]="perfilEstudiante.resumeLink" placeholder="https://..." />
-        </div>
-      </div>
-
-      <div class="form-group-ia">
-        <label>Perfil Profesional (Sobre mí)</label>
-        <textarea rows="3" [(ngModel)]="perfilEstudiante.aboutMe" placeholder="Describe tus intereses de práctica profesional..."></textarea>
-      </div>
-
-      <div *ngIf="mensajePerfilExito" class="alerta-exito-ia">{{ mensajePerfilExito }}</div>
-      <div *ngIf="mensajePerfilError" class="alerta-error-ia">{{ mensajePerfilError }}</div>
-    </div>
-
-    <div class="modal-footer-ia">
-      <button type="button" class="btn-cancelar-ia" (click)="cerrarModalPerfil()">Cerrar</button>
-      <button type="button" class="btn-confirmar-ia" [disabled]="guardandoPerfil" (click)="guardarPerfilEstudiante()">
-        {{ guardandoPerfil ? 'Guardando...' : '💾 Guardar Mi Perfil' }}
-      </button>
-    </div>
+  <div class="ui-page-header__actions">
+    <button type="button" class="ui-btn ui-btn--ai" [disabled]="!store.documento()" (click)="store.abrirRecomendacionIa()">
+      <ui-icon name="sparkles" /> Recomendar según mi perfil
+    </button>
   </div>
-</div>
+</header>
 
-<!-- MODAL 2: ASISTENTE IA GEMINI -->
-<div *ngIf="mostrarModalIaEstudiante" class="modal-overlay" (click)="cerrarModalIaEstudiante()">
-  <div class="modal-card-udec" (click)="$event.stopPropagation()">
-    <div class="modal-header-udec">
-      <div>
-        <span class="gold-pill">INTELIGENCIA ARTIFICIAL GEMINI</span>
-        <h3>🤖 Recomendación de Prácticas para tu Perfil</h3>
-      </div>
-      <button type="button" class="btn-cerrar-modal" (click)="cerrarModalIaEstudiante()">✕</button>
-    </div>
-
-    <div class="modal-body-udec">
-      <div *ngIf="cargandoIaEstudiante" class="estado-carga-ia">
-        <p>⏳ Analizando tus habilidades ({{ perfilEstudiante.skills }}) frente a las ofertas activas...</p>
-      </div>
-      <div *ngIf="!cargandoIaEstudiante && errorIaEstudiante" class="alerta-error-ia">
-        {{ errorIaEstudiante }}
-      </div>
-      <div *ngIf="!cargandoIaEstudiante && !errorIaEstudiante">
-        <div class="badge-ia-info">
-          Ofertas activas evaluadas por IA: <strong>{{ totalOfertasAnalizadasIa }}</strong>
-        </div>
-        <div class="resultado-texto-ia">{{ recomendacionIaTexto }}</div>
-      </div>
-    </div>
-
-    <div class="modal-footer-ia">
-      <button type="button" class="btn-confirmar-ia" (click)="cerrarModalIaEstudiante()">Entendido</button>
-    </div>
+@if (store.perfil() && !store.perfilCompleto()) {
+  <div class="ui-file">
+    <span class="ui-file__icon"><ui-icon name="user" /></span>
+    <span class="ui-file__text">
+      <span class="ui-file__title">Completa tu perfil profesional</span>
+      <span class="ui-file__meta">Las empresas y la IA usan tus habilidades, tu descripción y tu hoja de vida para evaluarte.</span>
+    </span>
+    <a class="ui-btn ui-btn--secondary ui-btn--sm" routerLink="/mi-perfil">Completar perfil <ui-icon name="arrow-right" /></a>
   </div>
-</div>
+}
 
-<!-- MODAL 3: CAMBIAR CONTRASEÑA -->
-<div *ngIf="mostrarModalPassword" class="modal-overlay" (click)="cerrarModalPassword()">
-  <div class="modal-card-udec" (click)="$event.stopPropagation()">
-    <div class="modal-header-udec">
-      <div>
-        <span class="gold-pill">SEGURIDAD DE CUENTA</span>
-        <h3>🔒 Actualizar Contraseña</h3>
-      </div>
-      <button type="button" class="btn-cerrar-modal" (click)="cerrarModalPassword()">✕</button>
+<section class="ui-card">
+  <div class="ui-card__header">
+    <div class="ui-toolbar">
+      <label class="ui-search">
+        <ui-icon name="search" />
+        <span class="ui-sr-only">Buscar oferta</span>
+        <input type="search" class="ui-input" placeholder="Buscar por cargo, programa o ciudad"
+          [ngModel]="busqueda()" (ngModelChange)="busqueda.set($event)" />
+      </label>
+      <select class="ui-select" aria-label="Modalidad" [ngModel]="modalidad()" (ngModelChange)="modalidad.set($event)">
+        <option value="TODAS">Todas las modalidades</option>
+        <option value="Presencial">Presencial</option>
+        <option value="Remoto">Remoto</option>
+        <option value="Híbrido">Híbrido</option>
+      </select>
     </div>
-
-    <div class="modal-body-udec">
-      <div class="form-group-ia">
-        <label>Contraseña Actual</label>
-        <input type="password" [(ngModel)]="passwordActual" placeholder="Ingresa tu contraseña actual" />
-      </div>
-      <div class="form-group-ia">
-        <label>Nueva Contraseña</label>
-        <input type="password" [(ngModel)]="passwordNueva" placeholder="Mínimo 6 caracteres" />
-      </div>
-      <div class="form-group-ia">
-        <label>Confirmar Nueva Contraseña</label>
-        <input type="password" [(ngModel)]="passwordConfirmar" placeholder="Repite la nueva contraseña" />
-      </div>
-
-      <div *ngIf="mensajePasswordError" class="alerta-error-ia">{{ mensajePasswordError }}</div>
-      <div *ngIf="mensajePasswordExito" class="alerta-exito-ia">{{ mensajePasswordExito }}</div>
-    </div>
-
-    <div class="modal-footer-ia">
-      <button type="button" class="btn-cancelar-ia" (click)="cerrarModalPassword()">Cancelar</button>
-      <button type="button" class="btn-confirmar-ia" [disabled]="cargandoPassword" (click)="guardarNuevaContrasena()">
-        {{ cargandoPassword ? 'Actualizando...' : 'Actualizar Contraseña' }}
-      </button>
-    </div>
+    <span class="ui-cell-sub">{{ ofertasFiltradas().length }} oferta(s)</span>
   </div>
-</div>
 
-<app-footer></app-footer>
+  @if (store.cargandoOfertas()) {
+    <div class="ui-empty"><span class="ui-empty__text">Cargando ofertas…</span></div>
+  } @else if (ofertasFiltradas().length === 0) {
+    <div class="ui-empty">
+      <span class="ui-empty__icon"><ui-icon name="inbox" [size]="20" /></span>
+      <span class="ui-empty__title">{{ store.ofertas().length ? 'Sin resultados' : 'No hay ofertas abiertas' }}</span>
+      <span class="ui-empty__text">{{ store.ofertas().length ? 'Prueba con otra búsqueda o modalidad.' : 'Vuelve pronto: las empresas aliadas publican nuevas convocatorias constantemente.' }}</span>
+    </div>
+  } @else {
+    <div class="est-grid">
+      @for (oferta of ofertasFiltradas(); track oferta.idOffer) {
+        @let yaPostulado = store.ofertasPostuladas().has(oferta.idOffer!);
+        <article class="est-offer">
+          <div class="est-offer__top">
+            <span class="ui-badge ui-badge--neutral ui-badge--plain">{{ oferta.modality }}</span>
+            <span class="ui-cell-sub">{{ oferta.availableSpots }} cupo(s)</span>
+          </div>
+          <h2>{{ oferta.practiceName }}</h2>
+          <span class="ui-cell-sub">{{ oferta.profession }}</span>
+          <p class="est-offer__desc">{{ oferta.practiceDescription }}</p>
+          <dl class="est-offer__facts">
+            <div><dt><ui-icon name="wallet" [size]="14" /></dt><dd>{{ formatearSalario(oferta.salary) }}</dd></div>
+            <div><dt><ui-icon name="map-pin" [size]="14" /></dt><dd>{{ oferta.location }}</dd></div>
+            <div><dt><ui-icon name="calendar" [size]="14" /></dt><dd>Cierra {{ oferta.closingDate }}</dd></div>
+          </dl>
+          @if (yaPostulado) {
+            <button type="button" class="ui-btn ui-btn--secondary ui-btn--block" disabled>
+              <ui-icon name="check" /> Ya te postulaste
+            </button>
+          } @else {
+            <button type="button" class="ui-btn ui-btn--primary ui-btn--block"
+              [disabled]="store.procesandoOfertaId() === oferta.idOffer || !store.documento()"
+              (click)="store.postularme(oferta)">
+              {{ store.procesandoOfertaId() === oferta.idOffer ? 'Postulando…' : 'Postularme' }}
+            </button>
+          }
+        </article>
+      }
+    </div>
+  }
+</section>

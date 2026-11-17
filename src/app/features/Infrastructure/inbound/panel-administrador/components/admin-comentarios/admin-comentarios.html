@@ -1,0 +1,48 @@
+<section class="ui-card">
+  @if (store.comentariosPendientes().length === 0) {
+    <div class="ui-empty">
+      <span class="ui-empty__icon"><ui-icon name="message" [size]="20" /></span>
+      <span class="ui-empty__title">No hay reseñas por moderar</span>
+      <span class="ui-empty__text">Las calificaciones que envíen los practicantes al finalizar su práctica aparecerán aquí.</span>
+    </div>
+  } @else {
+    <div class="ui-table-wrap">
+      <table class="ui-table">
+        <caption class="ui-sr-only">Reseñas pendientes de moderación</caption>
+        <thead>
+          <tr>
+            <th>Estudiante</th>
+            <th>Empresa evaluada</th>
+            <th>Calificación</th>
+            <th>Comentario</th>
+            <th class="is-actions">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (c of store.comentariosPendientes(); track c.idComment) {
+            <tr>
+              <td><span class="ui-cell-main">{{ c.studentName }}</span></td>
+              <td>{{ store.nombreEmpresaPorNit(c.nitCompany) }}</td>
+              <td class="is-num">
+                <span class="ui-badge ui-badge--plain ui-badge--neutral">
+                  <ui-icon name="star" [size]="12" /> {{ c.rating }} / 5
+                </span>
+              </td>
+              <td>{{ c.content }}</td>
+              <td class="is-actions">
+                <button type="button" class="ui-btn ui-btn--danger ui-btn--sm" [disabled]="store.procesandoId() === c.idComment"
+                  (click)="store.moderarComentario(c, false)">
+                  <ui-icon name="x" /> Rechazar
+                </button>
+                <button type="button" class="ui-btn ui-btn--primary ui-btn--sm" [disabled]="store.procesandoId() === c.idComment"
+                  (click)="store.moderarComentario(c, true)">
+                  <ui-icon name="check" /> Publicar
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

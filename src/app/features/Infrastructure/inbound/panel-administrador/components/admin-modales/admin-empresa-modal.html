@@ -1,0 +1,84 @@
+@if (store.empresaModal(); as emp) {
+  <div class="ui-modal-backdrop" (click)="store.empresaModal.set(null)">
+    <div class="ui-modal" role="dialog" aria-modal="true" aria-labelledby="modal-empresa-titulo" (click)="$event.stopPropagation()">
+      <div class="ui-modal__header">
+        <div class="ui-cell-entity">
+          <span class="ui-avatar ui-avatar--sq ui-avatar--lg">
+            @if (emp.logoUrl) { <img [src]="emp.logoUrl" alt="" /> } @else { {{ emp.companyName.charAt(0) }} }
+          </span>
+          <div>
+            <h3 id="modal-empresa-titulo">{{ emp.companyName }}</h3>
+            <p>
+              NIT <span class="ui-mono">{{ emp.nit }}</span> ·
+              @switch (emp.verificationStatus) {
+                @case ('APROBADA') { <span class="ui-badge ui-badge--success">Aprobada</span> }
+                @case ('RECHAZADA') { <span class="ui-badge ui-badge--danger">Rechazada</span> }
+                @default { <span class="ui-badge ui-badge--warning">Pendiente</span> }
+              }
+            </p>
+          </div>
+        </div>
+        <button type="button" class="ui-close" aria-label="Cerrar" (click)="store.empresaModal.set(null)"><ui-icon name="x" /></button>
+      </div>
+
+      <div class="ui-modal__body">
+        @if (emp.companyDescription) {
+          <p class="ui-quote">{{ emp.companyDescription }}</p>
+        }
+
+        <dl class="ui-dl">
+          <div><dt>Razón social</dt><dd>{{ emp.legalName || emp.companyName }}</dd></div>
+          <div><dt>Tipo de sociedad</dt><dd>{{ store.etiquetaTipoEmpresa(emp.companyType) }}</dd></div>
+          <div><dt>Correo</dt><dd>{{ store.correoEmpresa(emp) }}</dd></div>
+          <div><dt>Teléfono</dt><dd>{{ emp.companyPhoneNumber || 'No registrado' }}</dd></div>
+          <div><dt>Ubicación</dt><dd>{{ emp.city || 'Fusagasugá' }}, {{ emp.department || 'Cundinamarca' }}</dd></div>
+          <div><dt>Dirección</dt><dd>{{ emp.companyAddress || 'No registrada' }}</dd></div>
+          <div>
+            <dt>Representante legal</dt>
+            <dd>
+              {{ emp.legalRepresentative?.nameRepresentative || emp.nameRepresentive || '—' }}
+              {{ emp.legalRepresentative?.lastNameRepresentative || emp.lastNameRepresentive || '' }}
+            </dd>
+          </div>
+          <div><dt>Documento del representante</dt><dd>{{ emp.legalRepresentative?.numberDocument || emp.numberDocument || '—' }}</dd></div>
+        </dl>
+
+        @if (!store.tieneCertificadoNit(emp) && emp.verificationStatus !== 'APROBADA') {
+          <div class="ui-alert ui-alert--error" role="alert">
+            <ui-icon name="alert" />
+            <span>Esta empresa no adjuntó el certificado RUT / NIT en PDF, por lo que no puede aprobarse. Puedes rechazar la solicitud para que se registre de nuevo con el documento.</span>
+          </div>
+        }
+
+        <div class="ui-file">
+          <span class="ui-file__icon"><ui-icon name="file-text" /></span>
+          <span class="ui-file__text">
+            <span class="ui-file__title">Soporte legal (RUT / certificado NIT)</span>
+            <span class="ui-file__meta">{{ store.tieneCertificadoNit(emp) ? 'Documento PDF cargado por la empresa' : 'La empresa no ha cargado el certificado' }}</span>
+          </span>
+          @if (store.tieneCertificadoNit(emp)) {
+            <a class="ui-btn ui-btn--secondary ui-btn--sm" [href]="store.urlPdfNit(emp)!" target="_blank" rel="noopener noreferrer">
+              <ui-icon name="external-link" /> Abrir
+            </a>
+          }
+        </div>
+      </div>
+
+      <div class="ui-modal__footer">
+        <button type="button" class="ui-btn ui-btn--ghost" (click)="store.empresaModal.set(null)">Cerrar</button>
+        @if (emp.verificationStatus === 'APROBADA') {
+          <button type="button" class="ui-btn ui-btn--danger" [disabled]="store.procesandoId() === emp.nit" (click)="store.verificarEmpresa(emp.nit, false)">
+            <ui-icon name="ban" /> Inhabilitar empresa
+          </button>
+        } @else {
+          <button type="button" class="ui-btn ui-btn--danger" [disabled]="store.procesandoId() === emp.nit" (click)="store.verificarEmpresa(emp.nit, false)">
+            <ui-icon name="x" /> Rechazar
+          </button>
+          <button type="button" class="ui-btn ui-btn--primary" [disabled]="store.procesandoId() === emp.nit || !store.tieneCertificadoNit(emp)" (click)="store.verificarEmpresa(emp.nit, true)">
+            <ui-icon name="check" /> Aprobar empresa
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+}

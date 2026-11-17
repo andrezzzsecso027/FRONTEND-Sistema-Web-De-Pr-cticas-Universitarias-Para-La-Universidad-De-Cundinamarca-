@@ -1,0 +1,139 @@
+<div class="ui-app">
+  <!-- BARRA LATERAL -->
+  <aside class="ui-sidebar">
+    <a class="ui-brand" routerLink="/ofertas">
+      <span class="ui-brand__mark">UdeC</span>
+      <span>
+        <span class="ui-brand__name">UdecPrac</span>
+        <span class="ui-brand__role">Portal del estudiante</span>
+      </span>
+    </a>
+
+    <nav class="ui-nav" aria-label="Secciones del portal">
+      <span class="ui-nav__label">Prácticas</span>
+      <a class="ui-nav__item" routerLink="/ofertas" routerLinkActive="is-active">
+        <ui-icon name="briefcase" /> Ofertas
+        <span class="ui-nav__count">{{ store.ofertas().length }}</span>
+      </a>
+      <a class="ui-nav__item" routerLink="/mis-postulaciones" routerLinkActive="is-active">
+        <ui-icon name="clipboard" /> Mis postulaciones
+        <span class="ui-nav__count">{{ store.postulaciones().length }}</span>
+      </a>
+
+      <span class="ui-nav__label">Cuenta</span>
+      <a class="ui-nav__item" routerLink="/mi-perfil" routerLinkActive="is-active">
+        <ui-icon name="user" /> Mi perfil
+        @if (store.perfil() && !store.perfilCompleto()) {
+          <span class="ui-nav__count is-alert" title="Completa tu perfil">!</span>
+        }
+      </a>
+    </nav>
+
+    <!-- USUARIO -->
+    <div class="ui-sidebar__footer">
+      @if (menuAbierto) {
+        <div class="ui-menu" role="menu">
+          <div class="ui-menu__header">
+            <span class="ui-user__name">{{ store.nombreCompleto() }}</span>
+            <span class="ui-user__mail">{{ store.correo() }}</span>
+          </div>
+          <a class="ui-menu__item" role="menuitem" routerLink="/mi-perfil" (click)="menuAbierto = false">
+            <ui-icon name="user" /> Mi perfil
+          </a>
+          <button type="button" class="ui-menu__item" role="menuitem" (click)="abrirModalPassword()">
+            <ui-icon name="key" /> Cambiar contraseña
+          </button>
+          <button type="button" class="ui-menu__item ui-menu__item--danger" role="menuitem" (click)="cerrarSesion()">
+            <ui-icon name="log-out" /> Cerrar sesión
+          </button>
+        </div>
+      }
+      <button type="button" class="ui-user" (click)="menuAbierto = !menuAbierto" [attr.aria-expanded]="menuAbierto">
+        <span class="ui-avatar">
+          @if (store.perfil()?.photoUrl) { <img [src]="store.perfil()!.photoUrl" alt="" /> } @else { {{ store.iniciales() }} }
+        </span>
+        <span class="ui-user__text">
+          <span class="ui-user__name">{{ store.nombreCompleto() }}</span>
+          <span class="ui-user__mail">{{ store.estudiante()?.academicProgram || store.correo() }}</span>
+        </span>
+        <ui-icon name="chevron-down" [size]="14" />
+      </button>
+    </div>
+  </aside>
+
+  <!-- CONTENIDO -->
+  <main class="ui-main">
+    <div class="ui-container">
+      @if (store.errorIdentidad()) {
+        <div class="ui-alert ui-alert--error" role="alert"><ui-icon name="alert" /> <span>{{ store.errorIdentidad() }}</span></div>
+      }
+      @if (store.mensajeExito()) {
+        <div class="ui-alert ui-alert--success" role="status">
+          <ui-icon name="check-circle" />
+          <span>{{ store.mensajeExito() }}</span>
+          <button type="button" class="ui-alert__close" aria-label="Cerrar" (click)="store.limpiarMensajes()"><ui-icon name="x" [size]="14" /></button>
+        </div>
+      }
+      @if (store.mensajeError()) {
+        <div class="ui-alert ui-alert--error" role="alert">
+          <ui-icon name="alert" />
+          <span>{{ store.mensajeError() }}</span>
+          <button type="button" class="ui-alert__close" aria-label="Cerrar" (click)="store.limpiarMensajes()"><ui-icon name="x" [size]="14" /></button>
+        </div>
+      }
+
+      <router-outlet />
+    </div>
+  </main>
+
+  @if (mostrarModalPassword) {
+    <app-cambiar-password-modal [email]="store.correo()" (cerrar)="mostrarModalPassword = false" />
+  }
+
+  <!-- RECOMENDACIÓN CON IA -->
+  @if (store.recomendacionIa().abierto) {
+    <div class="ui-modal-backdrop" (click)="store.cerrarRecomendacionIa()">
+      <div class="ui-modal ui-modal--ai" role="dialog" aria-modal="true" aria-labelledby="reco-ia-titulo" (click)="$event.stopPropagation()">
+        <div class="ui-modal__header">
+          <div>
+            <span class="ui-ai-chip"><ui-icon name="sparkles" [size]="14" /> Análisis con IA</span>
+            <h3 id="reco-ia-titulo" style="margin-top: 10px;">Ofertas recomendadas para ti</h3>
+            <p>Según tus habilidades, nivel de inglés y perfil profesional.</p>
+          </div>
+          <button type="button" class="ui-close" aria-label="Cerrar" (click)="store.cerrarRecomendacionIa()"><ui-icon name="x" /></button>
+        </div>
+        <div class="ui-modal__body">
+          @if (store.recomendacionIa().cargando) {
+            <div class="ui-ai-loading" role="status">
+              <ui-icon name="sparkles" [size]="18" /> Comparando tu perfil con las ofertas abiertas…
+            </div>
+          } @else if (store.recomendacionIa().error) {
+            <div class="ui-alert ui-alert--error" role="alert"><ui-icon name="alert" /> <span>{{ store.recomendacionIa().error }}</span></div>
+          } @else {
+            <div class="ui-ai-meta"><ui-icon name="briefcase" /> Ofertas analizadas: <strong>{{ store.recomendacionIa().totalAnalizadas }}</strong></div>
+            <div class="ui-ai-output">{{ store.recomendacionIa().resultado }}</div>
+          }
+        </div>
+        <div class="ui-modal__footer">
+          <button type="button" class="ui-btn ui-btn--secondary" (click)="store.cerrarRecomendacionIa()">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (inactividad.expirada()) {
+    <div class="ui-modal-backdrop">
+      <div class="ui-modal ui-modal--sm" role="alertdialog" aria-labelledby="sesion-expirada">
+        <div class="ui-modal__header">
+          <div>
+            <h3 id="sesion-expirada">Tu sesión expiró</h3>
+            <p>Por seguridad cerramos la sesión tras 10 minutos de inactividad. Te llevaremos al inicio de sesión.</p>
+          </div>
+        </div>
+        <div class="ui-modal__footer">
+          <button type="button" class="ui-btn ui-btn--dark" (click)="cerrarSesion()">Iniciar sesión de nuevo</button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

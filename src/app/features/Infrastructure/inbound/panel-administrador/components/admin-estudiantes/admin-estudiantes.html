@@ -1,0 +1,80 @@
+<section class="ui-card">
+  <div class="ui-card__header">
+    <div class="ui-toolbar">
+      <label class="ui-search">
+        <ui-icon name="search" />
+        <span class="ui-sr-only">Buscar estudiante</span>
+        <input type="search" class="ui-input" placeholder="Buscar por cédula o nombre"
+          [ngModel]="filtroTexto()" (ngModelChange)="filtrarTexto($event)" />
+      </label>
+      <select class="ui-select" aria-label="Sede" [ngModel]="filtroSede()" (ngModelChange)="cambiarSede($event)">
+        <option value="TODAS">Todas las sedes</option>
+        @for (s of sedesCatalogo; track s.valor) {
+          <option [value]="s.valor">{{ s.etiqueta }}</option>
+        }
+      </select>
+      <select class="ui-select" aria-label="Programa académico" [ngModel]="filtroPrograma()" (ngModelChange)="cambiarPrograma($event)">
+        <option value="TODOS">Todos los programas</option>
+        @for (prog of programasDisponibles(); track prog) {
+          <option [value]="prog">{{ prog }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  @if (filtrados().length === 0) {
+    <div class="ui-empty">
+      <span class="ui-empty__icon"><ui-icon name="graduation-cap" [size]="20" /></span>
+      <span class="ui-empty__title">Sin resultados</span>
+      <span class="ui-empty__text">No hay estudiantes que coincidan con los filtros seleccionados.</span>
+    </div>
+  } @else {
+    <div class="ui-table-wrap">
+      <table class="ui-table">
+        <caption class="ui-sr-only">Estudiantes registrados en UdecPrac</caption>
+        <thead>
+          <tr>
+            <th>Estudiante</th>
+            <th>Cédula</th>
+            <th>Programa</th>
+            <th>Sede</th>
+            <th>Teléfono</th>
+            <th class="is-actions"><span class="ui-sr-only">Acciones</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (est of paginados(); track est.document || est.documento) {
+            <tr>
+              <td>
+                <div class="ui-cell-entity">
+                  <span class="ui-avatar">{{ (est.name || est.nombres || 'E').charAt(0) }}{{ (est.lastName || est.apellidos || '').charAt(0) }}</span>
+                  <span class="ui-cell-main">{{ est.name || est.nombres }} {{ est.lastName || est.apellidos }}</span>
+                </div>
+              </td>
+              <td><span class="ui-mono">{{ est.document || est.documento }}</span></td>
+              <td>{{ est.academicProgram || est.programaAcademico }}</td>
+              <td>{{ (est.headquarters || est.sede) | titlecase }}</td>
+              <td class="is-num">{{ est.phoneNumber || est.telefono || '—' }}</td>
+              <td class="is-actions">
+                <button type="button" class="ui-btn ui-btn--ghost ui-btn--sm" (click)="store.abrirPerfilEstudiante(est)">
+                  <ui-icon name="user" /> Ver perfil
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="ui-pagination">
+      <span>{{ paginados().length }} de {{ filtrados().length }} estudiantes</span>
+      <div class="ui-pagination__controls">
+        <span>Página {{ pagina() }} de {{ totalPaginas() }}</span>
+        <button type="button" class="ui-btn ui-btn--secondary ui-btn--sm ui-btn--icon" aria-label="Página anterior"
+          [disabled]="pagina() === 1" (click)="pagina.set(pagina() - 1)"><ui-icon name="chevron-left" /></button>
+        <button type="button" class="ui-btn ui-btn--secondary ui-btn--sm ui-btn--icon" aria-label="Página siguiente"
+          [disabled]="pagina() === totalPaginas()" (click)="pagina.set(pagina() + 1)"><ui-icon name="chevron-right" /></button>
+      </div>
+    </div>
+  }
+</section>

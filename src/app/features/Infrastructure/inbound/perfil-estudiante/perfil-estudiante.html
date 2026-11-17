@@ -1,179 +1,83 @@
-<app-navbar></app-navbar>
-
-<main class="student-profile-page">
-  <div class="profile-container">
-
-    <div class="alert alert-success" *ngIf="mensajeExito">{{ mensajeExito }}</div>
-    <div class="alert alert-error" *ngIf="mensajeError">{{ mensajeError }}</div>
-
-    <div class="profile-grid">
-
-      <!-- COLUMNA IZQUIERDA: TARJETA DE IDENTIDAD, FOTO Y HOJA DE VIDA PDF -->
-      <aside class="profile-sidebar-card">
-        <div class="logo-upload-wrapper">
-          <div class="student-photo-preview">
-            <img *ngIf="photoUrl" [src]="photoUrl" alt="Foto Estudiante" />
-            <span *ngIf="!photoUrl" class="photo-initials">{{ nombreCompleto.charAt(0) | uppercase }}</span>
-          </div>
-          <label class="btn-upload-photo">
-            {{ subiendoFoto ? '⏳ Subiendo foto...' : '📷 Cambiar Foto de Perfil' }}
-            <input type="file" accept="image/*" (change)="onSeleccionarFoto($event)" hidden />
-          </label>
-          <small class="upload-hint">Visible para las empresas en tus postulaciones</small>
-        </div>
-
-        <div class="student-identity-summary">
-          <h3>{{ nombreCompleto }}</h3>
-          <span class="cc-badge">CC: {{ documento || 'Cargando...' }}</span>
-          <p class="email-text">{{ correo }}</p>
-          <span class="program-chip">{{ programaAcademico }}</span>
-          <small class="sede-text">Sede {{ sede | titlecase }}</small>
-        </div>
-
-        <hr class="divider" />
-
-        <!-- CARGA DE HOJA DE VIDA EN PDF -->
-        <div class="cv-pdf-box">
-          <h4>📄 Hoja de Vida (CV en PDF)</h4>
-          <p>Sube tu currículum actualizado para que las empresas lo revisen.</p>
-
-          <label class="pdf-dropzone">
-            <span class="pdf-icon">📑</span>
-            <span *ngIf="!linkLifesheet && !subiendoCv">Seleccionar archivo PDF de Hoja de Vida</span>
-            <span *ngIf="subiendoCv">⏳ Subiendo PDF a Cloudinary...</span>
-            <span *ngIf="linkLifesheet && !subiendoCv" class="pdf-success-text">
-              ✓ Hoja de Vida PDF cargada
-            </span>
-            <input type="file" accept="application/pdf" (change)="onSeleccionarPdfCv($event)" hidden />
-          </label>
-          <a *ngIf="linkLifesheet" [href]="linkLifesheet" target="_blank" class="link-ver-pdf">
-            🔗 Ver mi Hoja de Vida actual en Cloudinary
-          </a>
-        </div>
-
-        <hr class="divider" />
-
-        <button type="button" class="btn-password-full" (click)="abrirModalPassword()">
-          🔒 Cambiar Contraseña de Seguridad
-        </button>
-      </aside>
-
-      <!-- COLUMNA DERECHA: FORMULARIO DE EXPEDIENTE Y COMPETENCIAS -->
-      <section class="section-box">
-        <div class="section-header">
-          <div>
-            <h2>Mi Perfil Profesional y Competencias</h2>
-            <p>Esta información la ven las empresas cuando te postulas y la usa Gemini IA para recomendarte ofertas.</p>
-          </div>
-        </div>
-
-        <div class="profile-form">
-          <div class="form-group">
-            <label>Sobre Mí (Perfil Profesional, Intereses y Fortalezas) *</label>
-            <textarea
-              rows="4"
-              [(ngModel)]="aboutMe"
-              placeholder="Cuéntales a las empresas quién eres, qué tecnologías dominas y en qué área te gustaría realizar tu práctica profesional...">
-            </textarea>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label>Habilidades Técnicas y Herramientas (Skills) *</label>
-              <input
-                type="text"
-                [(ngModel)]="skills"
-                placeholder="Ej. Java, Spring Boot, Angular, PostgreSQL, Docker, Git" />
-            </div>
-
-            <div class="form-group">
-              <label>Nivel de Inglés (MCER) *</label>
-              <select [(ngModel)]="englishLevel">
-                <option *ngFor="let niv of nivelesIngles" [value]="niv">{{ niv }}</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label>Portafolio / Repositorio GitHub (URL)</label>
-              <input
-                type="url"
-                [(ngModel)]="githubUrl"
-                placeholder="https://github.com/tu-usuario" />
-            </div>
-
-            <div class="form-group">
-              <label>Documento de Identidad (Cédula)</label>
-              <input type="text" [value]="documento" readonly class="readonly-input" />
-            </div>
-          </div>
-
-          <div class="form-row three-cols">
-            <div class="form-group">
-              <label>Programa Académico</label>
-              <input type="text" [value]="programaAcademico" readonly class="readonly-input" />
-            </div>
-
-            <div class="form-group">
-              <label>Sede Universitaria</label>
-              <input type="text" [value]="sede | titlecase" readonly class="readonly-input" />
-            </div>
-
-            <div class="form-group">
-              <label>Teléfono Registrado</label>
-              <input type="text" [value]="telefono" readonly class="readonly-input" />
-            </div>
-          </div>
-
-          <div class="form-actions">
-            <button type="button" class="btn-primary" [disabled]="cargando" (click)="guardarPerfil()">
-              {{ cargando ? 'Guardando...' : '💾 Guardar Cambios del Perfil' }}
-            </button>
-          </div>
-        </div>
-      </section>
-
-    </div>
+<header class="ui-page-header">
+  <div>
+    <h1>Mi perfil</h1>
+    <p>Las empresas y el asistente de IA usan esta información para evaluar tu postulación.</p>
   </div>
-</main>
+</header>
 
-<!-- MODAL CAMBIAR CONTRASEÑA -->
-<div class="modal-overlay" *ngIf="mostrarModalPassword" (click)="cerrarModalPassword()">
-  <div class="modal-card-udec" (click)="$event.stopPropagation()">
-    <div class="modal-header-udec">
+<div class="est-profile">
+  <section class="ui-card">
+    <div class="ui-card__body est-identity">
+      <span class="ui-avatar ui-avatar--xl">
+        @if (store.perfil()?.photoUrl) { <img [src]="store.perfil()!.photoUrl" alt="Foto de perfil" /> } @else { {{ store.iniciales() }} }
+      </span>
+      <label class="ui-btn ui-btn--ghost ui-btn--sm est-upload">
+        <ui-icon name="camera" /> {{ subiendoFoto ? 'Subiendo…' : 'Cambiar foto' }}
+        <input type="file" accept="image/png,image/jpeg,image/webp" hidden (change)="onSeleccionarFoto($event)" />
+      </label>
+      <h2>{{ store.nombreCompleto() }}</h2>
+      <span class="ui-cell-sub">{{ store.correo() }}</span>
+
+      <dl class="ui-dl" style="width: 100%; text-align: left; margin-top: 12px;">
+        <div><dt>Cédula</dt><dd class="ui-mono">{{ store.documento() || '—' }}</dd></div>
+        <div><dt>Sede</dt><dd>{{ store.estudiante()?.headquarters || '—' }}</dd></div>
+        <div style="grid-column: 1 / -1;"><dt>Programa</dt><dd>{{ store.estudiante()?.academicProgram || '—' }}</dd></div>
+      </dl>
+
+      <hr class="ui-divider" style="width: 100%; margin: 12px 0 4px;" />
+
+      <div class="ui-file" style="width: 100%; text-align: left;">
+        <span class="ui-file__icon"><ui-icon name="file-text" /></span>
+        <span class="ui-file__text">
+          <span class="ui-file__title">Hoja de vida</span>
+          <span class="ui-file__meta">{{ subiendoCv ? 'Subiendo PDF…' : (store.perfil()?.linkLifesheet ? 'Documento PDF cargado' : 'Aún no la has cargado') }}</span>
+        </span>
+        @if (store.perfil()?.linkLifesheet) {
+          <a class="ui-btn ui-btn--ghost ui-btn--sm ui-btn--icon" [href]="store.perfil()!.linkLifesheet" target="_blank" rel="noopener noreferrer" aria-label="Ver hoja de vida">
+            <ui-icon name="external-link" />
+          </a>
+        }
+      </div>
+      <label class="ui-btn ui-btn--secondary ui-btn--sm ui-btn--block est-upload">
+        <ui-icon name="upload" /> {{ store.perfil()?.linkLifesheet ? 'Reemplazar hoja de vida' : 'Subir hoja de vida (PDF)' }}
+        <input type="file" accept="application/pdf" hidden (change)="onSeleccionarCv($event)" />
+      </label>
+    </div>
+  </section>
+
+  <form class="ui-card" [formGroup]="form" (ngSubmit)="guardar()">
+    <div class="ui-card__header">
       <div>
-        <span class="gold-pill">SEGURIDAD ESTUDIANTE</span>
-        <h3>🔒 Actualizar Contraseña</h3>
+        <h2>Perfil profesional</h2>
+        <p>Cuéntale a las empresas quién eres y qué sabes hacer.</p>
       </div>
-      <button type="button" class="btn-cerrar-modal" (click)="cerrarModalPassword()">✕</button>
     </div>
-
-    <div class="modal-body-udec">
-      <div class="form-group-ia">
-        <label>Contraseña Actual</label>
-        <input type="password" [(ngModel)]="passwordActual" placeholder="Ingresa tu contraseña actual" />
+    <div class="ui-card__body ui-form-grid">
+      <div class="ui-field is-full">
+        <label for="pe-about">Sobre mí</label>
+        <textarea id="pe-about" class="ui-textarea" rows="4" formControlName="aboutMe"
+          placeholder="Tus intereses, semestre y el tipo de práctica que buscas."></textarea>
       </div>
-      <div class="form-group-ia">
-        <label>Nueva Contraseña</label>
-        <input type="password" [(ngModel)]="passwordNueva" placeholder="Mínimo 6 caracteres" />
+      <div class="ui-field is-full">
+        <label for="pe-skills">Habilidades</label>
+        <input id="pe-skills" class="ui-input" formControlName="skills" placeholder="Ej. Java, Spring Boot, SQL, trabajo en equipo" />
+        <span class="ui-field__hint">Sepáralas con comas. La IA las compara con la descripción de cada oferta.</span>
       </div>
-      <div class="form-group-ia">
-        <label>Confirmar Nueva Contraseña</label>
-        <input type="password" [(ngModel)]="passwordConfirmar" placeholder="Repite la nueva contraseña" />
+      <div class="ui-field">
+        <label for="pe-ingles">Nivel de inglés</label>
+        <select id="pe-ingles" class="ui-select" formControlName="englishLevel">
+          @for (n of nivelesIngles; track n) { <option [value]="n">{{ n }}</option> }
+        </select>
       </div>
-
-      <div *ngIf="mensajePasswordError" class="alerta-error-ia">{{ mensajePasswordError }}</div>
-      <div *ngIf="mensajePasswordExito" class="alerta-exito-ia">{{ mensajePasswordExito }}</div>
+      <div class="ui-field">
+        <label for="pe-github">Portafolio o GitHub</label>
+        <input id="pe-github" type="url" class="ui-input" formControlName="githubUrl" placeholder="https://github.com/usuario" />
+      </div>
     </div>
-
-    <div class="modal-footer-ia">
-      <button type="button" class="btn-cancelar-ia" (click)="cerrarModalPassword()">Cancelar</button>
-      <button type="button" class="btn-confirmar-ia" [disabled]="cargandoPassword" (click)="guardarNuevaContrasena()">
-        {{ cargandoPassword ? 'Actualizando...' : 'Actualizar Contraseña' }}
+    <div class="ui-card__footer">
+      <button type="submit" class="ui-btn ui-btn--primary" [disabled]="!store.documento()">
+        <ui-icon name="save" /> Guardar perfil
       </button>
     </div>
-  </div>
+  </form>
 </div>
-
-<app-footer></app-footer>   

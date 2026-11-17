@@ -1,0 +1,66 @@
+<form class="ui-card" [formGroup]="ofertaForm" (ngSubmit)="publicarOferta()">
+  <div class="ui-card__header">
+    <div>
+      <h2>Datos de la convocatoria</h2>
+      <p>Se publicará a nombre de <strong>{{ store.nombreEmpresa() }}</strong> (NIT {{ store.nitEmpresa() }}).</p>
+    </div>
+  </div>
+
+  <div class="ui-card__body ui-form-grid">
+    <div class="ui-field">
+      <label for="of-titulo">Título de la práctica</label>
+      <input id="of-titulo" class="ui-input" formControlName="practiceName" placeholder="Ej. Practicante de desarrollo backend" />
+    </div>
+    <div class="ui-field">
+      <label for="of-programa">Programa académico</label>
+      <select id="of-programa" class="ui-select" formControlName="profession">
+        <option value="" disabled>Selecciona un programa</option>
+        @for (prog of programasUdec; track prog) {
+          <option [value]="prog">{{ prog }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="ui-field">
+      <label for="of-modalidad">Modalidad</label>
+      <select id="of-modalidad" class="ui-select" formControlName="modality">
+        @for (mod of modalidades; track mod) {
+          <option [value]="mod">{{ mod }}</option>
+        }
+      </select>
+    </div>
+    <div class="ui-field">
+      <label for="of-ubicacion">Ubicación</label>
+      <input id="of-ubicacion" class="ui-input" formControlName="location" placeholder="Ej. Fusagasugá, Cundinamarca" />
+    </div>
+
+    <div class="ui-field">
+      <label for="of-apoyo">Apoyo económico mensual (COP)</label>
+      <input id="of-apoyo" type="number" class="ui-input" formControlName="salary" min="0" step="50000" />
+      <span class="ui-field__hint">Escribe 0 si la práctica no tiene apoyo económico.</span>
+    </div>
+    <div class="ui-field">
+      <label for="of-cupos">Cupos disponibles</label>
+      <input id="of-cupos" type="number" class="ui-input" formControlName="availableSpots" min="1" max="50" />
+    </div>
+
+    <div class="ui-field">
+      <label for="of-cierre">Fecha límite de postulación</label>
+      <input id="of-cierre" type="date" class="ui-input" formControlName="closingDate" />
+    </div>
+
+    <div class="ui-field is-full">
+      <label for="of-descripcion">Funciones y habilidades esperadas</label>
+      <textarea id="of-descripcion" class="ui-textarea" rows="5" formControlName="practiceDescription"
+        placeholder="Describe las responsabilidades del practicante, las herramientas que usará y las competencias que buscas."></textarea>
+      <span class="ui-field__hint">Mínimo 15 caracteres. La IA usa esta descripción para recomendar la oferta a los estudiantes indicados.</span>
+    </div>
+  </div>
+
+  <div class="ui-card__footer">
+    <button type="button" class="ui-btn ui-btn--ghost" (click)="store.cambiarVista('mis-ofertas')">Cancelar</button>
+    <button type="submit" class="ui-btn ui-btn--primary" [disabled]="store.cargando()">
+      <ui-icon name="check" /> {{ store.cargando() ? 'Publicando…' : 'Publicar oferta' }}
+    </button>
+  </div>
+</form>

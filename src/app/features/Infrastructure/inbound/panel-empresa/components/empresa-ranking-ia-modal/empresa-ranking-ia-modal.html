@@ -1,0 +1,32 @@
+<div class="ui-modal-backdrop" (click)="store.cerrarRankingIa()">
+  <div class="ui-modal ui-modal--ai" role="dialog" aria-modal="true" aria-labelledby="ranking-ia-titulo" (click)="$event.stopPropagation()">
+    <div class="ui-modal__header">
+      <div>
+        <span class="ui-ai-chip"><ui-icon name="sparkles" [size]="14" /> Análisis con IA</span>
+        <h3 id="ranking-ia-titulo" style="margin-top: 10px;">Ranking de candidatos</h3>
+        <p>{{ store.rankingIa().nombreOferta }}</p>
+      </div>
+      <button type="button" class="ui-close" aria-label="Cerrar" (click)="store.cerrarRankingIa()"><ui-icon name="x" /></button>
+    </div>
+
+    <div class="ui-modal__body">
+      @if (store.rankingIa().cargando) {
+        <div class="ui-ai-loading" role="status">
+          <ui-icon name="sparkles" [size]="18" />
+          Evaluando competencias, nivel de inglés y perfil de cada postulado…
+        </div>
+      } @else if (store.rankingIa().error) {
+        <div class="ui-alert ui-alert--error" role="alert"><ui-icon name="alert" /> <span>{{ store.rankingIa().error }}</span></div>
+      } @else {
+        <div class="ui-ai-meta">
+          <ui-icon name="users" /> Candidatos analizados: <strong>{{ store.rankingIa().totalAnalizados }}</strong>
+        </div>
+        <div class="ui-ai-output">{{ store.rankingIa().resultado }}</div>
+      }
+    </div>
+
+    <div class="ui-modal__footer">
+      <button type="button" class="ui-btn ui-btn--secondary" (click)="store.cerrarRankingIa()">Cerrar</button>
+    </div>
+  </div>
+</div>

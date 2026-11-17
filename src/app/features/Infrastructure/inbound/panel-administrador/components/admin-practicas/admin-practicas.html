@@ -1,0 +1,64 @@
+<section class="ui-card">
+  @if (store.alumnosEnPractica().length === 0) {
+    <div class="ui-empty">
+      <span class="ui-empty__icon"><ui-icon name="file-check" [size]="20" /></span>
+      <span class="ui-empty__title">Aún no hay prácticas en curso</span>
+      <span class="ui-empty__text">Cuando una empresa acepte a un estudiante, la práctica aparecerá aquí con su contrato y seguimiento.</span>
+    </div>
+  } @else {
+    <div class="ui-table-wrap">
+      <table class="ui-table">
+        <caption class="ui-sr-only">Practicantes vinculados y estado de su contrato</caption>
+        <thead>
+          <tr>
+            <th>Practicante</th>
+            <th>Empresa</th>
+            <th>Oferta</th>
+            <th>Contrato</th>
+            <th>Estado</th>
+            <th class="is-actions"><span class="ui-sr-only">Acciones</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (al of store.alumnosEnPractica(); track al.idPostulation) {
+            @let doc = store.documentoDePractica(al);
+            <tr>
+              <td>
+                <div class="ui-cell-entity">
+                  <span class="ui-avatar">{{ al.studentFullName.charAt(0) }}</span>
+                  <span>
+                    <span class="ui-cell-main">{{ al.studentFullName }}</span>
+                    <span class="ui-cell-sub">CC {{ al.studentDocument }} · {{ al.studentProgram }}</span>
+                  </span>
+                </div>
+              </td>
+              <td>{{ al.companyName }}</td>
+              <td>{{ al.offerName }}</td>
+              <td>
+                @if (doc?.fileUrl) {
+                  <a class="ui-link" [href]="doc.fileUrl" target="_blank" rel="noopener noreferrer">
+                    <ui-icon name="file-text" [size]="14" /> Ver PDF
+                  </a>
+                } @else {
+                  <span class="ui-badge ui-badge--neutral ui-badge--plain">Pendiente de carga</span>
+                }
+              </td>
+              <td>
+                @switch (doc?.trackingStatus || al.statusPractice) {
+                  @case ('FINALIZADA') { <span class="ui-badge ui-badge--neutral">Finalizada</span> }
+                  @case ('CONTRATO_FIRMADO') { <span class="ui-badge ui-badge--success">Contrato firmado</span> }
+                  @default { <span class="ui-badge ui-badge--info">En curso</span> }
+                }
+              </td>
+              <td class="is-actions">
+                <button type="button" class="ui-btn ui-btn--ghost ui-btn--sm" (click)="store.practicaModal.set(al)">
+                  <ui-icon name="clipboard" /> Expediente
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

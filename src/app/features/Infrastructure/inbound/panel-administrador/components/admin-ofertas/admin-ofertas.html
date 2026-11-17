@@ -1,0 +1,102 @@
+<section class="ui-card">
+  <div class="ui-card__header">
+    <div class="ui-tabs" role="tablist" aria-label="Estado de las ofertas">
+      <button type="button" role="tab" class="ui-tabs__item" [class.is-active]="subVista() === 'actuales'"
+        [attr.aria-selected]="subVista() === 'actuales'" (click)="cambiarSubVista('actuales')">
+        Abiertas <span class="ui-tabs__count">{{ actuales().length }}</span>
+      </button>
+      <button type="button" role="tab" class="ui-tabs__item" [class.is-active]="subVista() === 'historial'"
+        [attr.aria-selected]="subVista() === 'historial'" (click)="cambiarSubVista('historial')">
+        Historial <span class="ui-tabs__count">{{ historial().length }}</span>
+      </button>
+    </div>
+    <div class="ui-toolbar">
+      <select class="ui-select" aria-label="Modalidad" [ngModel]="filtroModalidad()" (ngModelChange)="filtrar(filtroModalidad, $event)">
+        <option value="TODAS">Todas las modalidades</option>
+        @for (mod of modalidadesCatalogo; track mod) {
+          <option [value]="mod">{{ mod }}</option>
+        }
+      </select>
+      <select class="ui-select" aria-label="Programa" [ngModel]="filtroProfesion()" (ngModelChange)="filtrar(filtroProfesion, $event)">
+        <option value="TODAS">Todos los programas</option>
+        @for (prof of profesionesCatalogo; track prof) {
+          <option [value]="prof">{{ prof }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  @if (listaActiva().length === 0) {
+    <div class="ui-empty">
+      <span class="ui-empty__icon"><ui-icon name="briefcase" [size]="20" /></span>
+      <span class="ui-empty__title">{{ subVista() === 'actuales' ? 'No hay ofertas abiertas' : 'El historial está vacío' }}</span>
+      <span class="ui-empty__text">No hay ofertas que coincidan con los filtros seleccionados.</span>
+    </div>
+  } @else {
+    <div class="ui-table-wrap">
+      <table class="ui-table">
+        <caption class="ui-sr-only">{{ subVista() === 'actuales' ? 'Ofertas abiertas' : 'Historial de ofertas' }}</caption>
+        <thead>
+          <tr>
+            <th>Oferta</th>
+            <th>Empresa</th>
+            <th>Programa</th>
+            @if (subVista() === 'actuales') {
+              <th>Modalidad</th>
+              <th class="is-num">Cupos</th>
+              <th>Estado</th>
+            } @else {
+              <th class="is-num">Seleccionados</th>
+              <th>Estado</th>
+            }
+            <th class="is-actions"><span class="ui-sr-only">Acciones</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (of of paginadas(); track of.idOffer) {
+            <tr>
+              <td>
+                <span class="ui-cell-main">{{ of.practiceName }}</span>
+                <span class="ui-cell-sub">#{{ of.idOffer }} · {{ of.practiceDescription | slice:0:60 }}{{ (of.practiceDescription.length || 0) > 60 ? '…' : '' }}</span>
+              </td>
+              <td>{{ store.nombreEmpresaPorNit(of.nitCompanyAssociated) }}</td>
+              <td>{{ of.profession }}</td>
+              @if (subVista() === 'actuales') {
+                <td>{{ of.modality }}</td>
+                <td class="is-num">{{ of.availableSpots }} / {{ store.cuposIniciales(of) }}</td>
+                <td><span class="ui-badge ui-badge--success">Abierta</span></td>
+                <td class="is-actions">
+                  <button type="button" class="ui-btn ui-btn--danger ui-btn--sm" [disabled]="store.procesandoId() === of.idOffer"
+                    (click)="store.cerrarOferta(of)">
+                    <ui-icon name="ban" /> Cerrar oferta
+                  </button>
+                </td>
+              } @else {
+                <td class="is-num">{{ store.aceptadosPorOferta(of.idOffer).length }} de {{ store.cuposIniciales(of) }}</td>
+                <td>
+                  <span class="ui-badge ui-badge--neutral">{{ of.availableSpots === 0 ? 'Cupos completos' : 'Cerrada' }}</span>
+                </td>
+                <td class="is-actions">
+                  <button type="button" class="ui-btn ui-btn--ghost ui-btn--sm" (click)="store.ofertaHistorialModal.set(of)">
+                    <ui-icon name="users" /> Seleccionados
+                  </button>
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="ui-pagination">
+      <span>{{ paginadas().length }} de {{ listaActiva().length }} ofertas</span>
+      <div class="ui-pagination__controls">
+        <span>Página {{ pagina() }} de {{ totalPaginas() }}</span>
+        <button type="button" class="ui-btn ui-btn--secondary ui-btn--sm ui-btn--icon" aria-label="Página anterior"
+          [disabled]="pagina() === 1" (click)="pagina.set(pagina() - 1)"><ui-icon name="chevron-left" /></button>
+        <button type="button" class="ui-btn ui-btn--secondary ui-btn--sm ui-btn--icon" aria-label="Página siguiente"
+          [disabled]="pagina() === totalPaginas()" (click)="pagina.set(pagina() + 1)"><ui-icon name="chevron-right" /></button>
+      </div>
+    </div>
+  }
+</section>

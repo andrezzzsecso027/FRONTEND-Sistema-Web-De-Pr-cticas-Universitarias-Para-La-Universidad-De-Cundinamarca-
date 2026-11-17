@@ -1,0 +1,80 @@
+@if (store.estudianteModal(); as est) {
+  <div class="ui-modal-backdrop" (click)="store.cerrarPerfilEstudiante()">
+    <div class="ui-modal" role="dialog" aria-modal="true" aria-labelledby="modal-estudiante-titulo" (click)="$event.stopPropagation()">
+      <div class="ui-modal__header">
+        <div class="ui-cell-entity">
+          <span class="ui-avatar ui-avatar--lg">
+            @if (store.perfilEstudianteModal()?.photoUrl) {
+              <img [src]="store.perfilEstudianteModal()!.photoUrl" alt="" />
+            } @else {
+              {{ (est.name || est.nombres || 'E').charAt(0) }}{{ (est.lastName || est.apellidos || '').charAt(0) }}
+            }
+          </span>
+          <div>
+            <h3 id="modal-estudiante-titulo">{{ est.name || est.nombres }} {{ est.lastName || est.apellidos }}</h3>
+            <p>CC <span class="ui-mono">{{ est.document || est.documento }}</span> · {{ est.academicProgram || est.programaAcademico }}</p>
+          </div>
+        </div>
+        <button type="button" class="ui-close" aria-label="Cerrar" (click)="store.cerrarPerfilEstudiante()"><ui-icon name="x" /></button>
+      </div>
+
+      <div class="ui-modal__body">
+        <dl class="ui-dl">
+          <div><dt>Correo institucional</dt><dd>{{ store.correoEstudiante(est) }}</dd></div>
+          <div><dt>Sede</dt><dd>{{ (est.headquarters || est.sede) | titlecase }}</dd></div>
+          <div><dt>Teléfono</dt><dd>{{ est.phoneNumber || est.telefono || 'No registrado' }}</dd></div>
+          <div><dt>Dirección</dt><dd>{{ est.addres || est.direccion || 'No registrada' }}</dd></div>
+        </dl>
+
+        <hr class="ui-divider" />
+
+        @if (store.cargandoPerfilEstudiante()) {
+          <p class="ui-cell-sub">Consultando la hoja de vida del estudiante…</p>
+        } @else if (store.perfilEstudianteModal(); as perfil) {
+          <div>
+            <span class="ui-eyebrow">Perfil profesional</span>
+            <p>{{ perfil.aboutMe || 'Sin descripción registrada.' }}</p>
+          </div>
+          <dl class="ui-dl">
+            <div><dt>Habilidades</dt><dd>{{ perfil.skills || 'No especificadas' }}</dd></div>
+            <div><dt>Nivel de inglés</dt><dd>{{ perfil.englishLevel || 'No especificado' }}</dd></div>
+          </dl>
+          @if (perfil.linkLifesheet) {
+            <div class="ui-file">
+              <span class="ui-file__icon"><ui-icon name="file-text" /></span>
+              <span class="ui-file__text">
+                <span class="ui-file__title">Hoja de vida</span>
+                <span class="ui-file__meta">Documento PDF</span>
+              </span>
+              <a class="ui-btn ui-btn--secondary ui-btn--sm" [href]="perfil.linkLifesheet" target="_blank" rel="noopener noreferrer">
+                <ui-icon name="external-link" /> Abrir
+              </a>
+            </div>
+          }
+          @if (perfil.githubUrl) {
+            <div class="ui-file">
+              <span class="ui-file__icon"><ui-icon name="repo" /></span>
+              <span class="ui-file__text">
+                <span class="ui-file__title">Portafolio</span>
+                <span class="ui-file__meta">{{ perfil.githubUrl }}</span>
+              </span>
+              <a class="ui-btn ui-btn--secondary ui-btn--sm" [href]="perfil.githubUrl" target="_blank" rel="noopener noreferrer">
+                <ui-icon name="external-link" /> Abrir
+              </a>
+            </div>
+          }
+        } @else {
+          <div class="ui-empty" style="padding: 24px 12px;">
+            <span class="ui-empty__icon"><ui-icon name="file-text" [size]="20" /></span>
+            <span class="ui-empty__title">Hoja de vida pendiente</span>
+            <span class="ui-empty__text">El estudiante está registrado, pero aún no ha completado su perfil profesional.</span>
+          </div>
+        }
+      </div>
+
+      <div class="ui-modal__footer">
+        <button type="button" class="ui-btn ui-btn--secondary" (click)="store.cerrarPerfilEstudiante()">Cerrar</button>
+      </div>
+    </div>
+  </div>
+}

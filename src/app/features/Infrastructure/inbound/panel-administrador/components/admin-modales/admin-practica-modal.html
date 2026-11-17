@@ -1,0 +1,71 @@
+@if (store.practicaModal(); as p) {
+  @let doc = store.documentoDePractica(p);
+  <div class="ui-modal-backdrop" (click)="store.practicaModal.set(null)">
+    <div class="ui-modal" role="dialog" aria-modal="true" aria-labelledby="modal-practica-titulo" (click)="$event.stopPropagation()">
+      <div class="ui-modal__header">
+        <div>
+          <span class="ui-eyebrow"><ui-icon name="clipboard" [size]="14" /> Expediente de práctica #{{ p.idPractice }}</span>
+          <h3 id="modal-practica-titulo">{{ p.offerName }}</h3>
+          <p>{{ p.companyName }} · NIT <span class="ui-mono">{{ p.nitCompany }}</span></p>
+        </div>
+        <button type="button" class="ui-close" aria-label="Cerrar" (click)="store.practicaModal.set(null)"><ui-icon name="x" /></button>
+      </div>
+
+      <div class="ui-modal__body">
+        <dl class="ui-dl">
+          <div><dt>Practicante</dt><dd>{{ p.studentFullName }}</dd></div>
+          <div><dt>Cédula</dt><dd class="ui-mono">{{ p.studentDocument }}</dd></div>
+          <div><dt>Programa</dt><dd>{{ p.studentProgram }}</dd></div>
+          <div>
+            <dt>Estado</dt>
+            <dd>
+              @switch (doc?.trackingStatus || p.statusPractice) {
+                @case ('FINALIZADA') { <span class="ui-badge ui-badge--neutral">Finalizada</span> }
+                @case ('CONTRATO_FIRMADO') { <span class="ui-badge ui-badge--success">Contrato firmado</span> }
+                @default { <span class="ui-badge ui-badge--info">En curso</span> }
+              }
+            </dd>
+          </div>
+          <div><dt>Modalidad</dt><dd>{{ p.modality }} · {{ p.location }}</dd></div>
+          <div><dt>Apoyo económico</dt><dd>{{ p.salary > 0 ? ('$' + (p.salary | number) + ' COP') : 'A convenir' }}</dd></div>
+          <div><dt>Inicio</dt><dd>{{ p.startDate }}</dd></div>
+          <div><dt>Finalización</dt><dd>{{ p.endDate }}</dd></div>
+        </dl>
+
+        <div>
+          <span class="ui-eyebrow">Funciones de la oferta</span>
+          <p>{{ p.offerDescription }}</p>
+        </div>
+
+        <div class="ui-file">
+          <span class="ui-file__icon"><ui-icon name="file-check" /></span>
+          <span class="ui-file__text">
+            <span class="ui-file__title">Contrato de práctica</span>
+            <span class="ui-file__meta">
+              {{ doc?.fileUrl ? (doc.fileName || 'Documento PDF') : 'La empresa aún no ha cargado el contrato' }}
+            </span>
+          </span>
+          @if (doc?.fileUrl) {
+            <a class="ui-btn ui-btn--secondary ui-btn--sm" [href]="doc.fileUrl" target="_blank" rel="noopener noreferrer">
+              <ui-icon name="external-link" /> Abrir
+            </a>
+          }
+        </div>
+
+        @if (doc?.companyComments) {
+          <div>
+            <span class="ui-eyebrow">Observaciones de la empresa</span>
+            <p class="ui-quote">{{ doc.companyComments }}</p>
+          </div>
+        }
+      </div>
+
+      <div class="ui-modal__footer">
+        <button type="button" class="ui-btn ui-btn--ghost" (click)="store.practicaModal.set(null)">Cerrar</button>
+        <button type="button" class="ui-btn ui-btn--dark" (click)="verHojaDeVida()">
+          <ui-icon name="user" /> Ver hoja de vida
+        </button>
+      </div>
+    </div>
+  </div>
+}

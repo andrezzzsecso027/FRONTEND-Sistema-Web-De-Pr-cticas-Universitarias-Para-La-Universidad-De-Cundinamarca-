@@ -1,0 +1,64 @@
+<section class="ui-card">
+  @if (store.empresasPendientes().length === 0) {
+    <div class="ui-empty">
+      <span class="ui-empty__icon"><ui-icon name="inbox" [size]="20" /></span>
+      <span class="ui-empty__title">No hay solicitudes pendientes</span>
+      <span class="ui-empty__text">Cuando una empresa se registre, aparecerá aquí para que revises su información legal.</span>
+    </div>
+  } @else {
+    <div class="ui-table-wrap">
+      <table class="ui-table">
+        <caption class="ui-sr-only">Solicitudes de empresas pendientes de aprobación</caption>
+        <thead>
+          <tr>
+            <th>Empresa</th>
+            <th>NIT</th>
+            <th>Tipo</th>
+            <th>Ciudad</th>
+            <th>Estado</th>
+            <th class="is-actions">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (emp of store.empresasPendientes(); track emp.nit) {
+            <tr>
+              <td>
+                <div class="ui-cell-entity">
+                  <span class="ui-avatar ui-avatar--sq">
+                    @if (emp.logoUrl) { <img [src]="emp.logoUrl" alt="" /> } @else { {{ emp.companyName.charAt(0) }} }
+                  </span>
+                  <span class="ui-cell-main">{{ emp.companyName }}</span>
+                </div>
+              </td>
+              <td><span class="ui-mono">{{ emp.nit }}</span></td>
+              <td>{{ store.etiquetaTipoEmpresa(emp.companyType) }}</td>
+              <td>{{ emp.city || '—' }}</td>
+              <td>
+                @if (store.tieneCertificadoNit(emp)) {
+                  <span class="ui-badge ui-badge--warning">Pendiente</span>
+                } @else {
+                  <span class="ui-badge ui-badge--danger" title="No adjuntó el certificado RUT / NIT en PDF">Sin certificado</span>
+                }
+              </td>
+              <td class="is-actions">
+                <button type="button" class="ui-btn ui-btn--ghost ui-btn--sm" (click)="store.empresaModal.set(emp)">
+                  <ui-icon name="eye" /> Revisar
+                </button>
+                <button type="button" class="ui-btn ui-btn--danger ui-btn--sm" [disabled]="store.procesandoId() === emp.nit"
+                  (click)="store.verificarEmpresa(emp.nit, false)">
+                  <ui-icon name="x" /> Rechazar
+                </button>
+                <button type="button" class="ui-btn ui-btn--primary ui-btn--sm"
+                  [disabled]="store.procesandoId() === emp.nit || !store.tieneCertificadoNit(emp)"
+                  [attr.title]="store.tieneCertificadoNit(emp) ? null : 'No se puede aprobar sin el certificado RUT / NIT en PDF'"
+                  (click)="store.verificarEmpresa(emp.nit, true)">
+                  <ui-icon name="check" /> Aprobar
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

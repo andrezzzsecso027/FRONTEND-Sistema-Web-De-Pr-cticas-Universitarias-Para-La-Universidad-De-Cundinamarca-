@@ -1,0 +1,98 @@
+<header class="ui-page-header">
+  <div>
+    <button type="button" class="ui-btn ui-btn--ghost ui-btn--sm" style="margin: 0 0 8px -10px;" (click)="store.cambiarVista('mis-ofertas')">
+      <ui-icon name="arrow-left" /> Mis ofertas
+    </button>
+    <h1>{{ store.ofertaSeleccionada()?.practiceName }}</h1>
+    <p>{{ store.ofertaSeleccionada()?.profession }} · {{ store.ofertaSeleccionada()?.availableSpots }} cupo(s) disponibles</p>
+  </div>
+  <div class="ui-page-header__actions">
+    <button type="button" class="ui-btn ui-btn--ai" (click)="store.abrirRankingIa()" [disabled]="postulantes.length === 0">
+      <ui-icon name="sparkles" /> Analizar postulados con IA
+    </button>
+  </div>
+</header>
+
+<section class="ui-card">
+  @if (postulantes.length === 0 && !cargando) {
+    <div class="ui-empty">
+      <span class="ui-empty__icon"><ui-icon name="users" [size]="20" /></span>
+      <span class="ui-empty__title">Aún no hay postulados</span>
+      <span class="ui-empty__text">Cuando un estudiante se postule a esta convocatoria aparecerá aquí con su hoja de vida.</span>
+    </div>
+  }
+
+  @for (p of postulantes; track p.idPostulation) {
+    @let cv = p.lifesheet || $any(p).linkLifesheet;
+    <article class="pe-person">
+      <div class="pe-person__head">
+        <span class="ui-avatar ui-avatar--lg">
+          @if ($any(p).photoUrl) { <img [src]="$any(p).photoUrl" alt="" /> } @else { {{ (p.studentFullName || 'E').charAt(0) }} }
+        </span>
+        <div class="pe-person__info">
+          <span class="pe-person__name">
+            {{ p.studentFullName }}
+            @switch (p.statusPostulation) {
+              @case ('ACEPTADA') { <span class="ui-badge ui-badge--success">Aceptada</span> }
+              @case ('RECHAZADA') { <span class="ui-badge ui-badge--danger">Rechazada</span> }
+              @default { <span class="ui-badge ui-badge--warning">En revisión</span> }
+            }
+          </span>
+          <span class="pe-person__meta">
+            <span><ui-icon name="user" [size]="14" /> CC {{ p.documentStudent || p.studentDocument }}</span>
+            @if (p.studentEmail) { <span><ui-icon name="mail" [size]="14" /> {{ p.studentEmail }}</span> }
+            <span><ui-icon name="graduation-cap" [size]="14" /> Inglés {{ p.englishLevel || 'por registrar' }}</span>
+          </span>
+          @if ($any(p).aboutMe) {
+            <p class="ui-quote">{{ $any(p).aboutMe }}</p>
+          }
+          <span class="ui-cell-sub"><strong>Habilidades:</strong> {{ p.skills || 'Por registrar' }}</span>
+          <div class="pe-person__links">
+            @if (cv) {
+              <a class="ui-btn ui-btn--secondary ui-btn--sm" [href]="cv" target="_blank" rel="noopener noreferrer">
+                <ui-icon name="file-text" /> Hoja de vida
+              </a>
+            }
+            @if (p.githubUrl) {
+              <a class="ui-btn ui-btn--secondary ui-btn--sm" [href]="p.githubUrl" target="_blank" rel="noopener noreferrer">
+                <ui-icon name="repo" /> Portafolio
+              </a>
+            }
+          </div>
+        </div>
+      </div>
+
+      @if (p.statusPostulation === 'POSTULADA') {
+        <div class="pe-person__decision">
+          <div class="ui-field">
+            <label [for]="'obs-' + p.idPostulation">Mensaje para el estudiante <span class="ui-cell-sub" style="display:inline">(se envía a su correo)</span></label>
+            <textarea [id]="'obs-' + p.idPostulation" class="ui-textarea" rows="2" style="min-height: 64px;"
+              [(ngModel)]="observacionesPorPostulante[p.idPostulation]"
+              placeholder="Ej. Te esperamos el lunes para la inducción…"></textarea>
+          </div>
+          <div class="pe-person__buttons">
+            <button type="button" class="ui-btn ui-btn--danger" [disabled]="cargando" (click)="decidirPostulacion(p, 'RECHAZADA')">
+              <ui-icon name="x" /> Rechazar
+            </button>
+            <button type="button" class="ui-btn ui-btn--primary" [disabled]="cargando" (click)="decidirPostulacion(p, 'ACEPTADA')">
+              <ui-icon name="check" /> Aceptar
+            </button>
+          </div>
+        </div>
+      }
+
+      @if (p.statusPostulation === 'ACEPTADA') {
+        <div class="ui-file">
+          <span class="ui-file__icon"><ui-icon name="file-check" /></span>
+          <span class="ui-file__text">
+            <span class="ui-file__title">Practicante aceptado</span>
+            <span class="ui-file__meta">Sube su contrato y registra el seguimiento desde «Practicantes».</span>
+          </span>
+          <button type="button" class="ui-btn ui-btn--secondary ui-btn--sm" (click)="store.cambiarVista('mis-practicas')">
+            Ir a practicantes <ui-icon name="arrow-right" />
+          </button>
+        </div>
+      }
+    </article>
+  }
+</section>

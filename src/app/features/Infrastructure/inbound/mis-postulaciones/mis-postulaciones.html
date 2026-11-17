@@ -1,61 +1,65 @@
-﻿<app-navbar></app-navbar>
-
-<main class="postulaciones-page">
-  <div class="container">
-
-    <header class="postulaciones-header">
-      <h1>Mis Postulaciones</h1>
-      <p>Revisa el estado de las ofertas de práctica a las que te has postulado.</p>
-    </header>
-
-    <div *ngIf="mensajeError" class="alert alert-error">
-      {{ mensajeError }}
-    </div>
-
-    <div *ngIf="cargando" class="loading">
-      <p>Cargando tus postulaciones...</p>
-    </div>
-
-    <div *ngIf="!cargando && postulaciones.length === 0 && !mensajeError" class="empty-state">
-      <div class="empty-icon">📋</div>
-      <h3>Aún no tienes postulaciones</h3>
-      <p>Explora las ofertas disponibles y comienza tu camino profesional.</p>
-      <a routerLink="/ofertas" class="btn-primary">Ver ofertas disponibles</a>
-    </div>
-
-    <div *ngIf="!cargando && postulaciones.length > 0" class="postulaciones-list">
-      <div *ngFor="let post of postulaciones" class="postulacion-card">
-        
-        <div class="postulacion-header">
-          <div>
-            <h2 class="postulacion-title">{{ post.offerName }}</h2>
-            <p class="postulacion-company">🏢 {{ post.companyName }}</p>
-          </div>
-          <span class="badge" [ngClass]="getEstadoClase(post.state)">
-            {{ post.state.replace('_', ' ') }}
-          </span>
-        </div>
-
-        <div class="postulacion-body">
-          <div class="postulacion-info">
-            <span class="info-label">Fecha de postulación</span>
-            <span class="info-value">{{ post.applicationDate }}</span>
-          </div>
-          
-          <div class="postulacion-info" *ngIf="post.observations">
-            <span class="info-label">Observaciones</span>
-            <span class="info-value">{{ post.observations }}</span>
-          </div>
-        </div>
-
-        <div class="postulacion-actions">
-          <button class="btn-secondary">Ver historial</button>
-        </div>
-
-      </div>
-    </div>
-
+﻿<header class="ui-page-header">
+  <div>
+    <h1>Mis postulaciones</h1>
+    <p>Estado de las ofertas a las que te has postulado y los mensajes de las empresas.</p>
   </div>
-</main>
+  <div class="ui-page-header__actions">
+    <button type="button" class="ui-btn ui-btn--secondary" (click)="store.cargarPostulaciones()">
+      <ui-icon name="refresh" /> Actualizar
+    </button>
+  </div>
+</header>
 
-<app-footer></app-footer>
+<section class="ui-card">
+  @if (store.cargandoPostulaciones()) {
+    <div class="ui-empty"><span class="ui-empty__text">Cargando tus postulaciones…</span></div>
+  } @else if (store.postulaciones().length === 0) {
+    <div class="ui-empty">
+      <span class="ui-empty__icon"><ui-icon name="clipboard" [size]="20" /></span>
+      <span class="ui-empty__title">Aún no te has postulado</span>
+      <span class="ui-empty__text">Explora las ofertas abiertas y postúlate a las que encajen con tu programa.</span>
+      <a class="ui-btn ui-btn--primary" routerLink="/ofertas">Ver ofertas</a>
+    </div>
+  } @else {
+    <div class="ui-table-wrap">
+      <table class="ui-table">
+        <caption class="ui-sr-only">Mis postulaciones</caption>
+        <thead>
+          <tr>
+            <th>Oferta</th>
+            <th>Empresa</th>
+            <th>Postulación</th>
+            <th>Estado</th>
+            <th>Mensaje de la empresa</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (p of store.postulaciones(); track p.idPostulation) {
+            <tr>
+              <td>
+                <span class="ui-cell-main">{{ p.offerName }}</span>
+                <span class="ui-cell-sub">{{ p.modality }}{{ p.location ? ' · ' + p.location : '' }}</span>
+              </td>
+              <td>{{ p.companyName || '—' }}</td>
+              <td class="is-num">{{ p.datePostulation | date: 'dd/MM/yyyy' }}</td>
+              <td>
+                @switch (p.status) {
+                  @case ('ACEPTADA') { <span class="ui-badge ui-badge--success">Aceptada</span> }
+                  @case ('RECHAZADA') { <span class="ui-badge ui-badge--danger">No seleccionada</span> }
+                  @default { <span class="ui-badge ui-badge--warning">En revisión</span> }
+                }
+              </td>
+              <td>
+                @if (p.observations) {
+                  <span class="ui-cell-sub" style="margin: 0;">{{ p.observations }}</span>
+                } @else {
+                  <span class="ui-cell-sub" style="margin: 0;">—</span>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

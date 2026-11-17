@@ -13,18 +13,28 @@ import { adminGuard } from './core/guards/admin.guard';
 import { estudianteGuard } from './core/guards/estudiante.guard';
 import { empresaGuard } from './core/guards/empresa.guard';
 import { PerfilEstudiante } from './features/Infrastructure/inbound/perfil-estudiante/perfil-estudiante';
+import { PanelEstudiante } from './features/Infrastructure/inbound/panel-estudiante/panel-estudiante';
 
 export const routes: Routes = [
-  { path: '', component: Home },
+  { path: '', component: Home, pathMatch: 'full' },
   { path: 'login', component: Login },
   { path: 'registro', component: Registro },
   { path: 'registro-estudiante', component: RegistroEstudiante },
   { path: 'registro-empresa', component: RegistroEmpresa },
   { path: 'verificar-cuenta', component: VerificarCuenta },
-  { path: 'ofertas', component: OfertaLista, canActivate: [estudianteGuard] },
-  { path: 'mis-postulaciones', component: MisPostulaciones, canActivate: [estudianteGuard] },
   { path: 'panel-administrador', component: PanelAdministrador, canActivate: [adminGuard] },
-  { path: 'mi-perfil', component: PerfilEstudiante },
   { path: 'panel-empresa', component: PanelEmpresa, canActivate: [empresaGuard] },
+  // Portal del estudiante: layout con barra lateral y vistas hijas, todas protegidas por el guard
+  // (antes /mi-perfil no tenía guard). Las URL se mantienen: /ofertas, /mis-postulaciones, /mi-perfil.
+  {
+    path: '',
+    component: PanelEstudiante,
+    canActivate: [estudianteGuard],
+    children: [
+      { path: 'ofertas', component: OfertaLista },
+      { path: 'mis-postulaciones', component: MisPostulaciones },
+      { path: 'mi-perfil', component: PerfilEstudiante }
+    ]
+  },
   { path: '**', redirectTo: '', pathMatch: 'full' }
 ];
