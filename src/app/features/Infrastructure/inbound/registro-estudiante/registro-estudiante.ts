@@ -2,6 +2,7 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { RouterLink, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { correoInstitucional, normalizarCorreo } from '../../../../core/validators/correo-institucional';
 import { HttpClient } from '@angular/common/http';
 import { Navbar } from '../../../../share/ui/navbar/navbar';
 import { Footer } from '../../../../share/ui/footer/footer';
@@ -23,6 +24,7 @@ export class RegistroEstudiante implements OnInit {
   // Propiedades del modal de verificación por código
   mostrarModalVerificacion = false;
   correoParaVerificar = '';
+  mensajeErrorRegistro = '';
   codigoVerificacion = '';
   verificandoCodigo = false;
   mensajeVerificacionError = '';
@@ -96,22 +98,33 @@ export class RegistroEstudiante implements OnInit {
       programaAcademico: ['', Validators.required],
       direccion: ['', Validators.required],
       telefono: ['', Validators.required],
-      correo: ['', [Validators.required, Validators.email]],
-      contrasenia: ['', Validators.required]
+      correo: ['', [Validators.required, Validators.email, correoInstitucional]],
+      contrasenia: ['', [Validators.required, Validators.minLength(6)]]
     });
   }
 
+  /** true si el campo fue tocado y tiene el error indicado (para mostrar el mensaje bajo el campo). */
+  tieneError(campo: string, error?: string): boolean {
+    const control = this.formularioEstudiante.get(campo);
+    if (!control || !control.touched) return false;
+    return error ? control.hasError(error) : control.invalid;
+  }
+
   onSubmit(): void {
+    this.mensajeErrorRegistro = '';
     if (this.formularioEstudiante.invalid) {
       this.formularioEstudiante.markAllAsTouched();
-      alert('Por favor, llena todos los campos correctamente.');
+      this.mensajeErrorRegistro = this.formularioEstudiante.get('correo')?.hasError('correoInstitucional')
+        ? 'Solo puedes registrarte con tu correo institucional @ucundinamarca.edu.co.'
+        : 'Revisa los campos marcados antes de continuar.';
       return;
     }
 
-    const correoIngresado = String(this.formularioEstudiante.get('correo')?.value || '').trim();
+    // Se envía como lo guarda el backend: sin espacios y en minúsculas
+    const correoIngresado = normalizarCorreo(this.formularioEstudiante.get('correo')?.value);
     this.cargando = true;
 
-    this.estudiante.registrarEstudiante(this.formularioEstudiante.value).subscribe({
+    this.estudiante.registrarEstudiante({ ...this.formularioEstudiante.value, correo: correoIngresado }).subscribe({
       next: () => {
         this.cargando = false;
         this.correoParaVerificar = correoIngresado;
@@ -123,14 +136,16 @@ export class RegistroEstudiante implements OnInit {
       },
       error: (err) => {
         this.cargando = false;
-        console.error(err);
-        if (err.status === 500 || err.status === 409 || err.status === 400) {
+        if (err.status === 409) {
+          // La cuenta ya existe: puede que falte verificarla con el código enviado al correo
           this.correoParaVerificar = correoIngresado;
           this.mostrarModalVerificacion = true;
           this.mensajeVerificacionError =
-            'Este correo o documento ya fue registrado. Ingresa el código de 6 dígitos enviado a tu correo.';
+            'Este correo o documento ya fue registrado. Si aún no verificaste tu cuenta, ingresa el código de 6 dígitos enviado a tu correo.';
+        } else if (err.status === 400 && typeof err.error === 'string' && err.error) {
+          this.mensajeErrorRegistro = err.error;
         } else {
-          alert('Hubo un error de conexión al registrar el estudiante.');
+          this.mensajeErrorRegistro = 'No fue posible completar el registro. Verifica tu conexión e inténtalo de nuevo.';
         }
         this.cdr.detectChanges();
       }

@@ -247,3 +247,14 @@
     padding: 24px 20px;
   }
 }
+/* Mensaje de validación bajo un campo */
+.field-error {
+  display: block;
+  margin-top: 6px;
+  color: #fca5a5;
+  font-size: 0.8rem;
+}
+
+input[aria-invalid="true"] {
+  border-color: rgba(248, 113, 113, 0.7) !important;
+}

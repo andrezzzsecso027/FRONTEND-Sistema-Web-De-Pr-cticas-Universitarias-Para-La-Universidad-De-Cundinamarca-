@@ -64,14 +64,27 @@
 
           <div class="field-group">
             <label>Correo institucional (@ucundinamarca.edu.co)</label>
-            <input type="email" formControlName="correo" placeholder="usuario@ucundinamarca.edu.co" />
+            <input type="email" formControlName="correo" placeholder="usuario@ucundinamarca.edu.co"
+              autocomplete="email" [attr.aria-invalid]="tieneError('correo')" aria-describedby="error-correo" />
+            @if (tieneError('correo', 'required')) {
+              <small id="error-correo" class="field-error">Ingresa tu correo institucional.</small>
+            } @else if (tieneError('correo', 'correoInstitucional') || tieneError('correo', 'email')) {
+              <small id="error-correo" class="field-error">Usa tu correo institucional, terminado en &#64;ucundinamarca.edu.co.</small>
+            }
           </div>
         </div>
 
         <div class="field-group">
           <label>Contraseña de acceso</label>
-          <input type="password" formControlName="contrasenia" placeholder="Mínimo 6 caracteres" />
+          <input type="password" formControlName="contrasenia" placeholder="Mínimo 6 caracteres" autocomplete="new-password" />
+          @if (tieneError('contrasenia')) {
+            <small class="field-error">La contraseña debe tener al menos 6 caracteres.</small>
+          }
         </div>
+
+        @if (mensajeErrorRegistro) {
+          <div class="auth-alert-error" role="alert"><span>{{ mensajeErrorRegistro }}</span></div>
+        }
 
         <div class="reg-actions">
           <a routerLink="/login" class="chromatic-link">¿Ya tienes cuenta? Iniciar sesión ›</a>

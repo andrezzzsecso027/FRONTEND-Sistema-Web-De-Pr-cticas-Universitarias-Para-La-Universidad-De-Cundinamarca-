@@ -20,6 +20,8 @@ import { HttpClient } from '@angular/common/http';
 })
 
 export class RegistroEmpresa implements OnInit {
+  static readonly TAMANO_MAXIMO_PDF = 10 * 1024 * 1024;
+
   formularioEmpresa: FormGroup;
 
   datosColombia: any[] = [];
@@ -99,9 +101,29 @@ export class RegistroEmpresa implements OnInit {
     if (!input.files || input.files.length === 0) return;
 
     const file = input.files[0];
+    input.value = ''; // permite volver a elegir el mismo archivo tras un error
+
+    // Al elegir otro archivo se descarta el anterior: si esta subida falla no debe quedar la URL vieja
+    this.urlPdfNitSubido = '';
+    this.mensajeError = '';
+
+    // Mismas reglas que el backend (UploadFileUseCaseImpl): PDF y máximo 10 MB
+    const esPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+    if (!esPdf) {
+      this.nombrePdfSeleccionado = '';
+      this.mensajeError = 'El certificado debe ser un archivo PDF.';
+      this.cdr.detectChanges();
+      return;
+    }
+    if (file.size > RegistroEmpresa.TAMANO_MAXIMO_PDF) {
+      this.nombrePdfSeleccionado = '';
+      this.mensajeError = 'El PDF supera el tamaño máximo de 10 MB.';
+      this.cdr.detectChanges();
+      return;
+    }
+
     this.nombrePdfSeleccionado = file.name;
     this.subiendoPdf = true;
-    this.mensajeError = '';
     this.cdr.detectChanges();
 
     this.empresaService.subirArchivoCloudinary(file, 'empresas_nit').subscribe({
@@ -115,9 +137,11 @@ export class RegistroEmpresa implements OnInit {
         }
         this.cdr.detectChanges();
       },
-      error: () => {
+      error: (err) => {
         this.subiendoPdf = false;
-        this.mensajeError = 'No fue posible subir el archivo PDF a Cloudinary. Intenta nuevamente.';
+        this.nombrePdfSeleccionado = '';
+        // El backend explica el motivo (no es un PDF válido, supera 10 MB...)
+        this.mensajeError = err?.error?.error || 'No fue posible subir el certificado PDF. Intenta nuevamente.';
         this.cdr.detectChanges();
       }
     });
