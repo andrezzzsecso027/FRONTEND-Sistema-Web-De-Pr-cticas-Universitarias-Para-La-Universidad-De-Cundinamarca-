@@ -39,8 +39,17 @@ export class Auth {
     return usuario ? usuario.userRol : null;
   }
 
+  /** Hay sesión solo si existe un token y aún no ha expirado (claim "exp" del JWT). */
   isLoggedIn(): boolean {
-    return !!localStorage.getItem('token');
+    const token = localStorage.getItem('token');
+    if (!token) return false;
+    try {
+      const payloadBase64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+      const payload = JSON.parse(atob(payloadBase64));
+      return typeof payload.exp !== 'number' || payload.exp * 1000 > Date.now();
+    } catch {
+      return false;
+    }
   }
 
   logout(): void {

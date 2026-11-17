@@ -152,8 +152,9 @@ export class OfertaLista implements OnInit {
       },
       error: (err) => {
         this.procesandoId = null;
-        this.mensajeError = err.status === 409
-          ? 'Ya te postulaste a esta oferta.'
+        // El backend envía el motivo exacto (ya postulado, oferta cerrada, práctica activa...)
+        this.mensajeError = typeof err.error === 'string' && err.error
+          ? err.error
           : 'Error al postularte. Intenta de nuevo.';
         this.cdr.detectChanges();
         setTimeout(() => { this.mensajeError = ''; this.cdr.detectChanges(); }, 4000);
