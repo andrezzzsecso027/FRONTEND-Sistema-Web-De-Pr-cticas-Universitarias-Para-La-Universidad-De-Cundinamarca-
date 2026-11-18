@@ -1,0 +1,20 @@
+/*
+ * Solo para SonarQube 9.9: su analizador TypeScript no reconoce moduleResolution "bundler" (Angular 17+).
+ * Es una copia independiente de tsconfig.json (sin "extends", porque Sonar valida también el archivo base).
+ */
+{
+  "compilerOptions": {
+    "strict": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "skipLibCheck": true,
+    "experimentalDecorators": true,
+    "target": "ES2022",
+    "module": "es2022",
+    "moduleResolution": "node",
+    "types": ["vitest/globals"]
+  },
+  "include": ["src/**/*.ts"]
+}

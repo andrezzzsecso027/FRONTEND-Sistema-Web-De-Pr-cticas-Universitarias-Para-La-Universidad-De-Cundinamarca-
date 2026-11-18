@@ -78,10 +78,22 @@
   border-radius: 9999px;
   font-weight: 600;
   margin-left: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: none;
+  cursor: pointer;
 
   &:hover {
     background-color: #96f27e !important;
     transform: translateY(-1px);
+  }
+
+  .chevron-icon {
+    transition: transform 0.2s ease;
+    &.rotated {
+      transform: rotate(180deg);
+    }
   }
 }
 
@@ -135,21 +147,6 @@
 .nav-dropdown-wrapper {
   position: relative;
   display: inline-block;
-}
-
-.btn-registro {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  border: none;
-  cursor: pointer;
-
-  .chevron-icon {
-    transition: transform 0.2s ease;
-    &.rotated {
-      transform: rotate(180deg);
-    }
-  }
 }
 
 .register-dropdown {

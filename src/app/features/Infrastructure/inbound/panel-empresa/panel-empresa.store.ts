@@ -253,42 +253,11 @@ export class PanelEmpresaStore {
           );
 
           aceptados.forEach((post: any) => {
-            const doc = String(post.documentStudent || post.studentDocument || '');
             if (!this.estadoSeguimientoContrato[post.idPostulation]) {
               this.estadoSeguimientoContrato[post.idPostulation] = 'EN_CURSO';
             }
-
-            const item: PracticaEmpresaView = {
-              idPostulation: Number(post.idPostulation),
-              idOffer: Number(oferta.idOffer),
-              offerName: oferta.practiceName,
-              modality: oferta.modality,
-              salary: oferta.salary,
-              studentDocument: doc,
-              studentFullName: post.studentFullName || 'Estudiante UdeC',
-              studentEmail: post.studentEmail || '',
-              studentSkills: post.skills || 'Por registrar',
-              studentEnglishLevel: post.englishLevel || 'B1',
-              studentCvUrl: post.lifesheet || post.linkLifesheet || null,
-              studentGithubUrl: post.githubUrl || null,
-              photoUrl: post.photoUrl || null
-            };
-
-            if (doc) {
-              this.http.get<any>(`${environment.baseUrl}/registro/estudiantes/perfil/${doc}`).subscribe({
-                next: (perfil) => {
-                  if (perfil) {
-                    item.photoUrl = perfil.photoUrl || item.photoUrl;
-                    item.studentSkills = perfil.skills || item.studentSkills;
-                    item.studentEnglishLevel = perfil.englishLevel || item.studentEnglishLevel;
-                    item.studentGithubUrl = perfil.githubUrl || item.studentGithubUrl;
-                    item.studentCvUrl = perfil.linkLifesheet || item.studentCvUrl;
-                    this.misPracticas.update(lista => [...lista]); // notifica la mutación
-                  }
-                },
-                error: () => {}
-              });
-            }
+            const item = this.crearPracticaView(oferta, post);
+            this.completarConPerfil(item);
 
             if (!acumuladas.some(x => x.idPostulation === item.idPostulation)) {
               acumuladas.push(item);
@@ -298,6 +267,42 @@ export class PanelEmpresaStore {
         },
         error: () => {}
       });
+    });
+  }
+
+  /** Arma la fila de "Mis practicantes" con los datos de la oferta y del postulante aceptado. */
+  private crearPracticaView(oferta: OfferRequestDTO, post: any): PracticaEmpresaView {
+    return {
+      idPostulation: Number(post.idPostulation),
+      idOffer: Number(oferta.idOffer),
+      offerName: oferta.practiceName,
+      modality: oferta.modality,
+      salary: oferta.salary,
+      studentDocument: String(post.documentStudent || post.studentDocument || ''),
+      studentFullName: post.studentFullName || 'Estudiante UdeC',
+      studentEmail: post.studentEmail || '',
+      studentSkills: post.skills || 'Por registrar',
+      studentEnglishLevel: post.englishLevel || 'B1',
+      studentCvUrl: post.lifesheet || post.linkLifesheet || null,
+      studentGithubUrl: post.githubUrl || null,
+      photoUrl: post.photoUrl || null
+    };
+  }
+
+  /** Completa la fila con el perfil profesional del estudiante (foto, habilidades, CV...). */
+  private completarConPerfil(item: PracticaEmpresaView): void {
+    if (!item.studentDocument) return;
+    this.http.get<any>(`${environment.baseUrl}/registro/estudiantes/perfil/${item.studentDocument}`).subscribe({
+      next: (perfil) => {
+        if (!perfil) return;
+        item.photoUrl = perfil.photoUrl || item.photoUrl;
+        item.studentSkills = perfil.skills || item.studentSkills;
+        item.studentEnglishLevel = perfil.englishLevel || item.studentEnglishLevel;
+        item.studentGithubUrl = perfil.githubUrl || item.studentGithubUrl;
+        item.studentCvUrl = perfil.linkLifesheet || item.studentCvUrl;
+        this.misPracticas.update(lista => [...lista]); // notifica la mutación
+      },
+      error: () => {}
     });
   }
 

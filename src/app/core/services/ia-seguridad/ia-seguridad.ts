@@ -38,24 +38,4 @@ export class IaSeguridadService {
       `${this.iaUrl}/ranking-postulados/${idOffer}`
     );
   }
-
-  obtenerEmailDeSesion(): string {
-    try {
-      const sesionRaw = localStorage.getItem('usuario_sesion');
-      if (sesionRaw) {
-        const sesion = JSON.parse(sesionRaw);
-        if (sesion.email) return sesion.email;
-        if (sesion.correo) return sesion.correo;
-        if (sesion.correoElectronico) return sesion.correoElectronico;
-      }
-      const token = localStorage.getItem('token');
-      if (token && token.includes('.')) {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        if (payload.sub) return payload.sub;
-      }
-    } catch {
-      // Fallback vacío si no hay sesión válida
-    }
-    return '';
-  }
 }

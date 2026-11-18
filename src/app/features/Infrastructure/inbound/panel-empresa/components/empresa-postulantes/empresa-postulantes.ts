@@ -44,23 +44,7 @@ export class EmpresaPostulantes implements OnInit {
           if (!this.store.estadoSeguimientoContrato[post.idPostulation]) {
             this.store.estadoSeguimientoContrato[post.idPostulation] = 'EN_CURSO';
           }
-          const doc = post.documentStudent || post.studentDocument;
-          if (doc) {
-            this.http.get<any>(`${environment.baseUrl}/registro/estudiantes/perfil/${doc}`).subscribe({
-              next: (perfil) => {
-                if (perfil) {
-                  post.photoUrl = perfil.photoUrl || post.photoUrl;
-                  post.skills = perfil.skills || post.skills;
-                  post.englishLevel = perfil.englishLevel || post.englishLevel;
-                  post.githubUrl = perfil.githubUrl || post.githubUrl;
-                  post.lifesheet = perfil.linkLifesheet || post.lifesheet;
-                  post.aboutMe = perfil.aboutMe || post.aboutMe;
-                  this.cdr.detectChanges();
-                }
-              },
-              error: () => {}
-            });
-          }
+          this.completarConPerfil(post);
         });
         this.cdr.detectChanges();
       },
@@ -69,6 +53,25 @@ export class EmpresaPostulantes implements OnInit {
         this.cargando = false;
         this.cdr.detectChanges();
       }
+    });
+  }
+
+  /** Completa la tarjeta del postulante con su perfil profesional (foto, habilidades, CV...). */
+  private completarConPerfil(post: any): void {
+    const doc = post.documentStudent || post.studentDocument;
+    if (!doc) return;
+    this.http.get<any>(`${environment.baseUrl}/registro/estudiantes/perfil/${doc}`).subscribe({
+      next: (perfil) => {
+        if (!perfil) return;
+        post.photoUrl = perfil.photoUrl || post.photoUrl;
+        post.skills = perfil.skills || post.skills;
+        post.englishLevel = perfil.englishLevel || post.englishLevel;
+        post.githubUrl = perfil.githubUrl || post.githubUrl;
+        post.lifesheet = perfil.linkLifesheet || post.lifesheet;
+        post.aboutMe = perfil.aboutMe || post.aboutMe;
+        this.cdr.detectChanges();
+      },
+      error: () => {}
     });
   }
 
