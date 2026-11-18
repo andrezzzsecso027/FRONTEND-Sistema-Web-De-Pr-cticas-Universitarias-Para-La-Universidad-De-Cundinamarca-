@@ -62,3 +62,7 @@ sonar-project.properties
 
 # Artefactos del análisis de SonarQube
 .scannerwork/
+
+# Playwright (reportes y videos generados)
+/playwright-report
+/test-results
