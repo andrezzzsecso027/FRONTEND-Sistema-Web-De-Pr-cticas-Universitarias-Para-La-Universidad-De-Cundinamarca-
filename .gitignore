@@ -51,8 +51,8 @@ dist/
 *.log
 *.md
 Dockerfile
-# Variables de entorno locales
-src/environments/*
+# Variables de entorno locales (environment.ts y environment.prod.ts sí se versionan: solo tienen URLs)
+src/environments/*.local.ts
 
 # Archivos temporales de analisis
 codigo_completo.txt
