@@ -1,6 +1,6 @@
 ﻿<header class="navbar">
   <div class="navbar-container">
-    <a routerLink="/" class="navbar-logo">
+    <a [routerLink]="isLoggedIn ? (userRole === 'estudiante' ? '/ofertas' : (userRole === 'empresa' ? '/panel-empresa' : '/panel-administrador')) : '/'" class="navbar-logo">
       <span class="udec-crest-badge">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M12 2L2 7l10 5 10-5-10-5z"/>
@@ -12,10 +12,9 @@
     </a>
 
     <nav class="navbar-links">
-      <a routerLink="/" class="nav-link">Inicio</a>
-
-      <!-- SIN SESIÓN: CON MENÚ DESPLEGABLE EN REGISTRARME -->
+      <!-- SIN SESIÓN: AQUÍ VA "INICIO" -->
       <ng-container *ngIf="!isLoggedIn">
+        <a routerLink="/" class="nav-link">Inicio</a>
         <a routerLink="/login" class="nav-link">Iniciar sesión</a>
 
         <div class="nav-dropdown-wrapper" (click)="$event.stopPropagation()">
@@ -58,9 +57,10 @@
         </div>
       </ng-container>
 
-      <!-- ESTUDIANTE -->
+      <!-- ESTUDIANTE (SIN "INICIO" Y CON "MI PRÁCTICA") -->
       <ng-container *ngIf="isLoggedIn && userRole === 'estudiante'">
         <a routerLink="/ofertas" class="nav-link">Ofertas</a>
+        <a routerLink="/mi-practica" class="nav-link">Mi práctica</a>
         <a routerLink="/mis-postulaciones" class="nav-link">Mis postulaciones</a>
         <a routerLink="/mi-perfil" class="nav-link">Mi perfil</a>
         <span class="nav-user">

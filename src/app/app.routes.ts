@@ -12,20 +12,23 @@ import { PanelEmpresa } from './features/Infrastructure/inbound/panel-empresa/pa
 import { adminGuard } from './core/guards/admin.guard';
 import { estudianteGuard } from './core/guards/estudiante.guard';
 import { empresaGuard } from './core/guards/empresa.guard';
+import { invitadoGuard } from './core/guards/invitado.guard';
 import { PerfilEstudiante } from './features/Infrastructure/inbound/perfil-estudiante/perfil-estudiante';
 import { PanelEstudiante } from './features/Infrastructure/inbound/panel-estudiante/panel-estudiante';
+import { MiPracticaVista } from './features/Infrastructure/inbound/mi-practica/mi-practica';
 
 export const routes: Routes = [
-  { path: '', component: Home, pathMatch: 'full' },
-  { path: 'login', component: Login },
-  { path: 'registro', component: Registro },
-  { path: 'registro-estudiante', component: RegistroEstudiante },
-  { path: 'registro-empresa', component: RegistroEmpresa },
+  // Páginas públicas: si hay sesión abierta, invitadoGuard pregunta si se quiere cerrar antes de entrar.
+  { path: '', component: Home, pathMatch: 'full', canActivate: [invitadoGuard] },
+  { path: 'login', component: Login, canActivate: [invitadoGuard] },
+  { path: 'registro', component: Registro, canActivate: [invitadoGuard] },
+  { path: 'registro-estudiante', component: RegistroEstudiante, canActivate: [invitadoGuard] },
+  { path: 'registro-empresa', component: RegistroEmpresa, canActivate: [invitadoGuard] },
   { path: 'verificar-cuenta', component: VerificarCuenta },
   { path: 'panel-administrador', component: PanelAdministrador, canActivate: [adminGuard] },
   { path: 'panel-empresa', component: PanelEmpresa, canActivate: [empresaGuard] },
   // Portal del estudiante: layout con barra lateral y vistas hijas, todas protegidas por el guard
-  // (antes /mi-perfil no tenía guard). Las URL se mantienen: /ofertas, /mis-postulaciones, /mi-perfil.
+  // (antes /mi-perfil no tenía guard). Las URL se mantienen: /ofertas, /mis-postulaciones, /mi-practica, /mi-perfil.
   {
     path: '',
     component: PanelEstudiante,
@@ -33,6 +36,7 @@ export const routes: Routes = [
     children: [
       { path: 'ofertas', component: OfertaLista },
       { path: 'mis-postulaciones', component: MisPostulaciones },
+      { path: 'mi-practica', component: MiPracticaVista },
       { path: 'mi-perfil', component: PerfilEstudiante }
     ]
   },

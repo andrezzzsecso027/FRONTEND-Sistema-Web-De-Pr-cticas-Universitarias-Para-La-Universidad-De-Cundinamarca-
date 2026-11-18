@@ -13,6 +13,6 @@ export const empresaGuard: CanActivateFn = () => {
   }
 
   console.warn('[empresaGuard] Acceso denegado: se requiere rol empresa');
-  router.navigate(['/login']);
-  return false;
+  // Con sesión de otro rol se le envía a su propio panel; sin sesión, al login.
+  return router.parseUrl(auth.isLoggedIn() ? auth.rutaInicio() : '/login');
 };

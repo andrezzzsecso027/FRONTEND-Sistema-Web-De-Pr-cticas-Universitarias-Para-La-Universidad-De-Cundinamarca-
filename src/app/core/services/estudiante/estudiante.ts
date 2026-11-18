@@ -41,6 +41,46 @@ export interface MiPostulacion {
   observations?: string;
 }
 
+export type EstadoPractica = 'EN_CURSO' | 'FINALIZADA';
+export type EstadoModeracion = 'PENDIENTE' | 'APROBADO' | 'RECHAZADO';
+
+/** Seguimiento de una práctica propia (GET /api/estudiantes/me/practicas). */
+export interface MiPractica {
+  idPractice: number;
+  idPostulation: number;
+  practiceStatus: EstadoPractica;
+  startDate?: string;
+  endDate?: string;
+  companyFeedback?: string;
+  offerName: string;
+  profession?: string;
+  modality?: string;
+  location?: string;
+  companyName?: string;
+  datePostulation?: string;
+  dateAccepted?: string;
+  contract?: {
+    trackingStatus: 'EN_CURSO' | 'CONTRATO_FIRMADO' | 'FINALIZADA';
+    fileName?: string;
+    fileUrl?: string;
+    companyComments?: string;
+    uploadDate?: string;
+  } | null;
+  evaluation?: {
+    companyRating: number;
+    commentText: string;
+    validationStatus: EstadoModeracion;
+    commentDate?: string;
+  } | null;
+}
+
+/** Calificación del estudiante a la empresa de una práctica finalizada (POST /api/comentarios/crear). */
+export interface CalificacionEmpresa {
+  idPractice: number;
+  companyRating: number;
+  commentText: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -64,6 +104,15 @@ export class Estudiante {
 
   obtenerMisPostulaciones(): Observable<MiPostulacion[]> {
     return this.http.get<MiPostulacion[]>(`${environment.baseUrl}/estudiantes/me/postulaciones`);
+  }
+
+  obtenerMisPracticas(): Observable<MiPractica[]> {
+    return this.http.get<MiPractica[]>(`${environment.baseUrl}/estudiantes/me/practicas`);
+  }
+
+  /** El backend valida que la práctica sea del estudiante del token, que esté FINALIZADA y la nota (1–5). */
+  calificarEmpresa(calificacion: CalificacionEmpresa): Observable<unknown> {
+    return this.http.post(`${environment.baseUrl}/comentarios/crear`, calificacion);
   }
 
   obtenerPerfil(documento: string): Observable<PerfilProfesional | null> {

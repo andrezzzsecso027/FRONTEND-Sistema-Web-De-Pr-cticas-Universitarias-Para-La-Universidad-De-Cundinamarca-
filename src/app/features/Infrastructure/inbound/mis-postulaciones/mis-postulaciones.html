@@ -44,7 +44,10 @@
               <td class="is-num">{{ p.datePostulation | date: 'dd/MM/yyyy' }}</td>
               <td>
                 @switch (p.status) {
-                  @case ('ACEPTADA') { <span class="ui-badge ui-badge--success">Aceptada</span> }
+                  @case ('ACEPTADA') {
+                    <span class="ui-badge ui-badge--success">Aceptada</span>
+                    <a class="ui-link mp-seguimiento" routerLink="/mi-practica">Ver seguimiento <ui-icon name="arrow-right" [size]="12" /></a>
+                  }
                   @case ('RECHAZADA') { <span class="ui-badge ui-badge--danger">No seleccionada</span> }
                   @default { <span class="ui-badge ui-badge--warning">En revisión</span> }
                 }

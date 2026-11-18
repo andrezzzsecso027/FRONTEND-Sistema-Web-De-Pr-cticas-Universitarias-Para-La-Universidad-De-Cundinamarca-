@@ -19,6 +19,12 @@
         <ui-icon name="clipboard" /> Mis postulaciones
         <span class="ui-nav__count">{{ store.postulaciones().length }}</span>
       </a>
+      <a class="ui-nav__item" routerLink="/mi-practica" routerLinkActive="is-active">
+        <ui-icon name="graduation-cap" /> Mi práctica
+        @if (store.practicaEnCurso()) {
+          <span class="ui-nav__count" title="Tienes una práctica en curso">En curso</span>
+        }
+      </a>
 
       <span class="ui-nav__label">Cuenta</span>
       <a class="ui-nav__item" routerLink="/mi-perfil" routerLinkActive="is-active">

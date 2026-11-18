@@ -1,0 +1,89 @@
+/* Vista "Mi práctica" (portal del estudiante). Usa los tokens --ui-* del sistema de diseño. */
+
+.pr-hero {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  &__text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  h2 { font-size: 18px; font-weight: 600; letter-spacing: -0.02em; }
+  .ui-cell-sub { margin: 0; }
+}
+
+.pr-progress {
+  border-top: 1px solid var(--ui-hairline);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  &__head { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; color: var(--ui-graphite);
+    strong { color: var(--ui-ink); font-weight: 600; } }
+  &__dates { display: flex; justify-content: space-between; gap: 12px; font-size: 12px; color: var(--ui-stone);
+    span { display: inline-flex; align-items: center; gap: 6px; } }
+  &__empty { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ui-graphite); }
+}
+
+.pr-bar {
+  height: 8px;
+  border-radius: var(--ui-radius-full);
+  background: var(--ui-recessed);
+  overflow: hidden;
+
+  &__fill { display: block; height: 100%; border-radius: inherit; background: var(--ui-accent); transition: width 400ms ease; }
+}
+
+.pr-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+.pr-side { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+.pr-stack { display: flex; flex-direction: column; gap: 12px; align-items: flex-start;
+  .ui-file, .ui-quote { width: 100%; } }
+.pr-muted { margin: 0; display: inline-flex; align-items: center; gap: 6px; }
+
+@media (max-width: 960px) { .pr-grid { grid-template-columns: 1fr; } }
+
+/* ---------- Línea de tiempo ---------- */
+.pr-timeline { list-style: none; margin: 0; display: flex; flex-direction: column; }
+
+.pr-step {
+  position: relative;
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) auto;
+  gap: 12px;
+  padding-bottom: 20px;
+
+  &:last-child { padding-bottom: 0; }
+  /* línea vertical entre pasos */
+  &:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    left: 10px;
+    top: 24px;
+    bottom: 2px;
+    width: 2px;
+    background: var(--ui-hairline);
+  }
+  &.is-hecho:not(:last-child)::before { background: var(--ui-accent); }
+
+  &__dot {
+    width: 22px; height: 22px;
+    display: grid; place-items: center;
+    border-radius: 50%;
+    border: 2px solid var(--ui-hairline-strong);
+    background: var(--ui-surface);
+    color: #fff;
+  }
+  &.is-hecho &__dot { border-color: var(--ui-accent); background: var(--ui-accent); }
+  &.is-actual &__dot { border-color: var(--ui-accent); box-shadow: 0 0 0 4px var(--ui-accent-ring); }
+
+  &__text { display: flex; flex-direction: column; gap: 2px; min-width: 0; .ui-cell-sub { margin: 0; } }
+  &__title { font-weight: 500; font-size: 14px; }
+  &.is-pendiente &__title { color: var(--ui-stone); }
+  &__date { font-size: 12px; color: var(--ui-graphite); padding-top: 2px; }
+}
+
+.pr-rating { display: inline-flex; gap: 2px; }
+/* Las estrellas (.pr-star) son globales en styles/_ui.scss porque también las usa el modal de evaluación. */

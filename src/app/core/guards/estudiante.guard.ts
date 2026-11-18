@@ -11,6 +11,6 @@ export const estudianteGuard: CanActivateFn = () => {
   }
 
   console.warn('[estudianteGuard] Acceso denegado: se requiere rol estudiante');
-  router.navigate(['/login']);
-  return false;
+  // Con sesión de otro rol se le envía a su propio panel; sin sesión, al login.
+  return router.parseUrl(auth.isLoggedIn() ? auth.rutaInicio() : '/login');
 };

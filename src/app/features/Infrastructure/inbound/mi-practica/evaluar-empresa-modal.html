@@ -1,0 +1,49 @@
+<div class="ui-modal-backdrop" (click)="cerrar.emit()">
+  <div class="ui-modal ui-modal--sm" role="dialog" aria-modal="true" aria-labelledby="evaluar-titulo" (click)="$event.stopPropagation()">
+    <div class="ui-modal__header">
+      <div>
+        <h3 id="evaluar-titulo">Evaluar a {{ practica.companyName || 'la empresa' }}</h3>
+        <p>Tu opinión ayuda a otros estudiantes a elegir su práctica. Se publica después de que un administrador la revise.</p>
+      </div>
+      <button type="button" class="ui-close" aria-label="Cerrar" (click)="cerrar.emit()"><ui-icon name="x" /></button>
+    </div>
+
+    <form class="ui-modal__body pr-eval-form" (ngSubmit)="enviar()">
+      <div class="ui-field">
+        <span class="ui-field__label" id="estrellas-label">Calificación</span>
+        <div class="pr-stars" role="radiogroup" aria-labelledby="estrellas-label" (mouseleave)="hover.set(0)">
+          @for (n of estrellas; track n) {
+            <button type="button" class="pr-star" role="radio"
+                    [class.is-on]="n <= (hover() || calificacion())"
+                    [attr.aria-checked]="calificacion() === n"
+                    [attr.aria-label]="n + (n === 1 ? ' estrella' : ' estrellas') + ' — ' + etiqueta(n)"
+                    [attr.tabindex]="(calificacion() || 1) === n ? 0 : -1"
+                    (mouseenter)="hover.set(n)" (click)="calificacion.set(n)" (keydown)="moverConTeclado($event)">
+              <ui-icon name="star" [size]="28" [strokeWidth]="1.5" />
+            </button>
+          }
+          <span class="pr-stars__label" aria-live="polite">{{ etiqueta(hover() || calificacion()) }}</span>
+        </div>
+      </div>
+
+      <div class="ui-field">
+        <label for="eval-comentario">Comentario</label>
+        <textarea id="eval-comentario" name="comentario" class="ui-textarea" rows="5" [maxlength]="maxComentario"
+                  placeholder="¿Cómo fue el acompañamiento, el ambiente y lo que aprendiste?"
+                  [(ngModel)]="comentario"></textarea>
+        <span class="ui-field__hint pr-counter">{{ comentario.length }} / {{ maxComentario }}</span>
+      </div>
+
+      @if (error()) {
+        <div class="ui-alert ui-alert--error" role="alert"><ui-icon name="alert" /> <span>{{ error() }}</span></div>
+      }
+
+      <div class="pr-eval-actions">
+        <button type="button" class="ui-btn ui-btn--secondary" (click)="cerrar.emit()" [disabled]="store.enviandoCalificacion()">Cancelar</button>
+        <button type="submit" class="ui-btn ui-btn--primary" [disabled]="store.enviandoCalificacion() || !valido">
+          <ui-icon name="message" /> {{ store.enviandoCalificacion() ? 'Enviando…' : 'Enviar evaluación' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

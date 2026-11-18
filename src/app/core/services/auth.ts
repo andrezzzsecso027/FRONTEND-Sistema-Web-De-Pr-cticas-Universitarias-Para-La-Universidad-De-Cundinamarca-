@@ -52,9 +52,24 @@ export class Auth {
     }
   }
 
+  /** Ruta de inicio según el rol (a donde se redirige tras el login). */
+  rutaInicio(): string {
+    switch (this.getRol()?.toLowerCase()) {
+      case 'administrador': return '/panel-administrador';
+      case 'empresa': return '/panel-empresa';
+      case 'estudiante': return '/ofertas';
+      default: return '/';
+    }
+  }
+
+  /** Borra el token, el usuario y los datos cacheados por los paneles, sin navegar. */
+  limpiarSesion(): void {
+    ['token', 'usuario_sesion', 'nitEmpresa', 'nombreEmpresaReal', 'documento_estudiante']
+      .forEach((k) => localStorage.removeItem(k));
+  }
+
   logout(): void {
-    localStorage.removeItem('usuario_sesion');
-    localStorage.removeItem('token');
+    this.limpiarSesion();
     this.router.navigate(['/login']);
   }
 }

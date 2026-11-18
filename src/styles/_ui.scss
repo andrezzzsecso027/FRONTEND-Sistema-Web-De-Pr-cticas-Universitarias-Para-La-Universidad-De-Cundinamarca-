@@ -893,3 +893,30 @@
   h2 { margin-top: 8px; font-size: 16px; font-weight: 600; } }
 .est-upload { cursor: pointer; }
 @media (max-width: 960px) { .est-profile { grid-template-columns: 1fr; } }
+
+/* Enlace "Ver seguimiento" bajo una postulación aceptada */
+.mp-seguimiento { display: flex; width: fit-content; margin-top: 6px; font-size: 12px; }
+
+/* Estrellas de calificación (vista "Mi práctica" y modal "Evaluar empresa") */
+.pr-star {
+  display: inline-grid;
+  place-items: center;
+  padding: 2px;
+  border: 0;
+  border-radius: var(--ui-radius-sm);
+  background: transparent;
+  color: var(--ui-hairline-strong);
+  cursor: pointer;
+  transition: color var(--ui-ease), transform var(--ui-ease);
+
+  &.is-on { color: #f5a524; svg { fill: currentColor; } }
+  &:not(.is-static):hover { transform: scale(1.08); }
+  &:focus-visible { outline: 2px solid var(--ui-accent); outline-offset: 2px; }
+  &.is-static { cursor: default; }
+}
+.pr-stars { display: flex; align-items: center; gap: 2px;
+  &__label { margin-left: 10px; font-size: 13px; color: var(--ui-graphite); } }
+.pr-eval-form { display: flex; flex-direction: column; gap: 16px; }
+.pr-counter { align-self: flex-end; font-variant-numeric: tabular-nums; }
+.pr-eval-actions { display: flex; justify-content: flex-end; gap: 8px; }
+@media (prefers-reduced-motion: reduce) { .pr-star { transition: none; &:not(.is-static):hover { transform: none; } } }

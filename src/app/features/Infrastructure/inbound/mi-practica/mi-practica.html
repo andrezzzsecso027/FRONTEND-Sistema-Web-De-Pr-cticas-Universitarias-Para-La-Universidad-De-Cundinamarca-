@@ -1,0 +1,176 @@
+<header class="ui-page-header">
+  <div>
+    <h1>Mi práctica</h1>
+    <p>Sigue el avance de tu práctica, revisa tu contrato y evalúa a la empresa al terminar.</p>
+  </div>
+  <div class="ui-page-header__actions">
+    <button type="button" class="ui-btn ui-btn--secondary" (click)="store.cargarPracticas()">
+      <ui-icon name="refresh" /> Actualizar
+    </button>
+  </div>
+</header>
+
+@if (store.cargandoPracticas()) {
+  <section class="ui-card"><div class="ui-empty"><span class="ui-empty__text">Cargando tu práctica…</span></div></section>
+} @else if (!practica()) {
+  <section class="ui-card">
+    <div class="ui-empty">
+      <span class="ui-empty__icon"><ui-icon name="graduation-cap" [size]="20" /></span>
+      <span class="ui-empty__title">Aún no tienes una práctica</span>
+      <span class="ui-empty__text">Cuando una empresa acepte tu postulación, aquí podrás seguir tu práctica paso a paso.</span>
+      <a class="ui-btn ui-btn--primary" routerLink="/mis-postulaciones">Ver mis postulaciones</a>
+    </div>
+  </section>
+} @else {
+  @let p = practica()!;
+
+  @if (store.practicas().length > 1) {
+    <div class="ui-tabs" role="tablist" aria-label="Mis prácticas">
+      @for (item of store.practicas(); track item.idPractice) {
+        <button type="button" class="ui-tabs__item" role="tab" [class.is-active]="item.idPractice === p.idPractice"
+                [attr.aria-selected]="item.idPractice === p.idPractice" (click)="seleccionar(item.idPractice)">
+          {{ item.offerName }}
+          <span class="ui-tabs__count">{{ item.practiceStatus === 'EN_CURSO' ? 'En curso' : 'Finalizada' }}</span>
+        </button>
+      }
+    </div>
+  }
+
+  <!-- RESUMEN -->
+  <section class="ui-card">
+    <div class="ui-card__body pr-hero">
+      <span class="ui-avatar ui-avatar--sq ui-avatar--lg"><ui-icon name="building" [size]="20" /></span>
+      <div class="pr-hero__text">
+        <span class="ui-eyebrow">{{ p.companyName || 'Empresa' }}</span>
+        <h2>{{ p.offerName }}</h2>
+        <span class="ui-cell-sub">
+          {{ p.profession }}{{ p.modality ? ' · ' + p.modality : '' }}{{ p.location ? ' · ' + p.location : '' }}
+        </span>
+      </div>
+      @if (p.practiceStatus === 'EN_CURSO') {
+        <span class="ui-badge ui-badge--success">En curso</span>
+      } @else {
+        <span class="ui-badge ui-badge--neutral">Finalizada</span>
+      }
+    </div>
+
+    <div class="ui-card__body pr-progress">
+      @if (progreso(); as pr) {
+        <div class="pr-progress__head">
+          <span>
+            @switch (pr.fase) {
+              @case ('por-iniciar') { Tu práctica inicia el <strong>{{ p.startDate | date: 'd MMM y' }}</strong> }
+              @case ('terminada') { Práctica completada · <strong>{{ pr.totales }} días</strong> }
+              @default { Día <strong>{{ pr.transcurridos }}</strong> de {{ pr.totales }} · faltan {{ pr.restantes }} días }
+            }
+          </span>
+          <span class="ui-mono">{{ pr.porcentaje }}%</span>
+        </div>
+        <div class="pr-bar" role="progressbar" aria-label="Avance de la práctica"
+             [attr.aria-valuenow]="pr.porcentaje" aria-valuemin="0" aria-valuemax="100">
+          <span class="pr-bar__fill" [style.width.%]="pr.porcentaje"></span>
+        </div>
+        <div class="pr-progress__dates">
+          <span><ui-icon name="calendar" [size]="14" /> Inicio: {{ p.startDate | date: 'dd/MM/yyyy' }}</span>
+          <span>Fin: {{ p.endDate | date: 'dd/MM/yyyy' }}</span>
+        </div>
+      } @else {
+        <div class="pr-progress__empty">
+          <ui-icon name="clock" /> La empresa aún no ha registrado las fechas de inicio y fin de tu práctica.
+        </div>
+      }
+    </div>
+  </section>
+
+  <div class="pr-grid">
+    <!-- LÍNEA DE TIEMPO -->
+    <section class="ui-card">
+      <div class="ui-card__header"><div><h2>Seguimiento</h2><p>Cada etapa de tu práctica.</p></div></div>
+      <ol class="ui-card__body pr-timeline">
+        @for (paso of pasos(); track paso.titulo) {
+          <li class="pr-step" [class]="'is-' + paso.estado">
+            <span class="pr-step__dot" aria-hidden="true">
+              @if (paso.estado === 'hecho') { <ui-icon name="check" [size]="12" [strokeWidth]="2.5" /> }
+            </span>
+            <div class="pr-step__text">
+              <span class="pr-step__title">
+                {{ paso.titulo }}
+                <span class="ui-sr-only">({{ paso.estado === 'hecho' ? 'completado' : (paso.estado === 'actual' ? 'siguiente paso' : 'pendiente') }})</span>
+              </span>
+              <span class="ui-cell-sub">{{ paso.detalle }}</span>
+            </div>
+            @if (paso.fecha) { <span class="pr-step__date ui-mono">{{ paso.fecha | date: 'dd/MM/yyyy' }}</span> }
+          </li>
+        }
+      </ol>
+    </section>
+
+    <div class="pr-side">
+      <!-- CONTRATO -->
+      <section class="ui-card">
+        <div class="ui-card__header"><div><h2>Contrato de práctica</h2></div></div>
+        <div class="ui-card__body pr-stack">
+          @if (p.contract?.fileUrl) {
+            <div class="ui-file">
+              <span class="ui-file__icon"><ui-icon name="file-check" /></span>
+              <span class="ui-file__text">
+                <span class="ui-file__title">{{ p.contract!.fileName || 'Contrato.pdf' }}</span>
+                <span class="ui-file__meta">Cargado el {{ p.contract!.uploadDate | date: 'dd/MM/yyyy' }}</span>
+              </span>
+              <a class="ui-btn ui-btn--ghost ui-btn--sm ui-btn--icon" [href]="p.contract!.fileUrl" target="_blank"
+                 rel="noopener noreferrer" aria-label="Abrir contrato"><ui-icon name="external-link" /></a>
+            </div>
+            @if (p.contract!.companyComments) { <p class="ui-quote">{{ p.contract!.companyComments }}</p> }
+          } @else {
+            <p class="ui-cell-sub pr-muted">La empresa aún no ha cargado tu contrato firmado.</p>
+          }
+        </div>
+      </section>
+
+      <!-- RETROALIMENTACIÓN DE LA EMPRESA -->
+      <section class="ui-card">
+        <div class="ui-card__header"><div><h2>Retroalimentación de la empresa</h2></div></div>
+        <div class="ui-card__body">
+          @if (p.companyFeedback) {
+            <p class="ui-quote">{{ p.companyFeedback }}</p>
+          } @else {
+            <p class="ui-cell-sub pr-muted">Aún no hay comentarios de la empresa sobre tu desempeño.</p>
+          }
+        </div>
+      </section>
+
+      <!-- EVALUACIÓN DE LA EMPRESA -->
+      <section class="ui-card">
+        <div class="ui-card__header"><div><h2>Tu evaluación de la empresa</h2></div></div>
+        <div class="ui-card__body pr-stack">
+          @if (p.evaluation; as ev) {
+            <div class="pr-rating" [attr.aria-label]="ev.companyRating + ' de 5 estrellas'" role="img">
+              @for (n of estrellas; track n) {
+                <span class="pr-star is-static" [class.is-on]="n <= ev.companyRating"><ui-icon name="star" [size]="18" [strokeWidth]="1.5" /></span>
+              }
+            </div>
+            <p class="ui-quote">{{ ev.commentText }}</p>
+            @switch (ev.validationStatus) {
+              @case ('APROBADO') { <span class="ui-badge ui-badge--success">Publicada</span> }
+              @case ('RECHAZADO') { <span class="ui-badge ui-badge--danger">No publicada por moderación</span> }
+              @default { <span class="ui-badge ui-badge--warning">En revisión por un administrador</span> }
+            }
+          } @else if (p.practiceStatus === 'FINALIZADA') {
+            <p class="ui-cell-sub pr-muted">Tu práctica terminó. Cuéntale a otros estudiantes cómo fue tu experiencia.</p>
+            <button type="button" class="ui-btn ui-btn--primary" (click)="mostrarEvaluacion.set(true)">
+              <ui-icon name="star" /> Evaluar empresa
+            </button>
+          } @else {
+            <p class="ui-cell-sub pr-muted">
+              <ui-icon name="clock" [size]="14" /> Podrás calificar a la empresa cuando tu práctica sea marcada como finalizada.
+            </p>
+          }
+        </div>
+      </section>
+    </div>
+  </div>
+
+  @if (mostrarEvaluacion()) {
+    <app-evaluar-empresa-modal [practica]="p" (cerrar)="mostrarEvaluacion.set(false)" />
+  }
+}

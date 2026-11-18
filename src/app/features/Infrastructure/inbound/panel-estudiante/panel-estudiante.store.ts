@@ -5,8 +5,10 @@ import { IaSeguridadService } from '../../../../core/services/ia-seguridad/ia-se
 import { Auth } from '../../../../core/services/auth';
 import {
   Estudiante,
+  CalificacionEmpresa,
   EstudianteActual,
   MiPostulacion,
+  MiPractica,
   PerfilProfesional
 } from '../../../../core/services/estudiante/estudiante';
 
@@ -55,6 +57,12 @@ export class PanelEstudianteStore {
   readonly postulaciones = signal<MiPostulacion[]>([]);
   readonly cargandoPostulaciones = signal(true);
   readonly procesandoOfertaId = signal<number | null>(null);
+  readonly practicas = signal<MiPractica[]>([]);
+  readonly cargandoPracticas = signal(true);
+  readonly enviandoCalificacion = signal(false);
+
+  /** La práctica en curso (si la hay) para destacarla en la barra lateral. */
+  readonly practicaEnCurso = computed(() => this.practicas().find(p => p.practiceStatus === 'EN_CURSO') ?? null);
 
   /** Ofertas a las que ya se postuló (para deshabilitar el botón "Postularme"). */
   readonly ofertasPostuladas = computed(() => new Set(this.postulaciones().map(p => p.idOffer)));
@@ -79,6 +87,7 @@ export class PanelEstudianteStore {
         this.estudiante.set(est);
         this.cargarPerfil();
         this.cargarPostulaciones();
+        this.cargarPracticas();
       },
       error: () => this.errorIdentidad.set('No pudimos cargar tus datos de estudiante. Cierra sesión e ingresa de nuevo.')
     });
@@ -98,6 +107,34 @@ export class PanelEstudianteStore {
     this.estudianteService.obtenerMisPostulaciones().subscribe({
       next: (data) => { this.postulaciones.set(data || []); this.cargandoPostulaciones.set(false); },
       error: () => { this.postulaciones.set([]); this.cargandoPostulaciones.set(false); }
+    });
+  }
+
+  cargarPracticas(): void {
+    this.cargandoPracticas.set(true);
+    this.estudianteService.obtenerMisPracticas().subscribe({
+      next: (data) => { this.practicas.set(data || []); this.cargandoPracticas.set(false); },
+      error: () => { this.practicas.set([]); this.cargandoPracticas.set(false); }
+    });
+  }
+
+  /**
+   * Envía la calificación a la empresa. `alTerminar(true)` si se guardó (para cerrar el modal);
+   * el comentario queda pendiente de moderación por el administrador.
+   */
+  calificarEmpresa(calificacion: CalificacionEmpresa, alTerminar: (ok: boolean, error?: string) => void): void {
+    this.enviandoCalificacion.set(true);
+    this.estudianteService.calificarEmpresa(calificacion).subscribe({
+      next: () => {
+        this.enviandoCalificacion.set(false);
+        this.mensajeExito.set('¡Gracias por tu evaluación! Se publicará cuando un administrador la revise.');
+        this.cargarPracticas();
+        alTerminar(true);
+      },
+      error: (err) => {
+        this.enviandoCalificacion.set(false);
+        alTerminar(false, typeof err?.error === 'string' && err.error ? err.error : 'No fue posible enviar tu evaluación. Intenta de nuevo.');
+      }
     });
   }
 
