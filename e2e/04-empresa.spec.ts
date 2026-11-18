@@ -104,4 +104,41 @@ test.describe('Panel de empresa', () => {
     await expect(page.getByRole('dialog')).toContainText('Laura Gómez — 92% de afinidad.');
     expect(api.llamadasA('GET', /^\/ia\/ranking-postulados\/101/)).toHaveLength(1);
   });
+
+  test('E2E-EMP-06 · cada candidato del ranking IA lleva a su tarjeta en "Postulantes"', async ({ page }) => {
+    api.get(/^\/ia\/ranking-postulados\/101/, {
+      json: {
+        idOffer: 101, practiceName: 'Desarrollador Frontend Angular', totalCandidatesAnalyzed: 2, aiPowered: true,
+        aiRankingAnalysis: '…',
+        ranking: [
+          { idPostulation: 502, studentFullName: 'Andrés Ruiz', match: 88, reason: 'Experiencia sólida en Angular; recomendado para entrevista.' },
+          { idPostulation: 501, studentFullName: 'Laura Gómez', match: 74, reason: 'Buen perfil frontend, validar TypeScript.' }
+        ]
+      }
+    });
+
+    // Desde "Mis ofertas" (aún no está en Postulantes): el clic debe abrir esa vista.
+    await page.getByRole('navigation').getByRole('button', { name: /Mis ofertas/ }).click();
+    await page.getByRole('row', { name: /Desarrollador Frontend Angular/ }).getByRole('button', { name: 'Ranking IA' }).click();
+
+    const modal = page.getByRole('dialog');
+    const lista = modal.getByRole('list', { name: 'Ranking de candidatos' });
+    await expect(lista.getByRole('listitem')).toHaveCount(2);
+    await expect(lista.getByRole('listitem').first()).toContainText('Andrés Ruiz');
+    await expect(lista.getByRole('listitem').first()).toContainText('88%');
+
+    await lista.getByRole('button', { name: /Andrés Ruiz, 88%/ }).click();
+
+    await expect(modal).toBeHidden();
+    await expect(page.getByRole('heading', { name: 'Desarrollador Frontend Angular' })).toBeVisible();
+    const tarjeta = page.locator('#postulante-502');
+    await expect(tarjeta).toHaveAttribute('aria-current', 'true');
+    await expect(tarjeta).toBeInViewport();
+    await expect(tarjeta.getByRole('button', { name: 'Aceptar' })).toBeVisible();
+
+    // Ya en "Postulantes", volver a abrir el ranking y elegir a otro candidato también funciona.
+    await page.getByRole('button', { name: 'Analizar postulados con IA' }).click();
+    await page.getByRole('dialog').getByRole('button', { name: /Laura Gómez, 74%/ }).click();
+    await expect(page.locator('#postulante-501')).toHaveAttribute('aria-current', 'true');
+  });
 });

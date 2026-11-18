@@ -99,7 +99,7 @@
   <!-- RECOMENDACIÓN CON IA -->
   @if (store.recomendacionIa().abierto) {
     <div class="ui-modal-backdrop" (click)="store.cerrarRecomendacionIa()">
-      <div class="ui-modal ui-modal--ai" role="dialog" aria-modal="true" aria-labelledby="reco-ia-titulo" (click)="$event.stopPropagation()">
+      <div class="ui-modal ui-modal--ai ui-modal--lg" role="dialog" aria-modal="true" aria-labelledby="reco-ia-titulo" (click)="$event.stopPropagation()">
         <div class="ui-modal__header">
           <div>
             <span class="ui-ai-chip"><ui-icon name="sparkles" [size]="14" /> Análisis con IA</span>
@@ -116,8 +116,66 @@
           } @else if (store.recomendacionIa().error) {
             <div class="ui-alert ui-alert--error" role="alert"><ui-icon name="alert" /> <span>{{ store.recomendacionIa().error }}</span></div>
           } @else {
-            <div class="ui-ai-meta"><ui-icon name="briefcase" /> Ofertas analizadas: <strong>{{ store.recomendacionIa().totalAnalizadas }}</strong></div>
-            <div class="ui-ai-output">{{ store.recomendacionIa().resultado }}</div>
+            <div class="ui-ai-meta">
+              <ui-icon name="briefcase" /> Ofertas analizadas: <strong>{{ store.recomendacionIa().totalAnalizadas }}</strong>
+              @if (!store.recomendacionIa().generadoPorIa) {
+                <span class="est-reco__fuente" title="La IA no respondió; el orden se calculó comparando tus habilidades con cada oferta">· Cálculo local</span>
+              }
+            </div>
+            @if (store.recomendacionIa().recomendaciones.length) {
+              @let activa = recoActiva();
+              <div class="est-reco">
+                <ol class="est-reco__lista" aria-label="Ofertas recomendadas">
+                  @for (r of store.recomendacionIa().recomendaciones; track r.idOffer; let i = $index) {
+                    @let disponible = !!store.ofertaPorId(r.idOffer);
+                    <li>
+                      <button type="button" class="est-reco__item" [class.is-active]="activa?.idOffer === r.idOffer"
+                              [disabled]="!disponible"
+                              [attr.aria-label]="r.practiceName + ', ' + r.match + '% de compatibilidad. ' + (disponible ? 'Ver oferta' : 'Ya no está disponible')"
+                              (mouseenter)="recoActivaId.set(r.idOffer)" (focus)="recoActivaId.set(r.idOffer)"
+                              (click)="verOferta(r.idOffer)">
+                        <span class="est-reco__pos">{{ i + 1 }}</span>
+                        <span class="est-reco__texto">
+                          <span class="est-reco__nombre">{{ r.practiceName }}</span>
+                          <span class="est-reco__motivo">{{ r.reason }}</span>
+                          <span class="est-reco__barra" aria-hidden="true"><span [style.width.%]="r.match"></span></span>
+                        </span>
+                        <span class="est-reco__match">{{ r.match }}%</span>
+                        @if (disponible) { <ui-icon name="arrow-right" [size]="16" /> }
+                      </button>
+                    </li>
+                  }
+                </ol>
+
+                @if (activa; as r) {
+                  @let o = store.ofertaPorId(r.idOffer);
+                  <aside class="est-reco__preview" aria-live="polite">
+                    @if (o) {
+                      <span class="ui-ai-chip"><ui-icon name="sparkles" [size]="12" /> {{ r.match }}% compatible</span>
+                      <h4>{{ o.practiceName }}</h4>
+                      <span class="est-reco__sub">{{ o.profession }}</span>
+                      <p class="est-reco__desc">{{ o.practiceDescription }}</p>
+                      <dl class="est-reco__facts">
+                        <div><dt><ui-icon name="map-pin" [size]="14" /></dt><dd>{{ o.modality }} · {{ o.location }}</dd></div>
+                        <div><dt><ui-icon name="wallet" [size]="14" /></dt><dd>{{ o.salary ? (o.salary | currency: 'COP' : 'symbol-narrow' : '1.0-0') : 'Sin apoyo económico' }}</dd></div>
+                        <div><dt><ui-icon name="users" [size]="14" /></dt><dd>{{ o.availableSpots }} cupo(s)</dd></div>
+                        <div><dt><ui-icon name="calendar" [size]="14" /></dt><dd>Cierra {{ o.closingDate }}</dd></div>
+                      </dl>
+                      @if (store.ofertasPostuladas().has(r.idOffer)) {
+                        <span class="ui-badge ui-badge--success">Ya te postulaste</span>
+                      }
+                      <button type="button" class="ui-btn ui-btn--ai" (click)="verOferta(r.idOffer)">
+                        Ver oferta <ui-icon name="arrow-right" />
+                      </button>
+                    } @else {
+                      <p class="est-reco__desc">Esta oferta ya no está disponible.</p>
+                    }
+                  </aside>
+                }
+              </div>
+            } @else {
+              <div class="ui-ai-output">{{ store.recomendacionIa().resultado }}</div>
+            }
           }
         </div>
         <div class="ui-modal__footer">

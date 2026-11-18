@@ -157,6 +157,37 @@ describe('PanelEstudianteStore', () => {
       expect(store.recomendacionIa().abierto).toBe(false);
     });
 
+    it('guarda las recomendaciones estructuradas y si vienen del cálculo local', () => {
+      store.inicializar();
+      ia['recomendarOfertasEstudiante'].mockReturnValue(of({
+        totalOffersAnalyzed: 500, aiRecommendation: '1. Backend', aiPowered: false,
+        recommendations: [{ idOffer: 9, practiceName: 'Backend', match: 88, reason: 'Coincide con Java' }]
+      }));
+      store.abrirRecomendacionIa();
+      expect(store.recomendacionIa()).toMatchObject({ totalAnalizadas: 500, generadoPorIa: false });
+      expect(store.recomendacionIa().recomendaciones[0]).toMatchObject({ idOffer: 9, match: 88 });
+    });
+
+    it('sin lista estructurada (backend anterior) deja la lista vacía y se considera IA', () => {
+      store.inicializar();
+      store.abrirRecomendacionIa();
+      expect(store.recomendacionIa()).toMatchObject({ recomendaciones: [], generadoPorIa: true });
+    });
+
+    it('irAOferta cierra el modal y marca la oferta a resaltar', () => {
+      store.inicializar();
+      store.abrirRecomendacionIa();
+      store.irAOferta(9);
+      expect(store.recomendacionIa().abierto).toBe(false);
+      expect(store.ofertaResaltadaId()).toBe(9);
+    });
+
+    it('ofertaPorId busca en el catálogo cargado', () => {
+      store.inicializar();
+      expect(store.ofertaPorId(9)?.practiceName).toBe('Backend');
+      expect(store.ofertaPorId(1234)).toBeUndefined();
+    });
+
     it('muestra un error si la IA no responde', () => {
       store.inicializar();
       ia['recomendarOfertasEstudiante'].mockReturnValue(throwError(() => new Error()));

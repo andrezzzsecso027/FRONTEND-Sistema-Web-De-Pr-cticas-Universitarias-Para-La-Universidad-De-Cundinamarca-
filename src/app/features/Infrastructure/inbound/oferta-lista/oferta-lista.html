@@ -52,7 +52,8 @@
     <div class="est-grid">
       @for (oferta of ofertasFiltradas(); track oferta.idOffer) {
         @let yaPostulado = store.ofertasPostuladas().has(oferta.idOffer!);
-        <article class="est-offer">
+        <article class="est-offer" [id]="'oferta-' + oferta.idOffer" tabindex="-1"
+          [class.is-highlight]="resaltadaId() === oferta.idOffer" [attr.aria-current]="resaltadaId() === oferta.idOffer ? 'true' : null">
           <div class="est-offer__top">
             <span class="ui-badge ui-badge--neutral ui-badge--plain">{{ oferta.modality }}</span>
             <span class="ui-cell-sub">{{ oferta.availableSpots }} cupo(s)</span>

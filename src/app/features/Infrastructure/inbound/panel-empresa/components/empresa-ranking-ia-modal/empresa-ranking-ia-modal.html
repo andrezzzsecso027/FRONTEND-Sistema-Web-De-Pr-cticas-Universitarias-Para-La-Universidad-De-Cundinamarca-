@@ -1,5 +1,5 @@
 <div class="ui-modal-backdrop" (click)="store.cerrarRankingIa()">
-  <div class="ui-modal ui-modal--ai" role="dialog" aria-modal="true" aria-labelledby="ranking-ia-titulo" (click)="$event.stopPropagation()">
+  <div class="ui-modal ui-modal--ai ui-modal--lg" role="dialog" aria-modal="true" aria-labelledby="ranking-ia-titulo" (click)="$event.stopPropagation()">
     <div class="ui-modal__header">
       <div>
         <span class="ui-ai-chip"><ui-icon name="sparkles" [size]="14" /> Análisis con IA</span>
@@ -20,8 +20,32 @@
       } @else {
         <div class="ui-ai-meta">
           <ui-icon name="users" /> Candidatos analizados: <strong>{{ store.rankingIa().totalAnalizados }}</strong>
+          @if (!store.rankingIa().generadoPorIa) {
+            <span class="est-reco__fuente" title="La IA no respondió; el orden se calculó comparando habilidades con la oferta">· Cálculo local</span>
+          }
         </div>
-        <div class="ui-ai-output">{{ store.rankingIa().resultado }}</div>
+        @if (store.rankingIa().ranking.length) {
+          <ol class="est-reco__lista est-reco--solo" aria-label="Ranking de candidatos">
+            @for (c of store.rankingIa().ranking; track c.idPostulation; let i = $index) {
+              <li>
+                <button type="button" class="est-reco__item"
+                        [attr.aria-label]="c.studentFullName + ', ' + c.match + '% de compatibilidad. Ver postulante'"
+                        (click)="store.irAPostulante(c.idPostulation)">
+                  <span class="est-reco__pos">{{ i + 1 }}</span>
+                  <span class="est-reco__texto">
+                    <span class="est-reco__nombre">{{ c.studentFullName }}</span>
+                    <span class="est-reco__motivo">{{ c.reason }}</span>
+                    <span class="est-reco__barra" aria-hidden="true"><span [style.width.%]="c.match"></span></span>
+                  </span>
+                  <span class="est-reco__match">{{ c.match }}%</span>
+                  <ui-icon name="arrow-right" [size]="16" />
+                </button>
+              </li>
+            }
+          </ol>
+        } @else {
+          <div class="ui-ai-output">{{ store.rankingIa().resultado }}</div>
+        }
       }
     </div>
 

@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, DestroyRef, ElementRef, OnInit, effect, inject, signal, untracked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Icon } from '../../../../../../share/ui/icon/icon';
 import { FormsModule } from '@angular/forms';
@@ -21,9 +21,40 @@ export class EmpresaPostulantes implements OnInit {
   private readonly http = inject(HttpClient);
   private readonly cdr = inject(ChangeDetectorRef);
 
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+
   postulantes: PostulationDetailResponse[] = [];
   observacionesPorPostulante: { [idPostulation: number]: string } = {};
   cargando = false;
+  private cargados = false;
+
+  /** Postulante resaltado al llegar desde el ranking IA. */
+  readonly resaltadoId = signal<number | null>(null);
+  private temporizador?: ReturnType<typeof setTimeout>;
+
+  constructor() {
+    // Si ya se está en esta vista cuando se elige un candidato del ranking, se resalta de inmediato.
+    effect(() => {
+      if (this.store.postulanteResaltadoId() !== null) untracked(() => this.resaltarPendiente());
+    });
+    inject(DestroyRef).onDestroy(() => clearTimeout(this.temporizador));
+  }
+
+  /** Desplaza hasta el postulante elegido en el ranking y lo resalta unos segundos. */
+  private resaltarPendiente(): void {
+    const id = this.store.postulanteResaltadoId();
+    if (id === null || !this.cargados) return;
+    this.store.postulanteResaltadoId.set(null);
+    this.resaltadoId.set(id);
+    this.cdr.detectChanges();
+    clearTimeout(this.temporizador);
+    this.temporizador = setTimeout(() => this.resaltadoId.set(null), 4000);
+    requestAnimationFrame(() => {
+      const tarjeta = this.host.nativeElement.querySelector<HTMLElement>(`#postulante-${id}`);
+      tarjeta?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      tarjeta?.focus({ preventScroll: true });
+    });
+  }
 
   ngOnInit(): void {
     this.store.cargarContratosEmpresa();
@@ -39,6 +70,7 @@ export class EmpresaPostulantes implements OnInit {
       next: (lista) => {
         this.postulantes = (lista || []).filter(p => p.studentFullName && p.studentFullName.trim().length > 0);
         this.cargando = false;
+        this.cargados = true;
 
         this.postulantes.forEach((post: any) => {
           if (!this.store.estadoSeguimientoContrato[post.idPostulation]) {
@@ -47,6 +79,7 @@ export class EmpresaPostulantes implements OnInit {
           this.completarConPerfil(post);
         });
         this.cdr.detectChanges();
+        this.resaltarPendiente();
       },
       error: () => {
         this.postulantes = [];

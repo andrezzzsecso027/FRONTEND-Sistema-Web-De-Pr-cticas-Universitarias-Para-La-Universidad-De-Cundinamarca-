@@ -172,6 +172,35 @@ describe('PanelEmpresaStore', () => {
       store.abrirRankingIa(oferta as never);
       expect(store.rankingIa().error).toContain('No se pudo generar');
     });
+
+    it('guarda el ranking estructurado y si vino del cálculo local', () => {
+      ia['obtenerRankingPostulados'].mockReturnValue(of({
+        practiceName: 'Backend', totalCandidatesAnalyzed: 1, aiRankingAnalysis: '#1. Ana', aiPowered: false,
+        ranking: [{ idPostulation: 3, studentFullName: 'Ana Pérez', match: 90, reason: 'Java' }]
+      }));
+      store.abrirRankingIa(oferta as never);
+      expect(store.rankingIa()).toMatchObject({ idOffer: 5, generadoPorIa: false });
+      expect(store.rankingIa().ranking[0]).toMatchObject({ idPostulation: 3, match: 90 });
+    });
+
+    it('irAPostulante abre "Postulantes" de la oferta del ranking y marca al candidato', () => {
+      store.misOfertas.set([oferta as never]);
+      store.abrirRankingIa(oferta as never);
+      store.irAPostulante(3);
+      expect(store.rankingIa().abierto).toBe(false);
+      expect(store.vista()).toBe('postulantes');
+      expect(store.ofertaSeleccionada()?.idOffer).toBe(5);
+      expect(store.postulanteResaltadoId()).toBe(3);
+    });
+
+    it('irAPostulante desde la misma vista de postulantes no vuelve a seleccionar la oferta', () => {
+      store.verPostulantes(oferta as never);
+      const seleccion = store.ofertaSeleccionada();
+      store.abrirRankingIa();
+      store.irAPostulante(4);
+      expect(store.ofertaSeleccionada()).toBe(seleccion);
+      expect(store.postulanteResaltadoId()).toBe(4);
+    });
   });
 
   afterEach(() => http.match(() => true).forEach(r => r.flush([])));

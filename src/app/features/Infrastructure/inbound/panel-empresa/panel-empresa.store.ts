@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { OfertaService, OfferRequestDTO } from '../../../../core/services/oferta/ofertas';
 import { PostulacionService } from '../../../../core/services/postulacion/postulacion';
 import { Empresa } from '../../../../core/services/empresa/empresa';
-import { IaSeguridadService } from '../../../../core/services/ia-seguridad/ia-seguridad';
+import { CandidatoRankeado, IaSeguridadService } from '../../../../core/services/ia-seguridad/ia-seguridad';
 import { environment } from '../../../../../environments/environment';
 
 export type VistaEmpresa = 'inicio' | 'crear-oferta' | 'mis-ofertas' | 'postulantes' | 'mis-practicas' | 'perfil';
@@ -27,11 +27,21 @@ export interface PracticaEmpresaView {
 export interface RankingIaState {
   abierto: boolean;
   cargando: boolean;
+  idOffer: number | null;
   nombreOferta: string;
   totalAnalizados: number;
   resultado: string;
+  /** Ranking estructurado (cada candidato enlaza a su tarjeta en "Postulantes"). */
+  ranking: CandidatoRankeado[];
+  /** false si el backend usó el cálculo local porque la IA no respondió. */
+  generadoPorIa: boolean;
   error: string;
 }
+
+const RANKING_INICIAL: RankingIaState = {
+  abierto: false, cargando: false, idOffer: null, nombreOferta: '', totalAnalizados: 0, resultado: '',
+  ranking: [], generadoPorIa: true, error: ''
+};
 
 const DESCRIPCION_POR_DEFECTO =
   'Somos una organización aliada de la Universidad de Cundinamarca comprometida con la formación profesional y tecnológica de practicantes universitarios.';
@@ -85,9 +95,10 @@ export class PanelEmpresaStore {
   );
 
   // ---------------- Ranking IA ----------------
-  readonly rankingIa = signal<RankingIaState>({
-    abierto: false, cargando: false, nombreOferta: '', totalAnalizados: 0, resultado: '', error: ''
-  });
+  readonly rankingIa = signal<RankingIaState>(RANKING_INICIAL);
+
+  /** Postulación a la que se debe desplazar y resaltar en "Postulantes" (al elegirla en el ranking). */
+  readonly postulanteResaltadoId = signal<number | null>(null);
 
   // =====================================================================
   // Navegación
@@ -354,9 +365,7 @@ export class PanelEmpresaStore {
     const target = oferta || this.ofertaSeleccionada();
     if (!target || !target.idOffer) return;
 
-    this.rankingIa.set({
-      abierto: true, cargando: true, nombreOferta: target.practiceName, totalAnalizados: 0, resultado: '', error: ''
-    });
+    this.rankingIa.set({ ...RANKING_INICIAL, abierto: true, cargando: true, idOffer: target.idOffer, nombreOferta: target.practiceName });
 
     this.iaService.obtenerRankingPostulados(target.idOffer).subscribe({
       next: (res) => this.rankingIa.update(s => ({
@@ -364,7 +373,9 @@ export class PanelEmpresaStore {
         cargando: false,
         nombreOferta: res.practiceName || target.practiceName,
         totalAnalizados: res.totalCandidatesAnalyzed,
-        resultado: res.aiRankingAnalysis
+        resultado: res.aiRankingAnalysis,
+        ranking: res.ranking ?? [],
+        generadoPorIa: res.aiPowered !== false
       })),
       error: () => this.rankingIa.update(s => ({
         ...s, cargando: false, error: 'No se pudo generar el ranking con IA para esta oferta.'
@@ -374,6 +385,18 @@ export class PanelEmpresaStore {
 
   cerrarRankingIa(): void {
     this.rankingIa.update(s => ({ ...s, abierto: false }));
+  }
+
+  /** Cierra el ranking y abre "Postulantes" de esa oferta con la tarjeta del candidato resaltada. */
+  irAPostulante(idPostulation: number): void {
+    const idOffer = this.rankingIa().idOffer;
+    const oferta = this.misOfertas().find(o => o.idOffer === idOffer)
+      ?? (this.ofertaSeleccionada()?.idOffer === idOffer ? this.ofertaSeleccionada() : null);
+    this.cerrarRankingIa();
+    if (oferta && (this.vista() !== 'postulantes' || this.ofertaSeleccionada()?.idOffer !== idOffer)) {
+      this.verPostulantes(oferta);
+    }
+    this.postulanteResaltadoId.set(idPostulation);
   }
 
   // =====================================================================

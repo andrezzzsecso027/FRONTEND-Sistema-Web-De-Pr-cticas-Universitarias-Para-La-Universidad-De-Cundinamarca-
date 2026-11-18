@@ -121,6 +121,48 @@ test.describe('Portal del estudiante', () => {
     await expect(modal).toBeHidden();
   });
 
+  test('E2E-EST-05b · las recomendaciones enlazan a la oferta: vista previa al pasar el ratón y clic para ir', async ({ page }) => {
+    api.get(/^\/ia\/recomendar-ofertas\//, {
+      json: {
+        totalOffersAnalyzed: 500, aiPowered: true, aiRecommendation: '…',
+        recommendations: [
+          { idOffer: 101, practiceName: 'Desarrollador Frontend Angular', match: 92, reason: 'Domina Angular y TypeScript, igual que pide el cargo.' },
+          { idOffer: 102, practiceName: 'Auxiliar contable', match: 41, reason: 'Poca relación con su perfil técnico.' },
+          { idOffer: 999, practiceName: 'Oferta ya cerrada', match: 30, reason: 'Ya no está publicada.' }
+        ]
+      }
+    });
+    await page.goto('/ofertas');
+    // Un filtro activo que oculta la oferta recomendada: al ir a ella se debe limpiar.
+    await page.getByPlaceholder('Buscar por cargo, programa o ciudad').fill('contable');
+    await expect(page.getByRole('heading', { name: 'Desarrollador Frontend Angular' })).toBeHidden();
+
+    await page.getByRole('button', { name: 'Recomendar según mi perfil' }).click();
+    const modal = page.getByRole('dialog', { name: 'Ofertas recomendadas para ti' });
+    const lista = modal.getByRole('list', { name: 'Ofertas recomendadas' });
+
+    await expect(lista.getByRole('listitem')).toHaveCount(3);
+    await expect(lista.getByRole('button', { name: /Oferta ya cerrada.*Ya no está disponible/ })).toBeDisabled();
+
+    // Vista previa: por defecto la primera; al pasar el ratón cambia a la oferta bajo el cursor.
+    const vistaPrevia = modal.locator('aside');
+    await expect(vistaPrevia).toContainText('Desarrollador Frontend Angular');
+    await lista.getByRole('button', { name: /Auxiliar contable, 41%/ }).hover();
+    await expect(vistaPrevia).toContainText('Conciliaciones bancarias');
+    await expect(vistaPrevia).toContainText('Sin apoyo económico');
+
+    // Clic: cierra el modal, quita el filtro y resalta la oferta.
+    await lista.getByRole('button', { name: /Desarrollador Frontend Angular, 92%/ }).click();
+    await expect(modal).toBeHidden();
+    const tarjeta = page.locator('#oferta-101');
+    await expect(tarjeta).toHaveAttribute('aria-current', 'true');
+    await expect(tarjeta).toBeInViewport();
+    await expect(page.getByPlaceholder('Buscar por cargo, programa o ciudad')).toHaveValue('');
+    await expect(tarjeta.getByRole('button', { name: 'Postularme' })).toBeEnabled();
+    // El resaltado es temporal.
+    await expect(tarjeta).not.toHaveAttribute('aria-current', 'true', { timeout: 6000 });
+  });
+
   test('E2E-EST-06 · sin práctica aún, "Mi práctica" muestra el estado vacío', async ({ page }) => {
     await page.goto('/mi-practica');
     await expect(page.getByText('Aún no tienes una práctica')).toBeVisible();

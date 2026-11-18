@@ -24,7 +24,8 @@
 
   @for (p of postulantes; track p.idPostulation) {
     @let cv = p.lifesheet || $any(p).linkLifesheet;
-    <article class="pe-person">
+    <article class="pe-person" [id]="'postulante-' + p.idPostulation" tabindex="-1"
+      [class.is-highlight]="resaltadoId() === p.idPostulation" [attr.aria-current]="resaltadoId() === p.idPostulation ? 'true' : null">
       <div class="pe-person__head">
         <span class="ui-avatar ui-avatar--lg">
           @if ($any(p).photoUrl) { <img [src]="$any(p).photoUrl" alt="" /> } @else { {{ (p.studentFullName || 'E').charAt(0) }} }

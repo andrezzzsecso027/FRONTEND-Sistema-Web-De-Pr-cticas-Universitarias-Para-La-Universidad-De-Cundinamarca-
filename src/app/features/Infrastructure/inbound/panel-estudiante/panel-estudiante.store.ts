@@ -1,7 +1,7 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { OfertaService, OfferRequestDTO } from '../../../../core/services/oferta/ofertas';
 import { PostulacionService } from '../../../../core/services/postulacion/postulacion';
-import { IaSeguridadService } from '../../../../core/services/ia-seguridad/ia-seguridad';
+import { IaSeguridadService, OfertaRecomendada } from '../../../../core/services/ia-seguridad/ia-seguridad';
 import { Auth } from '../../../../core/services/auth';
 import {
   Estudiante,
@@ -17,8 +17,16 @@ export interface RecomendacionIaState {
   cargando: boolean;
   totalAnalizadas: number;
   resultado: string;
+  /** Recomendaciones estructuradas (enlazables a la oferta). */
+  recomendaciones: OfertaRecomendada[];
+  /** false si el backend usó el cálculo local porque la IA no respondió. */
+  generadoPorIa: boolean;
   error: string;
 }
+
+const RECOMENDACION_INICIAL: RecomendacionIaState = {
+  abierto: false, cargando: false, totalAnalizadas: 0, resultado: '', recomendaciones: [], generadoPorIa: true, error: ''
+};
 
 /**
  * Estado compartido del portal del estudiante (una instancia por sesión del portal: se provee
@@ -77,9 +85,15 @@ export class PanelEstudianteStore {
   readonly mensajeError = signal('');
 
   // ---------------- Recomendación IA ----------------
-  readonly recomendacionIa = signal<RecomendacionIaState>({
-    abierto: false, cargando: false, totalAnalizadas: 0, resultado: '', error: ''
-  });
+  readonly recomendacionIa = signal<RecomendacionIaState>(RECOMENDACION_INICIAL);
+
+  /** Oferta a la que se debe desplazar y resaltar en el catálogo (al elegir una recomendación). */
+  readonly ofertaResaltadaId = signal<number | null>(null);
+
+  /** Oferta del catálogo con ese id (para la vista previa de una recomendación). */
+  ofertaPorId(idOffer: number): OfferRequestDTO | undefined {
+    return this.ofertas().find(o => o.idOffer === idOffer);
+  }
 
   inicializar(): void {
     this.estudianteService.obtenerMiInformacion().subscribe({
@@ -182,10 +196,11 @@ export class PanelEstudianteStore {
   abrirRecomendacionIa(): void {
     const doc = this.documento();
     if (!doc) return;
-    this.recomendacionIa.set({ abierto: true, cargando: true, totalAnalizadas: 0, resultado: '', error: '' });
+    this.recomendacionIa.set({ ...RECOMENDACION_INICIAL, abierto: true, cargando: true });
     this.iaService.recomendarOfertasEstudiante(doc).subscribe({
       next: (res) => this.recomendacionIa.update(s => ({
-        ...s, cargando: false, totalAnalizadas: res.totalOffersAnalyzed, resultado: res.aiRecommendation
+        ...s, cargando: false, totalAnalizadas: res.totalOffersAnalyzed, resultado: res.aiRecommendation,
+        recomendaciones: res.recommendations ?? [], generadoPorIa: res.aiPowered !== false
       })),
       error: () => this.recomendacionIa.update(s => ({
         ...s, cargando: false, error: 'No fue posible conectar con el asistente de IA en este momento.'
@@ -195,6 +210,12 @@ export class PanelEstudianteStore {
 
   cerrarRecomendacionIa(): void {
     this.recomendacionIa.update(s => ({ ...s, abierto: false }));
+  }
+
+  /** Cierra la recomendación y pide al catálogo que muestre y resalte esa oferta. */
+  irAOferta(idOffer: number): void {
+    this.cerrarRecomendacionIa();
+    this.ofertaResaltadaId.set(idOffer);
   }
 
   limpiarMensajes(): void {

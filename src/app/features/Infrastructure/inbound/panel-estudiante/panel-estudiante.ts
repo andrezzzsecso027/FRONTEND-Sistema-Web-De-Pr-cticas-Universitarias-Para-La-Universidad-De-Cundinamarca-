@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit, inject } from '@angular/core';
+import { Component, HostListener, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -27,6 +27,22 @@ export class PanelEstudiante implements OnInit {
 
   menuAbierto = false;
   mostrarModalPassword = false;
+
+  /** Recomendación IA bajo el cursor/foco (se muestra su vista previa). Por defecto, la primera disponible. */
+  readonly recoActivaId = signal<number | null>(null);
+  readonly recoActiva = computed(() => {
+    const recs = this.store.recomendacionIa().recomendaciones;
+    return recs.find(r => r.idOffer === this.recoActivaId())
+      ?? recs.find(r => this.store.ofertaPorId(r.idOffer))
+      ?? null;
+  });
+
+  /** Lleva al catálogo, desplaza hasta la oferta recomendada y la resalta. */
+  verOferta(idOffer: number): void {
+    this.recoActivaId.set(null);
+    this.store.irAOferta(idOffer);
+    if (!this.router.url.startsWith('/ofertas')) this.router.navigate(['/ofertas']);
+  }
 
   constructor() {
     // Los avisos pertenecen a la vista donde ocurrieron: se limpian al cambiar de sección
