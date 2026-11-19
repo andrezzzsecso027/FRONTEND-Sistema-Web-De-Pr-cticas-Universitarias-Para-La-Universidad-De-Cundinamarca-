@@ -79,6 +79,7 @@ app-panel-empresa.panel-empresa {
   .pe-ai-cta { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
 
   @media (max-width: 960px) {
+    .pe-hero { padding: 20px; h1, h2 { font-size: 22px; } }
     .pe-profile { grid-template-columns: 1fr; }
     .pe-tracking, .pe-person__decision { grid-template-columns: 1fr; }
   }

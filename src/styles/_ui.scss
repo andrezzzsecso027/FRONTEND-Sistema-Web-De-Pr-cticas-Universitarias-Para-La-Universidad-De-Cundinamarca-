@@ -492,7 +492,8 @@
 /* -----------------------------------------------------------------------------
    Tablas
 ----------------------------------------------------------------------------- */
-.ui-table-wrap { overflow-x: auto; }
+/* position: relative contiene el <caption class="ui-sr-only"> (absoluto); sin ella estiraba la página en móvil */
+.ui-table-wrap { position: relative; overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
 .ui-table {
   width: 100%;
@@ -843,24 +844,34 @@
 }
 
 @media (max-width: 960px) {
-  .ui-app { grid-template-columns: 1fr; }
+  /* minmax(0, 1fr): sin él, el ancho mínimo de la barra de secciones estiraba toda la página */
+  .ui-app { grid-template-columns: minmax(0, 1fr); }
+  /* Barra superior: fila 1 = marca + usuario; fila 2 = secciones deslizables en horizontal */
   .ui-sidebar {
     position: sticky;
     z-index: 30;
     height: auto;
+    min-width: 0;
     flex-direction: row;
+    flex-wrap: wrap;
     align-items: center;
     gap: 8px;
-    padding: 10px 12px;
+    padding: 10px 12px 8px;
     border-right: 0;
     border-bottom: 1px solid var(--ui-hairline);
-    overflow-x: auto;
   }
   .ui-brand { padding: 0 6px 0 0; .ui-brand__role { display: none; } }
-  .ui-nav { flex-direction: row; }
+  .ui-nav {
+    order: 3;
+    flex: 1 0 100%;
+    min-width: 0;
+    flex-direction: row;
+    flex-wrap: wrap; /* todas las secciones visibles: bajan de línea en vez de esconderse a la derecha */
+    gap: 4px;
+  }
   .ui-nav__label { display: none; }
-  .ui-nav__item { width: auto; white-space: nowrap; }
-  .ui-sidebar__footer { margin: 0 0 0 auto; padding: 0; border: 0; }
+  .ui-nav__item { width: auto; flex: 0 0 auto; white-space: nowrap; height: 34px; padding: 0 10px; gap: 6px; }
+  .ui-sidebar__footer { order: 2; margin: 0 0 0 auto; padding: 0; border: 0; }
   .ui-user__text { display: none; }
   .ui-menu { bottom: auto; top: calc(100% + 6px); left: auto; right: 0; width: 240px; }
   .ui-main { padding: 20px 16px 40px; }

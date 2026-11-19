@@ -144,6 +144,24 @@
   }
 }
 
+/* Móvil: el logo ya lleva al inicio, así que se oculta "Inicio" y se compactan los espacios */
+@media (max-width: 560px) {
+  .navbar-container { padding: 10px 16px; gap: 8px; }
+  .navbar-logo { gap: 8px; min-width: 0; }
+  .udec-crest-badge { display: none; }
+  .logo-text { font-size: 1.15rem; }
+  .navbar-links { gap: 2px; min-width: 0; }
+  .nav-link { padding: 8px 10px; white-space: nowrap; }
+  .navbar-links > a.nav-link[href="/"] { display: none; }
+  .btn-registro { padding: 8px 12px; margin-left: 2px; }
+  .btn-logout { padding: 7px 10px; white-space: nowrap; }
+  .register-dropdown { width: min(290px, calc(100vw - 32px)); }
+}
+
+@media (max-width: 360px) {
+  .btn-registro .chevron-icon { display: none; }
+}
+
 .nav-dropdown-wrapper {
   position: relative;
   display: inline-block;
