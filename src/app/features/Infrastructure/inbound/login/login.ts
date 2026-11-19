@@ -27,6 +27,9 @@ export class Login {
   verificandoCodigo = false;
   mensajeVerificacionError = '';
   mensajeVerificacionExito = '';
+  /** Aviso tras registrar una empresa: su cuenta queda pendiente de aprobación por Coordinación. */
+  avisoRegistroEmpresa = false;
+  correoRegistrado = '';
 
   constructor(
     private fb: FormBuilder,
@@ -39,6 +42,12 @@ export class Login {
       email: ['', [Validators.required, Validators.email]],
       password: ['', Validators.required]
     });
+    const estado = (globalThis.history?.state ?? {}) as { avisoRegistroEmpresa?: boolean; correoRegistrado?: string };
+    if (estado.avisoRegistroEmpresa) {
+      this.avisoRegistroEmpresa = true;
+      this.correoRegistrado = estado.correoRegistrado ?? '';
+      if (this.correoRegistrado) this.loginForm.patchValue({ email: this.correoRegistrado });
+    }
   }
 
   onSubmit(): void {

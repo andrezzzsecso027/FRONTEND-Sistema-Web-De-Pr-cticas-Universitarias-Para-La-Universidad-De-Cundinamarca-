@@ -305,3 +305,11 @@
   border-radius: 8px;
   cursor: pointer;
 }
+/* Aviso tras registrar una empresa (cuenta pendiente de aprobación) */
+.auth-alert-registro {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  line-height: 1.5;
+  svg { flex-shrink: 0; margin-top: 3px; }
+}

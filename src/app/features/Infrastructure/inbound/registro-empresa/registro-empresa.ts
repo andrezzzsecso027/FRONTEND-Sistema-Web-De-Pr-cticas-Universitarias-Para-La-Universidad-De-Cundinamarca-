@@ -177,13 +177,10 @@ export class RegistroEmpresa implements OnInit {
     this.empresa.registrarEmpresa(payload).subscribe({
       next: () => {
         this.enviandoRegistro = false;
-        this.mensajeExito = 'Solicitud corporativa registrada con éxito. Tu cuenta será habilitada tras la verificación del RUT/NIT por Coordinación UdeC.';
-        this.cdr.detectChanges();
-
-        setTimeout(() => {
-          this.formularioEmpresa.reset();
-          this.router.navigate(['/login']);
-        }, 2200);
+        // El aviso se muestra en el login: arriba de este formulario tan largo no se veía (sobre todo en móvil)
+        const correoRegistrado = String(valores.correo ?? '').trim();
+        this.formularioEmpresa.reset();
+        this.router.navigate(['/login'], { state: { avisoRegistroEmpresa: true, correoRegistrado } });
       },
       error: (err) => {
         this.enviandoRegistro = false;

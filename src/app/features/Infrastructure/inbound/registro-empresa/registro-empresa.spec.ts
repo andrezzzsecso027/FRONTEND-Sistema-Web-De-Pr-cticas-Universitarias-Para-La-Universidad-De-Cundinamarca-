@@ -114,17 +114,14 @@ describe('RegistroEmpresa', () => {
       expect(empresa['registrarEmpresa']).not.toHaveBeenCalled();
     });
 
-    it('registra con la URL del PDF y redirige al login', () => {
-      vi.useFakeTimers();
+    it('registra con la URL del PDF y lleva al login con el aviso de cuenta pendiente', () => {
       const c = crear();
       llenar(c);
       c.urlPdfNitSubido = 'https://cdn/nit.pdf';
       c.onSubmit();
       expect(empresa['registrarEmpresa']).toHaveBeenCalledWith(expect.objectContaining({ nit: '900123', urlPdfNit: 'https://cdn/nit.pdf' }));
-      expect(c.mensajeExito).toContain('registrada con éxito');
-      vi.advanceTimersByTime(2200);
-      expect(navegar).toHaveBeenCalledWith(['/login']);
-      vi.useRealTimers();
+      expect(navegar).toHaveBeenCalledWith(['/login'],
+        { state: expect.objectContaining({ avisoRegistroEmpresa: true }) });
     });
 
     it('muestra el error del backend o uno por defecto', () => {
